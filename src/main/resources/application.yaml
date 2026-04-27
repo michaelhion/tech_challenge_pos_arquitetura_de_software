@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: oficina360
+
+
+otel:
+  service:
+    name: oficina360
+  exporter:
+    otlp:
+      endpoint: http://localhost:4317
+
+

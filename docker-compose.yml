@@ -1,0 +1,55 @@
+version: '3.8'  # Specifies the Docker Compose file format version.
+
+services:
+  oficina360:
+    build:
+      context: .  # Directory to build Docker image from.
+      dockerfile: Dockerfile  # Dockerfile to use for building the image.
+    ports:
+      - 18080:8080  # Maps port 8080 in the container to port 18080 on the host.
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: [ "--config=/etc/otel-config.yaml" ]
+    volumes:
+      - ./otel-config.yaml:/etc/otel-config.yaml
+    ports:
+      - "4317:4317" # gRPC
+      - "4318:4318" # HTTP
+#    depends_on:
+#      mysqldb:
+#        condition: service_healthy  # Waits for 'mysqldb' to be healthy before starting.
+#    env_file:
+#      - .env  # Loads environment variables from the .env file.
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/${MYSQL_DATABASE}  # Database URL.
+#      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}  # Database username.
+#      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}  # Database password.
+#      - SPRING_CONFIG_LOCATION=file:/app/application.properties  # Location of application properties.
+#    networks:
+#      - springboot-mysql-network  # Connects to the specified network.
+#    volumes:
+#      - ./src/main/resources/application.properties:/app/application.properties  # Mounts properties file.
+#
+#  mysqldb:
+#    image: mysql:8.0.39  # MySQL image version.
+#    ports:
+#      - 13306:3306  # Maps port 3306 in the container to port 13306 on the host.
+#    env_file:
+#      - .env  # Loads environment variables from the .env file.
+#    volumes:
+#      - mysql-data:/var/lib/mysql  # Persistent storage for MySQL data.
+#      - ./src/main/resources/db_migration/init_all.sql:/docker-entrypoint-initdb.d/init.sql  # Initialization script.
+#    networks:
+#      - springboot-mysql-network  # Connects to the specified network.
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]  # Health check command.
+#      retries: 10  # Number of retries before considering the service unhealthy.
+#      interval: 3s  # Time between retries.
+#      timeout: 30s  # Timeout for each health check.
+
+#volumes:
+#  mysql-data:  # Named volume for MySQL data.
+
+#networks:
+#  springboot-mysql-network:
+#    name: springboot-mysql-network  # Custom network for service communication.
