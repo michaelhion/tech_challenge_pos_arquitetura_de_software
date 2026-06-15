@@ -1,0 +1,20 @@
+INSERT INTO USUARIO (
+    ID,
+    EMAIL,
+    SENHA,
+    ROLE,
+    DOCUMENTO
+) VALUES (
+ '99999999-9999-9999-9999-999999999999',
+ 'admin@oficina360.com',
+ '$2a$10$ATQgy75GIzx6MsDKQmijxOWrBb5oP7hu/1HBQa1slZfIVQ/fasI7e',
+ 'ADMIN',
+'99999999999'
+),
+(
+ '99999999-9999-9999-9999-999999999998',
+ 'cliente@oficina360.com',
+ '$2a$10$ATQgy75GIzx6MsDKQmijxOWrBb5oP7hu/1HBQa1slZfIVQ/fasI7e',
+ 'CLIENTE',
+ '12345678901'
+ );

@@ -7,14 +7,6 @@ services:
       dockerfile: Dockerfile  # Dockerfile to use for building the image.
     ports:
       - 18080:8080  # Maps port 8080 in the container to port 18080 on the host.
-  otel-collector:
-    image: otel/opentelemetry-collector:latest
-    command: [ "--config=/etc/otel-config.yaml" ]
-    volumes:
-      - ./otel-config.yaml:/etc/otel-config.yaml
-    ports:
-      - "4317:4317" # gRPC
-      - "4318:4318" # HTTP
 #    depends_on:
 #      mysqldb:
 #        condition: service_healthy  # Waits for 'mysqldb' to be healthy before starting.
