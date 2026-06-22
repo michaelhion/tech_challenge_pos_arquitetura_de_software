@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -169,7 +170,7 @@ public class OrdemServico {
             throw new ConflitoException("A execução só pode ser iniciada após aprovação do orçamento");
         }
 
-        this.dtHoraInicioExecucao = LocalDateTime.now();
+        this.dtHoraInicioExecucao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         this.dtHoraFimExecucao = null;
         this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_EXECUCAO;
     }
@@ -183,7 +184,7 @@ public class OrdemServico {
             throw new ConflitoException("A execução não possui data/hora de início registrada");
         }
 
-        this.dtHoraFimExecucao = LocalDateTime.now();
+        this.dtHoraFimExecucao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         this.ordemDeServicoStatus = OrdemDeServicoStatus.FINALIZADA;
     }
 
@@ -193,7 +194,7 @@ public class OrdemServico {
             throw new ConflitoException("A ordem de serviço só pode ser entregue após finalização");
         }
 
-        this.dtHoraFechamento = LocalDateTime.now();
+        this.dtHoraFechamento = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         this.ordemDeServicoStatus = OrdemDeServicoStatus.ENTREGUE;
     }
 

@@ -10,6 +10,7 @@ import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
 import com.techchallenger.oficina360.repositories.ClienteRepository;
 import com.techchallenger.oficina360.repositories.UsuarioRepository;
 import com.techchallenger.oficina360.security.JwtService;
+import com.techchallenger.oficina360.services.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

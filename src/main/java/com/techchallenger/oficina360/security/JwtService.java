@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 @Service
@@ -44,7 +45,7 @@ public class JwtService {
     }
 
     private Instant dataExpiracao() {
-        return LocalDateTime.now()
+        return LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
                 .plusHours(expirationHours)
                 .toInstant(ZoneOffset.of("-03:00"));
     }

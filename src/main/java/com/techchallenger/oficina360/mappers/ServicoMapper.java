@@ -5,6 +5,8 @@ import com.techchallenger.oficina360.entities.Servico;
 
 public class ServicoMapper {
 
+    private ServicoMapper(){}
+
     public static ServicoDTO toDTO(Servico servicoEntity) {
         return new ServicoDTO(
                 servicoEntity.getCodigo(),

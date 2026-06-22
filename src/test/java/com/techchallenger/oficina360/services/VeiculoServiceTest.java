@@ -178,7 +178,7 @@ class VeiculoServiceTest {
 
     @Test
     void deveEditarVeiculoComSucesso() {
-        VeiculoDTO veiculoDTO = new VeiculoDTO(
+        VeiculoDTO dtoAtualizado = new VeiculoDTO(
                 "ABC1D23",
                 "Volkswagen",
                 "Polo",
@@ -207,7 +207,7 @@ class VeiculoServiceTest {
         when(veiculoRepository.save(any(Veiculo.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        VeiculoDTO resultado = veiculoService.edit("ABC1D23", veiculoDTO);
+        VeiculoDTO resultado = veiculoService.edit("ABC1D23", dtoAtualizado );
 
         assertNotNull(resultado);
         assertEquals("ABC1D23", resultado.placa());

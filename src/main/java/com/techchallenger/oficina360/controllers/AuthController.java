@@ -4,7 +4,7 @@ import com.techchallenger.oficina360.docs.api.AuthApi;
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
-import com.techchallenger.oficina360.dtos.servicos.AuthService;
+import com.techchallenger.oficina360.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

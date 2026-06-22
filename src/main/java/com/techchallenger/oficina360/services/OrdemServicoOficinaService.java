@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -192,7 +193,7 @@ public class OrdemServicoOficinaService {
             TempoExecucaoServico tempoExecucaoServico = TempoExecucaoServico.builder()
                     .servicoID(oss.getServicoId())
                     .tempoExecucaoMinutos(tempoPorServico)
-                    .dataExecucao(LocalDateTime.now())
+                    .dataExecucao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")))
                     .build();
 
             tempoExecucaoServicoRepository.save(tempoExecucaoServico);

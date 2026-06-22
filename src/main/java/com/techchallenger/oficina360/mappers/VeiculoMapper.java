@@ -5,13 +5,13 @@ import com.techchallenger.oficina360.entities.Veiculo;
 
 public class VeiculoMapper {
 
+    private VeiculoMapper(){}
+
     public static VeiculoDTO toDTO(Veiculo veiculoEntity) {
         return new VeiculoDTO(
                 veiculoEntity.getPlaca(),
                 veiculoEntity.getMarca(),
                 veiculoEntity.getModelo(),
-
-                //todo ajustar
                 Integer.parseInt(veiculoEntity.getAno()),
                 veiculoEntity.getClienteDocumento()
         );
@@ -22,7 +22,6 @@ public class VeiculoMapper {
                 .placa(veiculoDTO.placa())
                 .modelo(veiculoDTO.modelo())
                 .marca(veiculoDTO.marca())
-                //todo ajustar
                 .ano(String.valueOf(veiculoDTO.ano()))
                 .clienteDocumento(veiculoDTO.clienteDocumento())
                 .build();

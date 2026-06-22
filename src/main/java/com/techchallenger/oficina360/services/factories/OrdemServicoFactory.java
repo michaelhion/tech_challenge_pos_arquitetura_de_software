@@ -8,6 +8,7 @@ import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Component
 public class OrdemServicoFactory {
@@ -17,7 +18,7 @@ public class OrdemServicoFactory {
                 .documentoCliente(cliente.getDocumento())
                 .placaVeiculo(veiculo.getPlaca())
                 .descricaoProblema(dto.descricaoProblema())
-                .dtHoraAbertura(LocalDateTime.now())
+                .dtHoraAbertura(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")))
                 .ordemDeServicoStatus(OrdemDeServicoStatus.RECEBIDA)
                 .build();
     }

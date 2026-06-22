@@ -5,6 +5,8 @@ import com.techchallenger.oficina360.entities.Usuario;
 
 public class UsuarioMapper {
 
+    private UsuarioMapper(){}
+
     public static CriarUsuarioRequestDTO toDTO(Usuario usuario) {
         return new CriarUsuarioRequestDTO(
                 usuario.getEmail(),

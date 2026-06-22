@@ -2,6 +2,8 @@ package com.techchallenger.oficina360.utils;
 
 public class FormataDadosUtils {
 
+    private FormataDadosUtils(){}
+
     public static String mascararDocumento(String documento) {
         if (documento == null || documento.length() < 4) {
             return "***";

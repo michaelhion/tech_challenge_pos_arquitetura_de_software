@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
-import com.techchallenger.oficina360.dtos.servicos.AuthService;
+import com.techchallenger.oficina360.services.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

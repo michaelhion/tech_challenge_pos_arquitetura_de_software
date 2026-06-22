@@ -1,4 +1,4 @@
-package com.techchallenger.oficina360.dtos.servicos;
+package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
@@ -46,8 +46,7 @@ public class AuthService {
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        String token = jwtService.gerarToken(usuario);
-        return token;
+        return jwtService.gerarToken(usuario);
     }
     public void criarUsuario(CriarUsuarioRequestDTO criarUsuarioRequestDTO) {
         if(usuarioRepository.existsByEmail(criarUsuarioRequestDTO.email())) {

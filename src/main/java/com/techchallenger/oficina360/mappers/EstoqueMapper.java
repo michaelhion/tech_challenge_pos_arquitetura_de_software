@@ -5,6 +5,8 @@ import com.techchallenger.oficina360.entities.Estoque;
 
 public class EstoqueMapper {
 
+    private EstoqueMapper(){}
+
     public static EstoqueDTO toDTO(Estoque estoqueEntity) {
         return new EstoqueDTO(
                 estoqueEntity.getId(),

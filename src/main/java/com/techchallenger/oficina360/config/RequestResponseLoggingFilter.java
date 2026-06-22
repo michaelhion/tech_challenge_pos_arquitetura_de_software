@@ -110,16 +110,17 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 
         body = body.replaceAll("\\b\\d{14}\\b", "***CNPJ***");
 
-        body = body.replaceAll("(?i)\"senha\"\\s*:\\s*\".*?\"", "\"senha\":\"***\"");
+        body = body.replaceAll("(?i)\"senha\"\\s*:\\s*\"[^\"]*+\"","\"senha\":\"***\""
+        );
 
-        body = body.replaceAll("(?i)\"token\"\\s*:\\s*\".*?\"", "\"token\":\"***\"");
+        body = body.replaceAll("(?i)\"token\"\\s*:\\s*\"[^\"]*+\"","\"token\":\"***\""
+        );
 
         return body;
     }
 
     private String getUsuarioLogado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.getAuthorities());
 
         if (authentication == null || authentication.getName() == null) {
             return "anonymous";

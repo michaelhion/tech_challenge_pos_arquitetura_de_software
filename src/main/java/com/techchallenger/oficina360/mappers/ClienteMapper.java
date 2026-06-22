@@ -7,6 +7,9 @@ import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocu
 
 public class ClienteMapper {
 
+    private ClienteMapper() {
+    }
+
     public static ClienteDTO toDTO(Cliente clienteEntity) {
         return new ClienteDTO(
                 mascararDocumento(clienteEntity.getDocumento()),

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Slf4j
 @RestControllerAdvice
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler {
                 "Regra de negócio violada",
                 ex.getMessage(),
                 ex.getMensagens(),
-                LocalDateTime.now()
+                LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
         );
 
         return ResponseEntity
@@ -188,7 +189,7 @@ public class GlobalExceptionHandler {
                                 status.value(),
                                 erro,
                                 mensagem,
-                                LocalDateTime.now()
+                                LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
                         )
                 );
     }
