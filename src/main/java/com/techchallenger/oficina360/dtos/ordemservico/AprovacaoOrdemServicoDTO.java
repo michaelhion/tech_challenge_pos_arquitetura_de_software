@@ -15,6 +15,14 @@ public record AprovacaoOrdemServicoDTO(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @NotNull(message = "O campo aprovado é obrigatório")
-        Boolean aprovado
+        Boolean aprovado,
+        @Schema(
+                description = "Texto livre e opcional para explicar o motivo da recusa.",
+                example = "O cliente discordou de algum serviço",
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                maxLength = 200
+        )
+        String observacao
+
 ) {
 }

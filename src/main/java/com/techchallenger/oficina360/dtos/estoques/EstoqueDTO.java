@@ -8,13 +8,19 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Schema(
         name = "EstoqueDTO",
         description = "DTO utilizado para cadastro, atualização e consulta de itens de estoque da oficina."
 )
 public record EstoqueDTO(
-
+        @Schema(
+                description = "Identificador da ordem de serviço.",
+                example = "7b5a3247-a14a-44f8-872f-016e179a92fd",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        UUID id,
         @Schema(
                 description = "Código funcional do item de estoque. Deve conter apenas letras maiúsculas, números, hífen ou underline, sem espaços ou acentos.",
                 example = "EST-FILTRO-OLEO",

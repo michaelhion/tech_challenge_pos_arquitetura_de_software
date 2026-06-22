@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.techchallenger.oficina360.constants.Roles.*;
+
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
@@ -30,6 +32,8 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+
+                        // PUBLIC
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -37,61 +41,36 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        // Clientes
-                        .requestMatchers(HttpMethod.GET, "/clientes/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
+                        // CLIENTE (restrito e específico)
+                        .requestMatchers(HttpMethod.GET, "/ordens-servico/cliente/**")
+                        .hasRole(CLIENTE)
 
-                        .requestMatchers(HttpMethod.POST, "/clientes/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
+                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/cliente/*/aprovacao")
+                        .hasRole(CLIENTE)
 
-                        .requestMatchers(HttpMethod.PUT, "/clientes/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
+                        .requestMatchers(HttpMethod.GET, "/clientes/me")
+                        .hasRole(CLIENTE)
 
-                        .requestMatchers(HttpMethod.DELETE, "/clientes/**")
-                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/veiculos/me")
+                        .hasRole(CLIENTE)
 
-                        // Veículos
-                        .requestMatchers("/veiculos/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
-
-                        // Serviços
-                        .requestMatchers("/servicos/**")
-                        .hasRole("ADMIN")
-
-                        // Estoque
-                        .requestMatchers("/estoque/**")
-                        .hasAnyRole("ADMIN", "ESTOQUISTA")
-
-                        // Diagnóstico
-                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/diagnostico")
-                        .hasAnyRole("ADMIN", "MECANICO")
-
-                        // Aprovação do orçamento
-                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/aprovacao")
-                        .hasAnyRole("ADMIN", "CLIENTE")
-
-                        // Execução
-                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/execucao/**")
-                        .hasAnyRole("ADMIN", "MECANICO")
-
-                        // Entrega
-                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/entrega")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
-
-                        // Ordem de serviço geral
-                        .requestMatchers(HttpMethod.POST, "/ordens-servico/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
-
+                        // INTERNO
                         .requestMatchers(HttpMethod.GET, "/ordens-servico/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE", "MECANICO")
+                        .hasAnyRole(ADMIN, ATENDENTE, MECANICO)
 
-                        .requestMatchers(HttpMethod.PUT, "/ordens-servico/**")
-                        .hasAnyRole("ADMIN", "ATENDENTE")
+                        .requestMatchers(HttpMethod.POST, "/ordens-servico/**")
+                        .hasAnyRole(ADMIN, ATENDENTE)
 
-                        .requestMatchers(HttpMethod.DELETE, "/ordens-servico/**")
-                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/diagnostico")
+                        .hasAnyRole(ADMIN, MECANICO)
 
-                        // Qualquer outro endpoint exige autenticação
+                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/execucao/**")
+                        .hasAnyRole(ADMIN, MECANICO)
+
+                        .requestMatchers(HttpMethod.PATCH, "/ordens-servico/*/entrega")
+                        .hasAnyRole(ADMIN, ATENDENTE)
+
+                        // fallback
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

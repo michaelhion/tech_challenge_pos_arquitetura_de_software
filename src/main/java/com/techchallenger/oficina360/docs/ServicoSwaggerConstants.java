@@ -9,7 +9,7 @@ public final class ServicoSwaggerConstants {
     /*
      * Tag
      */
-    public static final String TAG_NAME = "5 - Serviços";
+    public static final String TAG_NAME = "4 - Serviços";
 
     public static final String TAG_DESCRIPTION =
             "Endpoints administrativos para cadastro, consulta, edição e exclusão dos serviços oferecidos pela oficina.";

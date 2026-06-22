@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.services.factories;
 
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.entities.Cliente;
 import com.techchallenger.oficina360.entities.OrdemServico;
 import com.techchallenger.oficina360.entities.Veiculo;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Component
 public class OrdemServicoFactory {
 
-    public OrdemServico criar(OrdemServicoDTO dto, Cliente cliente, Veiculo veiculo) {
+    public OrdemServico criar(CriarOrdemServicoDTO dto, Cliente cliente, Veiculo veiculo) {
         return OrdemServico.builder()
                 .documentoCliente(cliente.getDocumento())
                 .placaVeiculo(veiculo.getPlaca())

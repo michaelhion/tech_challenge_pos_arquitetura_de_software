@@ -7,6 +7,7 @@ public class EstoqueMapper {
 
     public static EstoqueDTO toDTO(Estoque estoqueEntity) {
         return new EstoqueDTO(
+                estoqueEntity.getId(),
                 estoqueEntity.getCodigo(),
                 estoqueEntity.getNome(),
                 estoqueEntity.getValor(),
@@ -18,6 +19,7 @@ public class EstoqueMapper {
 
     public static Estoque toEntity(EstoqueDTO estoqueDTO) {
         return Estoque.builder()
+                .id(estoqueDTO.id())
                 .codigo(estoqueDTO.codigo())
                 .nome(estoqueDTO.nome())
                 .valor(estoqueDTO.valor())

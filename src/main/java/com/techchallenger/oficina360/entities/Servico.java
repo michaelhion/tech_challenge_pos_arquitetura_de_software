@@ -38,5 +38,8 @@ public class Servico {
     @Column(name = "CODIGO", nullable = false, unique = true, length = 100)
     private String codigo;
 
+    @Column(name = "TEMPO_MEDIO_EXECUCAO_MINUTOS")
+    private Integer tempoMedioExecucaoMinutos;
+
 
 }

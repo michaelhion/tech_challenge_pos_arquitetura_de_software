@@ -9,7 +9,8 @@ public class ServicoMapper {
         return new ServicoDTO(
                 servicoEntity.getCodigo(),
                 servicoEntity.getDescricao(),
-                servicoEntity.getValor()
+                servicoEntity.getValor(),
+                servicoEntity.getTempoMedioExecucaoMinutos()
         );
     }
 
@@ -18,6 +19,7 @@ public class ServicoMapper {
                 .codigo(servicoDTO.codigo())
                 .descricao(servicoDTO.descricao())
                 .valor(servicoDTO.valor())
+                .tempoMedioExecucaoMinutos(servicoDTO.tempoDeExecucaoMedio())
                 .build();
     }
 

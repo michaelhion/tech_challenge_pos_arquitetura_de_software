@@ -20,7 +20,7 @@ public record ClienteDTO(
         @NotBlank(message = "O documento é obrigatório")
         @Pattern(
                 regexp = "\\d{11}|\\d{14}",
-                message = "O documento deve conter 11 dígitos para CPF ou 14 dígitos para CNPJ"
+                message = "O documento deve conter 11 dígitos para CPF ou 14 dígitos para CNPJ, sem pontuação"
         )
         String documento,
 

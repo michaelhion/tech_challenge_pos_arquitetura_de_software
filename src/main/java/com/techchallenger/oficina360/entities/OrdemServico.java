@@ -48,6 +48,9 @@ public class OrdemServico {
     @Column(name = "ORDEM_DE_SERVICO_STATUS", nullable = false, length = 50)
     private OrdemDeServicoStatus ordemDeServicoStatus;
 
+    @Column(name = "OBSERVACAO_CLIENTE", length = 200)
+    private String observacaoCliente;
+
     @Builder.Default
     @OneToMany(
             mappedBy = "ordemServico",

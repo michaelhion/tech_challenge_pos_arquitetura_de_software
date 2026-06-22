@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
 @Tag(
-        name = "0 - Autenticação",
+        name = "1 - Autenticação",
         description = "Endpoints para autenticação e geração de token JWT."
 )
 public interface AuthApi {

@@ -38,6 +38,7 @@ class EstoqueControllerTest {
         estoqueId = UUID.fromString("2b3ded6d-2e43-4f2f-8ea3-26714b1398f8");
 
         estoqueDTO = new EstoqueDTO(
+                estoqueId,
                 "FILTRO-DE-OLEO",
                 "Filtro de óleo",
                 BigDecimal.valueOf(45.90),
@@ -99,6 +100,7 @@ class EstoqueControllerTest {
     @Test
     void deveEditarComSucesso() {
         EstoqueDTO estoqueAtualizado = new EstoqueDTO(
+                estoqueId,
                 "FILTRO-DE-OLEO-PREMIUM",
                 "Filtro de óleo premium",
                 BigDecimal.valueOf(60.00),
@@ -138,6 +140,7 @@ class EstoqueControllerTest {
     @Test
     void deveListarEstoquesComSucesso() {
         EstoqueDTO segundoItem = new EstoqueDTO(
+                estoqueId,
                 "PASTILHA-DE-FREIO",
                 "Pastilha de freio",
                 BigDecimal.valueOf(120.00),
@@ -189,6 +192,7 @@ class EstoqueControllerTest {
         ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(3);
 
         EstoqueDTO estoqueReservado = new EstoqueDTO(
+                estoqueId,
                 "FILTRO-DE-OLEO",
                 "Filtro de óleo",
                 BigDecimal.valueOf(45.90),

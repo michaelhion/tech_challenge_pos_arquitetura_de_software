@@ -10,6 +10,8 @@ import com.techchallenger.oficina360.entities.OrdemServicoServico;
 
 import java.util.List;
 
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocumento;
+
 public class OrdemServicoMapper {
 
     private OrdemServicoMapper() {
@@ -22,7 +24,7 @@ public class OrdemServicoMapper {
 
         return new OrdemServicoDTO(
                 ordemServicoEntity.getId(),
-                ordemServicoEntity.getDocumentoCliente(),
+                mascararDocumento(ordemServicoEntity.getDocumentoCliente()),
                 ordemServicoEntity.getPlacaVeiculo(),
                 ordemServicoEntity.getDescricaoProblema(),
                 ordemServicoEntity.getOrdemDeServicoStatus(),

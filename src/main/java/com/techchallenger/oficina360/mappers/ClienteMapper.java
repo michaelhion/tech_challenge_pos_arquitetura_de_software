@@ -3,11 +3,13 @@ package com.techchallenger.oficina360.mappers;
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.entities.Cliente;
 
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocumento;
+
 public class ClienteMapper {
 
     public static ClienteDTO toDTO(Cliente clienteEntity) {
         return new ClienteDTO(
-                clienteEntity.getDocumento(),
+                mascararDocumento(clienteEntity.getDocumento()),
                 clienteEntity.getNome(),
                 clienteEntity.getEmail(),
                 clienteEntity.getTelefone()

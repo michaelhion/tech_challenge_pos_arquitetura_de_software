@@ -1,45 +1,44 @@
 package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.docs.api.AuthApi;
+import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.security.JwtService;
+import com.techchallenger.oficina360.dtos.servicos.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.techchallenger.oficina360.constants.Roles.ADMIN;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 public class AuthController implements AuthApi {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+    private final AuthService authService;
 
     @Override
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO loginRequestDTO
     ) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
-                        loginRequestDTO.email(),
-                        loginRequestDTO.senha()
-                );
-
-        Authentication authentication =
-                authenticationManager.authenticate(authenticationToken);
-
-        Usuario usuario = (Usuario) authentication.getPrincipal();
-
-        String token = jwtService.gerarToken(usuario);
+        String token = authService.autenticar(loginRequestDTO);
 
         return ResponseEntity.ok(new LoginResponseDTO(token, "Bearer"));
+    }
+
+
+
+    @PostMapping("/criar-usuario")
+    @PreAuthorize("hasRole('" + ADMIN + "')")
+    public ResponseEntity<String> criarUsuario(@Valid @RequestBody CriarUsuarioRequestDTO criarUsuarioRequestDTO) {
+        authService.criarUsuario(criarUsuarioRequestDTO);
+        return ResponseEntity.ok("Usuário criado com sucesso!");
     }
 }

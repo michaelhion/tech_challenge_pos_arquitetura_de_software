@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
 import static com.techchallenger.oficina360.mappers.EstoqueMapper.toDTO;
 import static com.techchallenger.oficina360.mappers.EstoqueMapper.toEntity;
 
@@ -21,8 +22,6 @@ import static com.techchallenger.oficina360.mappers.EstoqueMapper.toEntity;
 @RequiredArgsConstructor
 public class EstoqueService {
 
-    private static final String ITEM_DE_ESTOQUE_NAO_DISPONIVEL = "Item de estoque n\u00E3o dispon\u00EDvel";
-    public static final String CODIGO_JA_EXISTE_NO_SISTEMA = "C\u00F3digo j\u00E1 existe no sistema";
     private final EstoqueRepository estoqueRepository;
 
     public List<EstoqueDTO> findAll() {
@@ -31,7 +30,7 @@ public class EstoqueService {
 
     public void delete(UUID id) {
         estoqueRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(ITEM_DE_ESTOQUE_NAO_DISPONIVEL));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(ESTOQUE_ITEM_DE_ESTOQUE_NAO_DISPONIVEL));
         estoqueRepository.deleteById(id);
     }
 
@@ -42,7 +41,7 @@ public class EstoqueService {
     public EstoqueDTO save(EstoqueDTO estoqueDTO) {
         estoqueRepository.findByCodigo(estoqueDTO.codigo())
                 .ifPresent(existing -> {
-                    throw new RegraDeNegocioException(CODIGO_JA_EXISTE_NO_SISTEMA);
+                    throw new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA);
                 });
         return toDTO(estoqueRepository.save(toEntity(estoqueDTO)));
     }
@@ -50,7 +49,7 @@ public class EstoqueService {
 
     public EstoqueDTO edit(UUID id, EstoqueDTO estoqueDTO) {
         Estoque estoque = estoqueRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(ITEM_DE_ESTOQUE_NAO_DISPONIVEL));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(ESTOQUE_ITEM_DE_ESTOQUE_NAO_DISPONIVEL));
 
         EstoqueMapper.updateEntityFromDto(estoqueDTO, estoque);
 
@@ -62,7 +61,7 @@ public class EstoqueService {
 
     public EstoqueDTO reservar(UUID id, ReservaEstoqueDTO reservaDTO) {
         Estoque estoque = estoqueRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de estoque não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(ESTOQUE_ITEM_NAO_ENCONTRADO));
 
         estoque.reservar(reservaDTO.quantidade());
 

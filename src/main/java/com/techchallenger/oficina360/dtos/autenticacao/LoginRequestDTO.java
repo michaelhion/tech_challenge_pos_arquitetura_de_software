@@ -6,12 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 
 @Schema(
         name = "LoginRequestDTO",
-        description = "DTO utilizado para autenticação de usuários administrativos."
+        description = "DTO utilizado para autenticação de usuários."
 )
 public record LoginRequestDTO(
 
         @Schema(
-                description = "E-mail do usuário administrativo.",
+                description = "E-mail do usuário.",
                 example = "admin@oficina360.com",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
@@ -20,7 +20,7 @@ public record LoginRequestDTO(
         String email,
 
         @Schema(
-                description = "Senha do usuário administrativo.",
+                description = "Senha do usuário.",
                 example = "123456",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

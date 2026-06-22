@@ -13,13 +13,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.CLIENTE_JA_CADASTRADO;
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.CLIENTE_NAO_ENCONTRADO;
 import static com.techchallenger.oficina360.mappers.ClienteMapper.toDTO;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
 
 @Service
 @RequiredArgsConstructor
 public class ClienteService {
 
-    private static final String CLIENTE_NAO_ENCONTRADO = "Cliente n\u00E3o encontrado";
+
     private final ClienteRepository clienteRepository;
 
     public List<ClienteDTO> findAll() {
@@ -35,7 +38,7 @@ public class ClienteService {
 
     public ClienteDTO save(ClienteDTO clienteDTO) {
         if (clienteRepository.existsByDocumento(normalizarDocumento(clienteDTO.documento()))) {
-            throw new ConflitoException("Cliente já cadastrado");
+            throw new ConflitoException(CLIENTE_JA_CADASTRADO);
         }
         return toDTO(clienteRepository.save(ClienteMapper.toEntity(clienteDTO)));
     }
@@ -55,8 +58,5 @@ public class ClienteService {
         return ClienteMapper.toDTO(clienteAtualizado);
     }
 
-    private String normalizarDocumento(String documento) {
-        return documento == null ? null : documento.trim();
-    }
 
 }

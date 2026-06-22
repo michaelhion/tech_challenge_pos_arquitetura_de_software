@@ -4,9 +4,11 @@ import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.entities.Servico;
 import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.repositories.ServicoRepository;
+import com.techchallenger.oficina360.repositories.TempoExecucaoServicoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +28,9 @@ class ServicoServiceTest {
     @Mock
     private ServicoRepository servicoRepository;
 
+    @Mock
+    private TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
+
     @InjectMocks
     private ServicoService servicoService;
 
@@ -40,13 +45,15 @@ class ServicoServiceTest {
         servicoDTO = new ServicoDTO(
                 "TROCA-DE-OLEO",
                 "Troca de óleo",
-                BigDecimal.valueOf(150.00)
+                BigDecimal.valueOf(150.00),
+                1
         );
 
         servico = Servico.builder()
                 .id(servicoId)
                 .descricao("Troca de óleo")
                 .valor(BigDecimal.valueOf(150.00))
+                .tempoMedioExecucaoMinutos(2)
                 .build();
     }
 
@@ -123,7 +130,8 @@ class ServicoServiceTest {
         ServicoDTO dtoAtualizado = new ServicoDTO(
                 "ALINHAMENTO-E-BALANCEAMENTO",
                 "Alinhamento e balanceamento",
-                BigDecimal.valueOf(220.00)
+                BigDecimal.valueOf(220.00),
+                1
         );
 
         Servico servicoAtualizado = Servico.builder()
@@ -192,6 +200,77 @@ class ServicoServiceTest {
 
         verify(servicoRepository, times(1)).findById(servicoId);
         verify(servicoRepository, never()).delete(any(Servico.class));
+    }
+
+    @Test
+    void deveRetornarTempoMedioCalculadoAoListarServicos() {
+
+        when(servicoRepository.findAll())
+                .thenReturn(List.of(servico));
+
+        when(tempoExecucaoServicoRepository
+                .calcularTempoMedio(servicoId))
+                .thenReturn(35.6);
+
+        List<ServicoDTO> resultado =
+                servicoService.findAll();
+
+        assertEquals(1, resultado.size());
+
+        assertEquals(
+                36,
+                resultado.get(0)
+                        .tempoDeExecucaoMedio()
+        );
+
+        verify(tempoExecucaoServicoRepository)
+                .calcularTempoMedio(servicoId);
+    }
+
+    @Test
+    void deveRetornarTempoMedioZeroQuandoNaoExistiremExecucoes() {
+
+        when(servicoRepository.findAll())
+                .thenReturn(List.of(servico));
+
+        when(tempoExecucaoServicoRepository
+                .calcularTempoMedio(servicoId))
+                .thenReturn(null);
+
+        List<ServicoDTO> resultado =
+                servicoService.findAll();
+
+        assertEquals(1, resultado.size());
+
+        assertEquals(
+                0,
+                resultado.get(0)
+                        .tempoDeExecucaoMedio()
+        );
+
+        verify(tempoExecucaoServicoRepository)
+                .calcularTempoMedio(servicoId);
+    }
+
+    @Test
+    void deveInicializarTempoMedioComZeroAoSalvar() {
+
+        ArgumentCaptor<Servico> captor =
+                ArgumentCaptor.forClass(Servico.class);
+
+        when(servicoRepository.save(any()))
+                .thenReturn(servico);
+
+        servicoService.save(servicoDTO);
+
+        verify(servicoRepository)
+                .save(captor.capture());
+
+        assertEquals(
+                0,
+                captor.getValue()
+                        .getTempoMedioExecucaoMinutos()
+        );
     }
 }
 

@@ -38,7 +38,8 @@ class ServicosControllerTest {
         servicoDTO = new ServicoDTO(
                 "TROCA-DE-OLEO",
                 "Troca de óleo",
-                BigDecimal.valueOf(150.00)
+                BigDecimal.valueOf(150.00),
+                1
         );
     }
 
@@ -90,7 +91,8 @@ class ServicosControllerTest {
         ServicoDTO servicoAtualizado = new ServicoDTO(
                 "ALINHAMENTO-E-BALANCEAMENTO",
                 "Alinhamento e balanceamento",
-                BigDecimal.valueOf(220.00)
+                BigDecimal.valueOf(220.00),
+                1
         );
 
         when(servicoService.edit(servicoId, servicoAtualizado))
@@ -124,7 +126,8 @@ class ServicosControllerTest {
         ServicoDTO segundoServico = new ServicoDTO(
                 "TROCA-DE-PASTILHA-DE-FREIO",
                 "Troca de pastilha de freio",
-                BigDecimal.valueOf(300.00)
+                BigDecimal.valueOf(300.00),
+                3
         );
 
         when(servicoService.findAll())

@@ -1,0 +1,414 @@
+{
+  "domain": {
+    "name": "default",
+    "actors": {
+      "System": "<svg viewBox=\"0 0 24 26\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20,18c1.1,0,2-0.9,2-2V6c0-1.1-0.9-2-2-2H4C2.9,4,2,4.9,2,6v10c0,1.1,0.9,2,2,2H0v2h24v-2H20z M4,6h16v10H4V6z\"/></svg>",
+      "Group": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"48\" viewBox=\"0 0 24 26\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M16.5 13c-1.2 0-3.07.34-4.5 1-1.43-.67-3.3-1-4.5-1C5.33 13 1 14.08 1 16.25V19h22v-2.75c0-2.17-4.33-3.25-6.5-3.25zm-4 4.5h-10v-1.25c0-.54 2.56-1.75 5-1.75s5 1.21 5 1.75v1.25zm9 0H14v-1.25c0-.46-.2-.86-.52-1.22.88-.3 1.96-.53 3.02-.53 2.44 0 5 1.21 5 1.75v1.25zM7.5 12c1.93 0 3.5-1.57 3.5-3.5S9.43 5 7.5 5 4 6.57 4 8.5 5.57 12 7.5 12zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 5.5c1.93 0 3.5-1.57 3.5-3.5S18.43 5 16.5 5 13 6.57 13 8.5s1.57 3.5 3.5 3.5zm0-5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z\"/></svg>",
+      "Person": "<svg viewBox=\"0 0 24 26\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12 5.9c1.16 0 2.1.94 2.1 2.1s-.94 2.1-2.1 2.1S9.9 9.16 9.9 8s.94-2.1 2.1-2.1m0 9c2.97 0 6.1 1.46 6.1 2.1v1.1H5.9V17c0-.64 3.13-2.1 6.1-2.1M12 4C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>"
+    },
+    "workObjects": {
+      "engine-gear-setting-svgrepo-com-custom": "data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KDTwhLS0gVXBsb2FkZWQgdG86IFNWRyBSZXBvLCB3d3cuc3ZncmVwby5jb20sIFRyYW5zZm9ybWVkIGJ5OiBTVkcgUmVwbyBNaXhlciBUb29scyAtLT4KPHN2ZyBmaWxsPSIjMDAwMDAwIiB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB2ZXJzaW9uPSIxLjEiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgoNPGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiLz4KDTxnIGlkPSJTVkdSZXBvX3RyYWNlckNhcnJpZXIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgoNPGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPiA8ZyBpZD0iX3gzN18yMS1fZ2Vhcl9feDJDX19zZXR0aW5nX194MkNfZW5naW5lX194MkNfIj4gPGc+IDxnPiA8cGF0aCBkPSJNMjgzLjY5Myw0OTIuODQ3SDIyOS4yNmMtMTQuOTcyLDAtMjcuMTUzLTEyLjE3Ny0yNy4xNTMtMjcuMTQ0di01My45Yy0xOS4yNzEtNi43NzQtMzcuNDE3LTE3LjI3MS01Mi45NzctMzAuNjQzIGwtNDYuNzY0LDI2Ljk5MWMtNC4xMDYsMi4zNjEtOC43NzIsMy42MDUtMTMuNTAzLDMuNjA2Yy05LjcwMywwLTE4LjcyNy01LjE3My0yMy41NS0xMy41bC0yNy4yMzctNDcuMTg0IGMtNy40NTctMTIuOTM1LTMuMDA0LTI5LjU1LDkuOTI1LTM3LjA0bDQ2Ljc0MS0yNi45NThjLTEuOTAzLTEwLjA3MS0yLjg2Ny0yMC4zNDEtMi44NjctMzAuNmMwLTEwLjI1OCwwLjk2My0yMC41MjcsMi44NjctMzAuNiBsLTQ2LjczLTI2Ljk1Yy0xMi45NzItNy41MTYtMTcuNDIzLTI0LjE1Ny05LjkzMy0zNy4xMDRsMjcuMjMtNDcuMTIxYzQuODM1LTguMzQ3LDEzLjg1OS0xMy41MjcsMjMuNTUzLTEzLjUyNyBjNC43NDMsMCw5LjQxNywxLjI1NywxMy41MTcsMy42MzVsNDYuNzU0LDI2Ljk0NmMxNS41NzYtMTMuMzUzLDMzLjcyNC0yMy44MzcsNTIuOTc0LTMwLjYwNHYtNTMuOSBjMC0xNC45NjgsMTIuMTgxLTI3LjE0NSwyNy4xNTMtMjcuMTQ1aDU0LjQzNGMxNC45NzQsMCwyNy4xNTUsMTIuMTc3LDI3LjE1NSwyNy4xNDV2NTMuODk5IGMxOS4zNDMsNi43OTMsMzcuNDkyLDE3LjI3NCw1Mi45ODMsMzAuNmw0Ni43NjEtMjYuOTUxYzQuMDk1LTIuMzY5LDguNzctMy42MjUsMTMuNTEtMy42MjVjOS42OTMsMCwxOC43MDgsNS4xODUsMjMuNTI0LDEzLjUzMSBsMjcuMjUsNDcuMTE4YzcuNDc3LDEyLjk3NywzLjAyMSwyOS42MTUtOS45MjgsMzcuMWwtNDYuNzM4LDI2Ljk1NWMxLjg5LDEwLjAyMSwyLjg0NiwyMC4yOTEsMi44NDYsMzAuNTk5IGMwLDEwLjM4OC0wLjk1MywyMC42NTktMi44MzksMzAuNjAzbDQ2LjcyNiwyNi45NDhjNi4yMzYsMy41NzIsMTAuNzIxLDkuMzk5LDEyLjYxMSwxNi4zOTggYzEuODk4LDcuMDMsMC45NDksMTQuMzYyLTIuNjc0LDIwLjY0NmwtMjcuMjMzLDQ3LjE3OGMtNC44MjcsOC4zMzUtMTMuODQ3LDEzLjUwOC0yMy41NDQsMTMuNTA5IGMtNC43MjksMC05LjM5Ni0xLjI0NC0xMy40OTktMy41OTdsLTQ2Ljc3NS0yN2MtMTUuNTUzLDEzLjM3OS0zMy43MDEsMjMuODYzLTUyLjk4LDMwLjYwNXY1My45MzcgQzMxMC44NDksNDgwLjY3LDI5OC42NjcsNDkyLjg0NywyODMuNjkzLDQ5Mi44NDd6IE0xNDkuOTU5LDM2Ni4yMjdjMS42MzYsMCwzLjI1OSwwLjU5OCw0LjUyNiwxLjc1NiBjMTYuMTQzLDE0Ljc0OCwzNS42MzEsMjYuMDIsNTYuMzU4LDMyLjU5N2MyLjc4NywwLjg4NSw0LjY4LDMuNDcyLDQuNjgsNi4zOTV2NTguNzI5YzAsNy41NjksNi4xNjIsMTMuNzI4LDEzLjczNiwxMy43MjhoNTQuNDM0IGM3LjU3NiwwLDEzLjczOC02LjE1OCwxMy43MzgtMTMuNzI4di01OC43NzRjMC0yLjkyOCwxLjg5OS01LjUxOCw0LjY5MS02LjM5N2MyMC43MzEtNi41MzcsNDAuMjE1LTE3Ljc5MSw1Ni4zNDQtMzIuNTQ2IGMyLjE1OS0xLjk3NCw1LjM0OC0yLjMyMyw3Ljg4Mi0wLjg2bDUwLjk0NywyOS40MDdjMi4wNTgsMS4xOCw0LjQxNywxLjgwOSw2LjgwNywxLjgwOWM0LjkyNy0wLjAwMSw5LjQ5OS0yLjYwOSwxMS45MzEtNi44MDggbDI3LjIyNy00Ny4xNjZjMS44MjctMy4xNywyLjMwNS02Ljg4LDEuMzQzLTEwLjQ0MmMtMC45NTQtMy41MzMtMy4yMDgtNi40NjgtNi4zNDUtOC4yNjVsLTUwLjkzOC0yOS4zNzggYy0yLjUzOS0xLjQ2NS0zLjgzNC00LjQwOC0zLjE5Ni03LjI3YzIuMzM0LTEwLjQ4MiwzLjUxOC0yMS40MjksMy41MTgtMzIuNTM2YzAtMTEuMDA0LTEuMTg1LTIxLjk1NS0zLjUyMS0zMi41NSBjLTAuNjMtMi44NTcsMC42NjQtNS43OTQsMy4xOTktNy4yNTZsNTAuOTIxLTI5LjM2N2M2LjU0Ny0zLjc4Myw4LjgtMTIuMjA3LDUuMDE3LTE4Ljc3M2wtMjcuMjQ3LTQ3LjExNCBjLTIuNDMyLTQuMjEzLTYuOTkyLTYuODI2LTExLjkwNy02LjgyNmMtMi4zODMsMC00LjczNCwwLjYzMi02LjgsMS44MjdsLTUwLjk1OCwyOS4zN2MtMi41MzMsMS40Ni01LjcyMSwxLjExLTcuODc5LTAuODY0IGMtMTYuMDQ3LTE0LjY4Ny0zNS41MzMtMjUuOTQxLTU2LjM1NC0zMi41NDhjLTIuNzg2LTAuODg1LTQuNjgtMy40NzItNC42OC02LjM5NVY0Ny4yNTFjMC03LjU2OS02LjE2Mi0xMy43MjktMTMuNzM4LTEzLjcyOSBIMjI5LjI2Yy03LjU3NCwwLTEzLjczNiw2LjE1OS0xMy43MzYsMTMuNzI5djU4LjcyOWMwLDIuOTIzLTEuODkzLDUuNTEtNC42OCw2LjM5NWMtMjAuNzA2LDYuNTY5LTQwLjE5NiwxNy44MjgtNTYuMzY2LDMyLjU1OSBjLTIuMTU3LDEuOTY3LTUuMzM5LDIuMzExLTcuODY3LDAuODU0bC01MC45NDgtMjkuMzYzYy0yLjA3My0xLjIwMy00LjQxOS0xLjgzNC02LjgwMS0xLjgzNGMtNC45MjQsMC05LjUsMi42MTctMTEuOTQsNi44MyBsLTI3LjIyOCw0Ny4xMThjLTMuNzg5LDYuNTUtMS41MzEsMTQuOTcsNS4wMzMsMTguNzcybDUwLjkwOSwyOS4zNmMyLjUzNSwxLjQ2MiwzLjgzLDQuMzk4LDMuMiw3LjI1NiBjLTIuMzUxLDEwLjY2Mi0zLjU0MiwyMS42MTMtMy41NDIsMzIuNTVjMCwxMC45MzgsMS4xOTIsMjEuODg5LDMuNTQyLDMyLjU1YzAuNjMsMi44NTctMC42NjUsNS43OTQtMy4xOTksNy4yNTZsLTUwLjkyLDI5LjM2OCBjLTYuNTMsMy43ODItOC43ODYsMTIuMTg0LTUuMDE4LDE4LjcybDI3LjIyOSw0Ny4xNzJjMi40MjgsNC4xOSw3LjAwMyw2Ljc5OSwxMS45MzYsNi43OTljMi4zODgsMCw0Ljc0Mi0wLjYyOCw2LjgwNy0xLjgxNCBsNTAuOTM4LTI5LjQwMUMxNDcuNjUyLDM2Ni41MjEsMTQ4LjgwOSwzNjYuMjI3LDE0OS45NTksMzY2LjIyN3oiLz4gPC9nPiA8Zz4gPHBhdGggZD0iTTI1Ni40OTEsMzM3Ljc2NGMtNDQuODU3LDAtODEuMzUxLTM2LjQ2NS04MS4zNTEtODEuMjg3YzAtNDQuODIxLDM2LjQ5NC04MS4yODYsODEuMzUxLTgxLjI4NiBjNDQuODQyLDAsODEuMzIzLDM2LjQ2NSw4MS4zMjMsODEuMjg2QzMzNy44MTQsMzAxLjI5OSwzMDEuMzMzLDMzNy43NjQsMjU2LjQ5MSwzMzcuNzY0eiBNMjU2LjQ5MSwxODguNjA2IGMtMzcuNDU5LDAtNjcuOTM0LDMwLjQ0Ni02Ny45MzQsNjcuODdzMzAuNDc1LDY3Ljg3MSw2Ny45MzQsNjcuODcxYzM3LjQ0NCwwLDY3LjkwNy0zMC40NDcsNjcuOTA3LTY3Ljg3MSBTMjkzLjkzNiwxODguNjA2LDI1Ni40OTEsMTg4LjYwNnoiLz4gPC9nPiA8L2c+IDwvZz4gPGcgaWQ9IkxheWVyXzEiLz4gPC9nPgoNPC9zdmc+",
+      "diagnostic-svgrepo-com-custom": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUuNSwxNGgtLjhsLS4zLS4zQTYuMjYsNi4yNiwwLDAsMCwxNiw5LjUsNi41LDYuNSwwLDEsMCw5LjUsMTZhNi4yNiw2LjI2LDAsMCwwLDQuMi0xLjZsLjMuM3YuOGw1LDVMMjAuNSwxOVptLTYtOWE0LjQ4LDQuNDgsMCwwLDEsNC4zOSwzLjVIMTEuNDZsLTEuMDcsMS42TDguMjIsNiw2LjkxLDguNUg1LjExQTQuNDgsNC40OCwwLDAsMSw5LjUsNVptMCw5QTQuNDgsNC40OCwwLDAsMSw1LDEwSDcuODJsLjQxLS43OCwyLDMuNzksMi0zSDE0QTQuNDcsNC40NywwLDAsMSw5LjUsMTRaIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=",
+      "Info": "<svg height=\"48\" viewBox=\"0 0 24 26\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z\"/></svg>",
+      "Conversation": "<svg height=\"48\" viewBox=\"0 0 24 26\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0 0h24v24H0V0z\" fill=\"none\"/><path d=\"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z\"/></svg>",
+      "Email": "<svg viewBox=\"0 0 24 26\" xmlns=\"http://www.w3.org/2000/svg\"><path fill=\"none\" d=\"M0,0h24v24H0V0z\"/><path fill-opacity=\"0.9\" d=\"M12,1.95c-5.52,0-10,4.48-10,10s4.48,10,10,10h5v-2h-5c-4.34,0-8-3.66-8-8s3.66-8,8-8s8,3.66,8,8v1.43 c0,0.79-0.71,1.57-1.5,1.57S17,14.17,17,13.38v-1.43c0-2.76-2.24-5-5-5s-5,2.24-5,5s2.24,5,5,5c1.38,0,2.64-0.56,3.54-1.47 c0.65,0.89,1.77,1.47,2.96,1.47c1.97,0,3.5-1.6,3.5-3.57v-1.43C22,6.43,17.52,1.95,12,1.95z M12,14.95c-1.66,0-3-1.34-3-3 s1.34-3,3-3s3,1.34,3,3S13.66,14.95,12,14.95z\"/></svg>",
+      "Call": "<svg viewBox=\"0 0 24 26\" xmlns=\"http://www.w3.org/2000/svg\"><path fill=\"none\" d=\"M0,0h24v24H0V0z\"/><path d=\"M6.54,5C6.6,5.89,6.75,6.76,6.99,7.59l-1.2,1.2C5.38,7.59,5.12,6.32,5.03,5H6.54 M16.4,17.02c0.85,0.24,1.72,0.39,2.6,0.45 v1.49c-1.32-0.09-2.59-0.35-3.8-0.75L16.4,17.02 M7.5,3H4C3.45,3,3,3.45,3,4c0,9.39,7.61,17,17,17c0.55,0,1-0.45,1-1v-3.49\tc0-0.55-0.45-1-1-1c-1.24,0-2.45-0.2-3.57-0.57c-0.1-0.04-0.21-0.05-0.31-0.05c-0.26,0-0.51,0.1-0.71,0.29l-2.2,2.2 c-2.83-1.45-5.15-3.76-6.59-6.59l2.2-2.2C9.1,8.31,9.18,7.92,9.07,7.57C8.7,6.45,8.5,5.25,8.5,4C8.5,3.45,8.05,3,7.5,3L7.5,3z\"/></svg>",
+      "Folder": "<svg viewBox=\"0 0 24 26\" xmlns=\"http://www.w3.org/2000/svg\"><path fill=\"none\" d=\"M0,0h24v24H0V0z\"/><path d=\"M9.17,6l2,2H20v10L4,18V6H9.17 M10,4H4C2.9,4,2.01,4.9,2.01,6L2,18c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8c0-1.1-0.9-2-2-2 h-8L10,4L10,4z\"/></svg>",
+      "Document": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 26\"><path fill=\"none\" d=\"M0 0h24v24H0V0z\"/><path d=\"M8 16h8v2H8zm0-4h8v2H8zm6-10H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z\"/></svg>",
+      "car-repair-svgrepo-com-custom": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBVcGxvYWRlZCB0bzogU1ZHIFJlcG8sIHd3dy5zdmdyZXBvLmNvbSwgR2VuZXJhdG9yOiBTVkcgUmVwbyBNaXhlciBUb29scyAtLT4NCjxzdmcgZmlsbD0iIzAwMDAwMCIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgDQoJIHZpZXdCb3g9IjAgMCAyOTYuNDQzIDI5Ni40NDMiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGc+DQoJPGc+DQoJCTxnPg0KCQkJPHBhdGggZD0iTTIyOC41NzEsNTYuMjIybC0yNi4xMTktMzYuNTcxaC00NS4zMXY0Ny42MTloNzEuNDI5VjU2LjIyMnogTTE5NC4xOTUsNTcuNzQ2bC0yLjkzMy0xMS43MzNsNi4xMS0zLjA1N2wtNC4yNjItOC41MTkNCgkJCQlsLTEyLjkzOCw2LjQ2N2w0LjIwNSwxNi44NDNoLTE3LjcxVjI5LjE3NWgzMC44ODFsMjAuNDEsMjguNTcxSDE5NC4xOTV6Ii8+DQoJCQk8cGF0aCBkPSJNNjYuNjY3LDExOS42NTFjLTcuODc2LDAtMTQuMjg2LDYuNDEtMTQuMjg2LDE0LjI4NmMwLDcuODc2LDYuNDEsMTQuMjg2LDE0LjI4NiwxNC4yODYNCgkJCQljNy44NzYsMCwxNC4yODYtNi40MSwxNC4yODYtMTQuMjg2QzgwLjk1MywxMjYuMDYxLDc0LjU0MywxMTkuNjUxLDY2LjY2NywxMTkuNjUxeiBNNjYuNjY3LDEzOC42OTkNCgkJCQljLTIuNjI0LDAtNC43NjItMi4xMzMtNC43NjItNC43NjJjMC0yLjYyOSwyLjEzOC00Ljc2Miw0Ljc2Mi00Ljc2MmMyLjYyNCwwLDQuNzYyLDIuMTMzLDQuNzYyLDQuNzYyDQoJCQkJQzcxLjQyOSwxMzYuNTY2LDY5LjI5LDEzOC42OTksNjYuNjY3LDEzOC42OTl6Ii8+DQoJCQk8cGF0aCBkPSJNMjI4LjU3MSwxMTkuNjUxYy03Ljg3NiwwLTE0LjI4Niw2LjQxLTE0LjI4NiwxNC4yODZjMCw3Ljg3Niw2LjQxLDE0LjI4NiwxNC4yODYsMTQuMjg2DQoJCQkJYzcuODc2LDAsMTQuMjg2LTYuNDEsMTQuMjg2LTE0LjI4NkMyNDIuODU3LDEyNi4wNjEsMjM2LjQ0OCwxMTkuNjUxLDIyOC41NzEsMTE5LjY1MXogTTIyOC41NzEsMTM4LjY5OQ0KCQkJCWMtMi42MjQsMC00Ljc2Mi0yLjEzMy00Ljc2Mi00Ljc2MmMwLTIuNjI5LDIuMTM4LTQuNzYyLDQuNzYyLTQuNzYyYzIuNjI0LDAsNC43NjIsMi4xMzMsNC43NjIsNC43NjINCgkJCQlDMjMzLjMzMywxMzYuNTY2LDIzMS4xOTUsMTM4LjY5OSwyMjguNTcxLDEzOC42OTl6Ii8+DQoJCQk8cGF0aCBkPSJNMjQ3LjYyLDI0My40NjFoNDguODIzbC0xLjMxOS01LjgxOWMtNC44NzEtMjEuNDYyLTI0Ljg1Mi0zNy4wMzgtNDcuNTA1LTM3LjAzOGMtMTcuMDI5LDAtMzIuNDU3LDkuMDQ4LTQwLjk0OCwyMy44MQ0KCQkJCUgxMjEuOWMtNC44NzEtOC40NjctMTIuMDY3LTE0Ljk3MS0yMC41LTE5LjA0OGgyNS43MjlsMTQuMjg2LDkuNTI0aDQ0LjN2LTQ3LjYxOWgxMDQuNzYydi05LjUyNGgtMzguNjI0DQoJCQkJYzUuMTE0LTUuMDA1LDguNi0xMS42MzgsOS42NzEtMTkuMDQ4aDE5LjQyOWMxMS44MDUsMCwxNC4yODYtNy43NzEsMTQuMjg2LTE0LjI4NlY4MS41NTZjMC0xMS44MDUtOS42MzMtMjIuMjcxLTE3Ljg5LTIzLjY2Nw0KCQkJCWwtMTkuMDMzLTQuNzYyYy00Ljc5NS0xLjIxNC03LjU2Ny0zLjA4Ni0xMS41ODEtNy42NzFsLTIzLjkzMy0zMy41QzIxNi42NjIsNC4xMDMsMjA5LjYyOSwwLjYwMywyMDAsMC42MDNoLTkwLjQ3Ng0KCQkJCWMtOS42MzMsMC0xNi42NjcsMy41LTIyLjkyNCwxMS41MTlMNjMuMDcxLDQ1LjA5OWMtNC4yNzYsNC45MjQtNy41MzgsNy4xNjItMTEuNDc2LDcuOTUybC0yOC43NTcsNC43OTUNCgkJCQlDOS4xODEsNjAuNjg5LDAsNzIuMTMxLDAsODYuMzE4djMzLjMzM2MwLDEwLjMyNCw4LjcyNCwxOS4wNDgsMTkuMDQ4LDE5LjA0OGgxNC42NjdjMi4zMjQsMTYuMTI0LDE2LjE5NSwyOC41NzEsMzIuOTUyLDI4LjU3MQ0KCQkJCWg3NC43NDhsLTE0LjI4Niw5LjUyNEgwdjkuNTI0aDEzMC4wMTRsMTQuMjg2LTkuNTI0aDMxLjg5djI4LjU3MUgxNDQuM2wtMTQuMjg2LTkuNTI0SDB2OS41MjRoNTkuODY3DQoJCQkJYy0xMy4xLDYuMTgxLTIzLjE2NywxNy44OTUtMjYuNDE0LDMyLjI4MWwtMS4zMTQsNS44MTRoNDguODE0djkuNTI0aC00OC44MmwxLjMxOSw1LjgxOWM0Ljg3MSwyMS40NjIsMjQuODUyLDM3LjAzOCw0Ny41LDM3LjAzOA0KCQkJCWMxNy4wMjksMCwzMi40NTctOS4wNDgsNDAuOTQ4LTIzLjgxaDg0Ljc3NmM4LjQ5LDE0Ljc2MiwyMy45MTksMjMuODEsNDAuOTQ4LDIzLjgxYzIyLjY3NiwwLDQyLjY1Ny0xNS41NzYsNDcuNTEtMzcuMDQzDQoJCQkJbDEuMzA1LTUuODE0SDI0Ny42MlYyNDMuNDYxeiBNMjI4LjU3MSwxNTcuNzQ2Yy0xMy4xMjksMC0yMy44MS0xMC42ODEtMjMuODEtMjMuODFjMC0xMy4xMjksMTAuNjgxLTIzLjgxLDIzLjgxLTIzLjgxDQoJCQkJYzEzLjEyOSwwLDIzLjgxLDEwLjY4MSwyMy44MSwyMy44MUMyNTIuMzgxLDE0Ny4wNjQsMjQxLjcsMTU3Ljc0NiwyMjguNTcxLDE1Ny43NDZ6IE0zMy43MTQsMTI5LjE3M0gxOS4wNDgNCgkJCQljLTUuMDcyLDAuMDAxLTkuNTI0LTQuNDUyLTkuNTI0LTkuNTIzVjk1Ljg0aDkuNTI0djkuNTI0aDkuNTI0Vjk1Ljg0YzAtNi4xNDMtMy4zODEtOS41MjQtOS41MjQtOS41MjRIOS41MjQNCgkJCQljMC0xMS43ODEsNy44ODEtMTcuNjE0LDE1LjA3MS0xOS4xMTRsMjguNzI0LTQuNzljNi4yMTQtMS4yNDgsMTEuMjgxLTQuNTU3LDE3LjIyNC0xMS40MjRsMjMuNjg2LTMzLjE3MQ0KCQkJCWM0LjM4MS01LjYwNSw4LjUyOS03LjY5LDE1LjI5NS03LjY5SDIwMGM2Ljc2MiwwLDEwLjkxLDIuMDg2LDE1LjE3MSw3LjUyOWwyNC4wOSwzMy42OWM0LjY3MSw1LjM3MSw5LjA5NSw5LjA4NiwxNi43MjQsMTEuMDE0DQoJCQkJbDE5LjQsNC44MzhjNC4wNjcsMC43LDEwLjMyOSw3LjE3MSwxMC4zMjksMTQuMzU3djQuNzYyaC05LjUyNHY5LjUyNGg5LjUyNHYyOC41NzFjMCw0LjA5LTAuNjY3LDQuNzYyLTQuNzYyLDQuNzYyaC0xOS40MjkNCgkJCQljLTIuMzI0LTE2LjEyNC0xNi4xOTUtMjguNTcxLTMyLjk1Mi0yOC41NzFjLTE2Ljc1NywwLTMwLjYyOSwxMi40NDgtMzIuOTUyLDI4LjU3MWgtMzguNDc2di0xMC44NTdsMjQuNTc2LTguMTloMTMuNTE5di05LjUyNA0KCQkJCWgtMTAuMzgxbC0zLjk5NS0xOS45ODFsLTkuMzM4LDEuODcxbDMuOTM4LDE5LjY5bC0yMi43MSw3LjU3MWwtMy41MDUtMS43NTJsNC40MS04LjgxOWwtMjAuNzcxLTE1LjU3NmwtMy4yNjctMTYuMzM4aDIyLjc2Mg0KCQkJCVYxOS42NTFoLTQ1LjMxTDgwLjk1Miw1Ni4yMjJ2MTEuMDQ4aDM4Ljk1MmwzLjMzOCwxNi42OWwtMTcuMjQ4LDEwLjM1MmwtMTEuNzEtMTUuNjE0bC03LjYxOSw1LjcxNGwxNi44NjIsMjIuNDg2bDI0Ljc0OC0xNC44NDgNCgkJCQlsMTMuMzA1LDkuOTgxbC01LjExNCwxMC4yMjlsMTEuMTUyLDUuNTcxdjExLjM0M2gtNDhjLTIuMzI0LTE2LjEyNC0xNi4xOTUtMjguNTcxLTMyLjk1Mi0yOC41NzENCgkJCQlDNDkuOTA5LDEwMC42MDMsMzYuMDM3LDExMy4wNSwzMy43MTQsMTI5LjE3M3ogTTkxLjU2Nyw1Ny43NDZsMjAuNDEtMjguNTcxaDMwLjg4MXYyOC41NzFIOTEuNTY3eiBNNjYuNjY3LDE1Ny43NDYNCgkJCQljLTEzLjEyOSwwLTIzLjgxLTEwLjY4Mi0yMy44MS0yMy44MWMwLTEzLjEyOSwxMC42ODEtMjMuODEsMjMuODEtMjMuODFjMTMuMTI5LDAsMjMuODEsMTAuNjgxLDIzLjgxLDIzLjgxDQoJCQkJQzkwLjQ3NywxNDcuMDY2LDc5Ljc5NiwxNTcuNzQ2LDY2LjY2NywxNTcuNzQ2eiBNODkuOTQ4LDE1Ny43NDZjNS4xMTQtNS4wMDUsOC42LTExLjYzOCw5LjY3MS0xOS4wNDhoNDhoOS41MjRoMzguNDc2DQoJCQkJYzEuMDY3LDcuNDEsNC41NTIsMTQuMDQzLDkuNjcxLDE5LjA0OEg4OS45NDh6IE0yODMuOTY3LDI2Mi41MDhjLTUuODYyLDEzLjkxNC0yMC41MDUsMjMuODEtMzYuMzQ4LDIzLjgxDQoJCQkJYy0xNC4zODEsMC0yNy4zNDMtOC4xMDktMzMuODI5LTIxLjE2N2wtMS4zMTQtMi42NDNoLTk2LjM4MWwtMS4zMTQsMi42NDNjLTYuNDg2LDEzLjA1Ny0xOS40NDgsMjEuMTY3LTMzLjgyOSwyMS4xNjcNCgkJCQljLTE1LjgyNCwwLTMwLjQ2Mi05Ljg5NS0zNi4zMzgtMjMuODFoNDUuODYydi0yOC41NzFINDQuNjFjNS44NTctMTMuOTE0LDIwLjUwNS0yMy44MSwzNi4zNDMtMjMuODENCgkJCQljMTQuMzgxLDAsMjcuMzQzLDguMTEsMzMuODI5LDIxLjE2N2wxLjMxNCwyLjY0M2g5Ni4zODFsMS4zMTQtMi42NDNjNi40ODYtMTMuMDU3LDE5LjQ0OC0yMS4xNjcsMzMuODI5LTIxLjE2Nw0KCQkJCWMxNS44MjQsMCwzMC40NjcsOS44OTUsMzYuMzQzLDIzLjgxaC00NS44Njd2MjguNTcxSDI4My45Njd6Ii8+DQoJCQk8cmVjdCB4PSIxMTkuMDQ4IiB5PSIyNDMuNDYxIiB3aWR0aD0iOS41MjQiIGhlaWdodD0iOS41MjQiLz4NCgkJCTxyZWN0IHg9IjEzOC4wOTUiIHk9IjI0My40NjEiIHdpZHRoPSI5LjUyNCIgaGVpZ2h0PSI5LjUyNCIvPg0KCQkJPHJlY3QgeD0iMTU3LjE0MyIgeT0iMTg2LjMxOCIgd2lkdGg9IjkuNTI0IiBoZWlnaHQ9IjkuNTI0Ii8+DQoJCQk8cmVjdCB4PSIyMy44MSIgeT0iMTU3Ljc0NiIgd2lkdGg9IjkuNTI0IiBoZWlnaHQ9IjkuNTI0Ii8+DQoJCQk8cmVjdCB4PSI0Ljc2MiIgeT0iMTU3Ljc0NiIgd2lkdGg9IjkuNTI0IiBoZWlnaHQ9IjkuNTI0Ii8+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8L3N2Zz4=",
+      "Car": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 26\"><path fill=\"none\" d=\"M0 0h24v24H0V0z\"/><path d=\"M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.08 3.11H5.77L6.85 7zM19 17H5v-5h14v5z\"/><circle cx=\"7.5\" cy=\"14.5\" r=\"1.5\"/><circle cx=\"16.5\" cy=\"14.5\" r=\"1.5\"/></svg>"
+    }
+  },
+  "dst": [
+    {
+      "type": "domainStory:activity",
+      "name": "Relata problema com ",
+      "id": "connection_2425",
+      "pickedColor": "black",
+      "number": 1,
+      "waypoints": [
+        {
+          "original": {
+            "x": -575,
+            "y": -59
+          },
+          "x": -532,
+          "y": -59
+        },
+        {
+          "original": {
+            "x": -403,
+            "y": -59
+          },
+          "x": -409,
+          "y": -59
+        }
+      ],
+      "source": "shape_8945",
+      "target": "shape_2047",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "",
+      "id": "connection_2714",
+      "pickedColor": "black",
+      "number": null,
+      "waypoints": [
+        {
+          "original": {
+            "x": -371,
+            "y": -59
+          },
+          "x": -329,
+          "y": -59
+        },
+        {
+          "original": {
+            "x": -188,
+            "y": -61
+          },
+          "x": -199,
+          "y": -61
+        }
+      ],
+      "source": "shape_2047",
+      "target": "shape_6412"
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "No",
+      "id": "connection_2763",
+      "pickedColor": "black",
+      "number": null,
+      "waypoints": [
+        {
+          "original": {
+            "x": -332,
+            "y": 61
+          },
+          "x": -344,
+          "y": 23
+        },
+        {
+          "original": {
+            "x": -371,
+            "y": -59
+          },
+          "x": -358,
+          "y": -20
+        }
+      ],
+      "source": "shape_6279",
+      "target": "shape_2047",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Aprova",
+      "id": "connection_4902",
+      "pickedColor": "black",
+      "number": 7,
+      "waypoints": [
+        {
+          "original": {
+            "x": -651,
+            "y": 90
+          },
+          "x": -617,
+          "y": 108
+        },
+        {
+          "original": {
+            "x": -458,
+            "y": 190
+          },
+          "x": -474,
+          "y": 182
+        }
+      ],
+      "source": "shape_4826",
+      "target": "shape_0354",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Gera",
+      "id": "connection_5080",
+      "pickedColor": "black",
+      "number": 6,
+      "waypoints": [
+        {
+          "original": {
+            "x": -161,
+            "y": 61
+          },
+          "x": -199,
+          "y": 80
+        },
+        {
+          "original": {
+            "x": -416,
+            "y": 191
+          },
+          "x": -402,
+          "y": 184
+        }
+      ],
+      "source": "shape_6257",
+      "target": "shape_0354",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Executa",
+      "id": "connection_5128",
+      "pickedColor": "black",
+      "number": 4,
+      "waypoints": [
+        {
+          "original": {
+            "x": -161,
+            "y": 61
+          },
+          "x": -199,
+          "y": 61
+        },
+        {
+          "original": {
+            "x": -332,
+            "y": 61
+          },
+          "x": -289,
+          "y": 61
+        }
+      ],
+      "source": "shape_6257",
+      "target": "shape_6279",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Faz",
+      "id": "connection_5868",
+      "pickedColor": "black",
+      "number": 8,
+      "waypoints": [
+        {
+          "original": {
+            "x": -161,
+            "y": 61
+          },
+          "x": -171,
+          "y": 108
+        },
+        {
+          "original": {
+            "x": -205,
+            "y": 262
+          },
+          "x": -203,
+          "y": 253
+        }
+      ],
+      "source": "shape_6257",
+      "target": "shape_8467",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Lê",
+      "id": "connection_6304",
+      "pickedColor": "black",
+      "number": 3,
+      "waypoints": [
+        {
+          "original": {
+            "x": -161,
+            "y": 61
+          },
+          "x": -132,
+          "y": 47
+        },
+        {
+          "original": {
+            "x": 86,
+            "y": -59
+          },
+          "x": 48,
+          "y": -41
+        }
+      ],
+      "source": "shape_6257",
+      "target": "shape_6388",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "No",
+      "id": "connection_6635",
+      "pickedColor": "black",
+      "number": null,
+      "waypoints": [
+        {
+          "original": {
+            "x": -207,
+            "y": 291
+          },
+          "x": -166,
+          "y": 290
+        },
+        {
+          "original": {
+            "x": -11,
+            "y": 284
+          },
+          "x": -13,
+          "y": 284
+        }
+      ],
+      "source": "shape_8467",
+      "target": "shape_1860",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Cria",
+      "id": "connection_7259",
+      "pickedColor": "black",
+      "number": 2,
+      "waypoints": [
+        {
+          "original": {
+            "x": -161,
+            "y": -73
+          },
+          "x": -116,
+          "y": -70
+        },
+        {
+          "original": {
+            "x": 86,
+            "y": -59
+          },
+          "x": 48,
+          "y": -61
+        }
+      ],
+      "source": "shape_6412",
+      "target": "shape_6388",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:activity",
+      "name": "Consulta estoque\ne reserva",
+      "id": "connection_8888",
+      "pickedColor": "black",
+      "number": 5,
+      "waypoints": [
+        {
+          "original": {
+            "x": -161,
+            "y": 61
+          },
+          "x": -116,
+          "y": 67
+        },
+        {
+          "original": {
+            "x": 107,
+            "y": 97
+          },
+          "x": 107,
+          "y": 97
+        }
+      ],
+      "source": "shape_6257",
+      "target": "shape_6933",
+      "multipleNumberAllowed": false
+    },
+    {
+      "type": "domainStory:workObjectDocument",
+      "name": "Orçamento",
+      "id": "shape_0354",
+      "x": -474,
+      "y": 154
+    },
+    {
+      "name": "Carro",
+      "id": "shape_1860",
+      "type": "domainStory:workObjectCar",
+      "x": -13,
+      "y": 238
+    },
+    {
+      "type": "domainStory:workObjectCar",
+      "name": "Carro",
+      "id": "shape_2047",
+      "x": -409,
+      "y": -97
+    },
+    {
+      "name": "Cliente",
+      "id": "shape_4826",
+      "type": "domainStory:actorPerson",
+      "x": -689,
+      "y": 52
+    },
+    {
+      "name": "Mecânico",
+      "id": "shape_6257",
+      "type": "domainStory:actorPerson",
+      "x": -199,
+      "y": 23
+    },
+    {
+      "type": "domainStory:workObjectdiagnostic-svgrepo-com-custom",
+      "name": "Diagnostico",
+      "id": "shape_6279",
+      "x": -370,
+      "y": 23
+    },
+    {
+      "name": "Ordem de serviço",
+      "id": "shape_6388",
+      "type": "domainStory:workObjectDocument",
+      "x": 48,
+      "y": -97
+    },
+    {
+      "name": "Atendente",
+      "id": "shape_6412",
+      "type": "domainStory:actorPerson",
+      "x": -199,
+      "y": -111
+    },
+    {
+      "type": "domainStory:workObjectengine-gear-setting-svgrepo-com-custom",
+      "name": "Peça/insumo",
+      "id": "shape_6933",
+      "x": 107,
+      "y": 45
+    },
+    {
+      "name": "Reparo",
+      "id": "shape_8467",
+      "type": "domainStory:workObjectcar-repair-svgrepo-com-custom",
+      "x": -245,
+      "y": 253
+    },
+    {
+      "type": "domainStory:actorPerson",
+      "name": "Cliente",
+      "id": "shape_8945",
+      "x": -613,
+      "y": -97
+    },
+    {
+      "info": "Storytelling do fluxo basico da oficina"
+    },
+    {
+      "version": "3.2.1"
+    }
+  ]
+}

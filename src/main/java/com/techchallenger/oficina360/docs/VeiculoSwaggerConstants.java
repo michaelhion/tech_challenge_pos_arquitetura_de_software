@@ -9,7 +9,7 @@ public final class VeiculoSwaggerConstants {
     /*
      * Tag
      */
-    public static final String TAG_NAME = "4 - Veículos";
+    public static final String TAG_NAME = "3 - Veículos";
 
     public static final String TAG_DESCRIPTION =
             "Endpoints administrativos para cadastro, consulta, edição e exclusão de veículos da oficina. "

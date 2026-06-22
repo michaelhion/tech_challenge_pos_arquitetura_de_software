@@ -38,6 +38,12 @@ public record ServicoDTO(
         )
         @NotNull(message = "O valor do serviço é obrigatório")
         @DecimalMin(value = "0.01", message = "O valor do serviço deve ser maior que zero")
-        BigDecimal valor
+        BigDecimal valor,
+        @Schema(
+                description = "Tempo médio de duração de execução do serviço em minutos.",
+                example = "120",
+                readOnly = true
+        )
+        Integer tempoDeExecucaoMedio
 ) {
 }

@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.services.factories;
 
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.entities.Cliente;
 import com.techchallenger.oficina360.entities.OrdemServico;
 import com.techchallenger.oficina360.entities.Veiculo;
@@ -25,7 +25,7 @@ class OrdemServicoFactoryTest {
 
     @Test
     void deveCriarOrdemServicoComDadosIniciaisCorretos() {
-        OrdemServicoDTO dto = criarOrdemServicoDTO();
+        CriarOrdemServicoDTO dto = criarOrdemServicoDTO();
         Cliente cliente = criarCliente();
         Veiculo veiculo = criarVeiculo();
 
@@ -43,13 +43,12 @@ class OrdemServicoFactoryTest {
         assertEquals(BigDecimal.ZERO, resultado.getValorOs());
     }
 
-    private OrdemServicoDTO criarOrdemServicoDTO() {
-        return new OrdemServicoDTO(
+    private CriarOrdemServicoDTO criarOrdemServicoDTO() {
+        return new CriarOrdemServicoDTO(
                 null,
                 "12345678901",
                 "ABC1D23",
                 "Veículo apresenta ruído ao frear",
-                null,
                 null
         );
     }

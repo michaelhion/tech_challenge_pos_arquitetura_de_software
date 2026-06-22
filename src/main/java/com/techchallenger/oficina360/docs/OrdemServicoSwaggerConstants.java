@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OrdemServicoSwaggerConstants {
 
-    public static final String TAG_NAME = "1 - Ordens de Serviço";
+    public static final String TAG_NAME = "6 - Ordens de Serviço";
 
     public static final String TAG_DESCRIPTION =
             "Endpoints relacionados à criação, consulta, edição, exclusão, aprovação e acompanhamento de ordens de serviço.";

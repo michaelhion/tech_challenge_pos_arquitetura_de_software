@@ -22,6 +22,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ClienteServiceTest {
 
+    private  static final String CPF = "***8901";
+
     @Mock
     private ClienteRepository clienteRepository;
 
@@ -62,7 +64,7 @@ class ClienteServiceTest {
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
 
-        assertEquals("12345678901", resultado.get(0).documento());
+        assertEquals(CPF, resultado.get(0).documento());
         assertEquals("João da Silva", resultado.get(0).nome());
         assertEquals("joao.silva@email.com", resultado.get(0).email());
         assertEquals("11999999999", resultado.get(0).telefone());
@@ -91,7 +93,7 @@ class ClienteServiceTest {
         Optional<ClienteDTO> resultado = clienteService.findByDocumento("12345678901");
 
         assertTrue(resultado.isPresent());
-        assertEquals("12345678901", resultado.get().documento());
+        assertEquals(CPF, resultado.get().documento());
         assertEquals("João da Silva", resultado.get().nome());
         assertEquals("joao.silva@email.com", resultado.get().email());
         assertEquals("11999999999", resultado.get().telefone());
@@ -119,7 +121,7 @@ class ClienteServiceTest {
         ClienteDTO resultado = clienteService.save(clienteDTO);
 
         assertNotNull(resultado);
-        assertEquals("12345678901", resultado.documento());
+        assertEquals(CPF, resultado.documento());
         assertEquals("João da Silva", resultado.nome());
         assertEquals("joao.silva@email.com", resultado.email());
         assertEquals("11999999999", resultado.telefone());
@@ -153,7 +155,7 @@ class ClienteServiceTest {
         ClienteDTO resultado = clienteService.edit(clienteId, dtoAtualizado);
 
         assertNotNull(resultado);
-        assertEquals("12345678901", resultado.documento());
+        assertEquals(CPF, resultado.documento());
         assertEquals("João da Silva Atualizado", resultado.nome());
         assertEquals("joao.atualizado@email.com", resultado.email());
         assertEquals("11888888888", resultado.telefone());

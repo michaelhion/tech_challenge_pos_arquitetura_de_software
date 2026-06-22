@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.services;
 
 
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
@@ -11,15 +11,18 @@ import com.techchallenger.oficina360.entities.OrdemServico;
 import com.techchallenger.oficina360.entities.OrdemServicoItemEstoque;
 import com.techchallenger.oficina360.entities.OrdemServicoServico;
 import com.techchallenger.oficina360.entities.Servico;
+import com.techchallenger.oficina360.entities.TempoExecucaoServico;
 import com.techchallenger.oficina360.entities.Veiculo;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
+import com.techchallenger.oficina360.mappers.CriarOrdemServicoMapper;
 import com.techchallenger.oficina360.mappers.OrdemServicoMapper;
 import com.techchallenger.oficina360.repositories.ClienteRepository;
 import com.techchallenger.oficina360.repositories.EstoqueRepository;
 import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
 import com.techchallenger.oficina360.repositories.ServicoRepository;
+import com.techchallenger.oficina360.repositories.TempoExecucaoServicoRepository;
 import com.techchallenger.oficina360.repositories.VeiculoRepository;
 import com.techchallenger.oficina360.services.factories.DiagnosticoFactory;
 import com.techchallenger.oficina360.services.factories.OrdemServicoFactory;
@@ -28,6 +31,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,16 +42,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
 import static com.techchallenger.oficina360.mappers.OrdemServicoMapper.toDTO;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
 
 @Service
 @RequiredArgsConstructor
-public class OrdemServicoService {
+public class OrdemServicoOficinaService {
 
-    private static final String ORDEM_DE_SERVICO_NAO_ENCONTRADA = "Ordem de servi\u00E7o n\u00E3o encontrada";
-    private static final String CLIENTE_NAO_ENCONTRADO = "Cliente n\u00E3o encontrado";
-    private static final String VEICULO_NAO_ENCONTRADO = "Ve\u00EDculo n\u00E3o encontrado";
-    private static final String O_VEICULO_NAO_PERTENCE_AO_CLIENTE_INFORMADO = "O ve\u00EDculo n\u00E3o pertence ao cliente informado";
 
     private static final List<OrdemDeServicoStatus> STATUS_OS_ATIVA = List.of(
             OrdemDeServicoStatus.RECEBIDA,
@@ -65,6 +69,7 @@ public class OrdemServicoService {
     private final OrdemServicoFactory ordemServicoFactory;
     private final DiagnosticoFactory diagnosticoFactory;
     private final DiagnosticoValidator diagnosticoValidator;
+    private final TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
 
     public List<OrdemServicoDTO> findAll() {
         return ordemServicosRepository.findAll()
@@ -78,21 +83,21 @@ public class OrdemServicoService {
                 .map(OrdemServicoMapper::toDTO);
     }
 
-    public OrdemServicoDTO save(OrdemServicoDTO ordemServicoDTO) {
-        String documentoCliente = normalizarDocumento(ordemServicoDTO.documentoCliente());
-        String placaVeiculo = normalizarPlaca(ordemServicoDTO.placaVeiculo());
+    public CriarOrdemServicoDTO save(CriarOrdemServicoDTO criarOrdemServicoDTO) {
+        String documentoCliente = normalizarDocumento(criarOrdemServicoDTO.documentoCliente());
+        String placaVeiculo = normalizarPlaca(criarOrdemServicoDTO.placaVeiculo());
 
         Cliente cliente = buscarClientePorDocumento(documentoCliente);
         Veiculo veiculo = buscarVeiculoPorPlaca(placaVeiculo);
 
-        validarVeiculoPertenceAoCliente(veiculo, cliente);
+        validarVeiculoPertenceAoCliente(veiculo.getClienteDocumento(), cliente.getDocumento());
         validarNaoExisteOrdemServicoAtivaParaVeiculo(placaVeiculo);
 
-        OrdemServico ordemServico = ordemServicoFactory.criar(ordemServicoDTO, cliente, veiculo);
+        OrdemServico ordemServico = ordemServicoFactory.criar(criarOrdemServicoDTO, cliente, veiculo);
 
         OrdemServico ordemServicoSalva = ordemServicosRepository.save(ordemServico);
 
-        return toDTO(ordemServicoSalva);
+        return CriarOrdemServicoMapper.toDTO(ordemServicoSalva);
     }
 
     public OrdemServicoDTO edit(UUID id, OrdemServicoDTO dto) {
@@ -110,15 +115,7 @@ public class OrdemServicoService {
         ordemServicosRepository.delete(ordemServico);
     }
 
-    public OrdemServicoDTO aprovar(UUID id, AprovacaoOrdemServicoDTO aprovacaoDTO) {
-        OrdemServico ordemServico = buscarOrdemServicoPorId(id);
 
-        ordemServico.registrarAprovacao(aprovacaoDTO.aprovado());
-
-        OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);
-
-        return toDTO(ordemServicoAtualizada);
-    }
 
     @Transactional
     public OrdemServicoDTO diagnosticar(UUID id, DiagnosticoDTO diagnosticoDTO) {
@@ -174,28 +171,52 @@ public class OrdemServicoService {
         ordemServico.finalizarExecucao();
 
         OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);
-
+        calcularTempoExecucaoESalvar(ordemServico);
         return toDTO(ordemServicoAtualizada);
+    }
+
+    private void calcularTempoExecucaoESalvar(OrdemServico ordemServico) {
+
+        int tempoTotal = (int) Duration
+                .between(ordemServico.getDtHoraInicioExecucao(), ordemServico.getDtHoraFimExecucao())
+                .toMinutes();
+
+        int quantidadeServicos = ordemServico.getServicos().size();
+
+        int tempoPorServico = quantidadeServicos > 0
+                ? tempoTotal / quantidadeServicos
+                : tempoTotal;
+
+        for (OrdemServicoServico oss : ordemServico.getServicos()) {
+
+            TempoExecucaoServico tempoExecucaoServico = TempoExecucaoServico.builder()
+                    .servicoID(oss.getServicoId())
+                    .tempoExecucaoMinutos(tempoPorServico)
+                    .dataExecucao(LocalDateTime.now())
+                    .build();
+
+            tempoExecucaoServicoRepository.save(tempoExecucaoServico);
+        }
     }
 
     private OrdemServico buscarOrdemServicoPorId(UUID id) {
         return ordemServicosRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(ORDEM_DE_SERVICO_NAO_ENCONTRADA));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(OS_ORDEM_DE_SERVICO_NAO_ENCONTRADA));
     }
 
     private Cliente buscarClientePorDocumento(String documentoCliente) {
         return clienteRepository.findByDocumento(documentoCliente)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(OS_CLIENTE_NAO_ENCONTRADO));
     }
 
     private Veiculo buscarVeiculoPorPlaca(String placaVeiculo) {
         return veiculoRepository.findByPlaca(placaVeiculo)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(VEICULO_NAO_ENCONTRADO));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(OS_VEICULO_NAO_ENCONTRADO));
     }
 
-    private void validarVeiculoPertenceAoCliente(Veiculo veiculo, Cliente cliente) {
-        if (!veiculo.getClienteDocumento().equals(cliente.getDocumento())) {
-            throw new RegraDeNegocioException(O_VEICULO_NAO_PERTENCE_AO_CLIENTE_INFORMADO);
+    private void validarVeiculoPertenceAoCliente(String documentoVeiculo, String documentoCliente) {
+        if (!documentoVeiculo.equals(documentoCliente)) {
+            throw new RegraDeNegocioException(OS_VEICULO_NAO_PERTENCE_AO_CLIENTE);
         }
     }
 
@@ -205,7 +226,7 @@ public class OrdemServicoService {
                 .ifPresent(os -> {
                     throw new RegraDeNegocioException(
                             String.format(
-                                    "Já existe uma ordem de serviço ativa para o veículo de placa %s. OS ativa: %s, status: %s",
+                                    OS_ORDEM_DE_SERVICO_ATIVA_PARA_O_VEICULO,
                                     os.getPlacaVeiculo(),
                                     os.getId(),
                                     os.getOrdemDeServicoStatus()
@@ -314,11 +335,5 @@ public class OrdemServicoService {
         }
     }
 
-    private String normalizarDocumento(String documento) {
-        return documento == null ? null : documento.trim();
-    }
 
-    private String normalizarPlaca(String placa) {
-        return placa == null ? null : placa.trim().toUpperCase();
-    }
 }

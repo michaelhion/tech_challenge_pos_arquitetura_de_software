@@ -9,7 +9,7 @@ public final class ClienteSwaggerConstants {
     /*
      * Tag
      */
-    public static final String TAG_NAME = "3 - Clientes";
+    public static final String TAG_NAME = "2 - Clientes";
 
     public static final String TAG_DESCRIPTION =
             "Administra clientes, realizando operações de cadastro, consulta, edição e exclusão.";

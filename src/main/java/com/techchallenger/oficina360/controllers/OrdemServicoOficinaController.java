@@ -1,10 +1,10 @@
 package com.techchallenger.oficina360.controllers;
 
-import com.techchallenger.oficina360.docs.api.OrdemServicoApi;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.docs.api.OrdemServicoOficinaApi;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.services.OrdemServicoService;
+import com.techchallenger.oficina360.services.OrdemServicoOficinaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +22,16 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/ordens-servico")
+@RequestMapping("/ordem-servico")
 @RequiredArgsConstructor
-public class OrdemServicoController implements OrdemServicoApi {
+public class OrdemServicoOficinaController implements OrdemServicoOficinaApi {
 
-    private final OrdemServicoService ordemServicoService;
+    private final OrdemServicoOficinaService ordemServicoOficinaService;
 
     @Override
     @GetMapping("/listar")
     public ResponseEntity<List<OrdemServicoDTO>> listarOrdensServico() {
-        List<OrdemServicoDTO> ordensServico = ordemServicoService.findAll();
+        List<OrdemServicoDTO> ordensServico = ordemServicoOficinaService.findAll();
         return ResponseEntity.ok(ordensServico);
     }
 
@@ -40,17 +40,17 @@ public class OrdemServicoController implements OrdemServicoApi {
     public ResponseEntity<OrdemServicoDTO> buscarPorId(
             @PathVariable UUID id
     ) {
-        return ordemServicoService.findById(id)
+        return ordemServicoOficinaService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @Override
     @PostMapping("/salvar")
-    public ResponseEntity<OrdemServicoDTO> salvar(
-            @Valid @RequestBody OrdemServicoDTO ordemServicoDTO
+    public ResponseEntity<CriarOrdemServicoDTO> salvar(
+            @Valid @RequestBody CriarOrdemServicoDTO criarOrdemServicoDTO
     ) {
-        OrdemServicoDTO ordemServicoSalva = ordemServicoService.save(ordemServicoDTO);
+        CriarOrdemServicoDTO ordemServicoSalva = ordemServicoOficinaService.save(criarOrdemServicoDTO);
         return ResponseEntity.status(201).body(ordemServicoSalva);
     }
 
@@ -60,7 +60,7 @@ public class OrdemServicoController implements OrdemServicoApi {
             @PathVariable UUID id,
             @Valid @RequestBody OrdemServicoDTO ordemServicoDTO
     ) {
-        OrdemServicoDTO ordemServicoAtualizada = ordemServicoService.edit(id, ordemServicoDTO);
+        OrdemServicoDTO ordemServicoAtualizada = ordemServicoOficinaService.edit(id, ordemServicoDTO);
         return ResponseEntity.ok(ordemServicoAtualizada);
     }
 
@@ -69,21 +69,10 @@ public class OrdemServicoController implements OrdemServicoApi {
     public ResponseEntity<Void> deletar(
             @PathVariable UUID id
     ) {
-        ordemServicoService.delete(id);
+        ordemServicoOficinaService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Override
-    @PatchMapping("/{id}/aprovacao")
-    public ResponseEntity<OrdemServicoDTO> aprovar(
-            @PathVariable UUID id,
-            @Valid @RequestBody AprovacaoOrdemServicoDTO aprovacaoDTO
-    ) {
-        OrdemServicoDTO ordemServicoAtualizada =
-                ordemServicoService.aprovar(id, aprovacaoDTO);
-
-        return ResponseEntity.ok(ordemServicoAtualizada);
-    }
 
     @Override
     @PatchMapping("/{id}/diagnostico")
@@ -92,7 +81,7 @@ public class OrdemServicoController implements OrdemServicoApi {
             @Valid @RequestBody DiagnosticoDTO diagnosticoDTO
     ) {
         OrdemServicoDTO ordemServicoDiagnosticada =
-                ordemServicoService.diagnosticar(id, diagnosticoDTO);
+                ordemServicoOficinaService.diagnosticar(id, diagnosticoDTO);
 
         return ResponseEntity.ok(ordemServicoDiagnosticada);
     }
@@ -102,7 +91,7 @@ public class OrdemServicoController implements OrdemServicoApi {
     public ResponseEntity<OrdemServicoDTO> iniciarExecucao(
             @PathVariable UUID id
     ) {
-        ordemServicoService.iniciarExecucao(id);
+        ordemServicoOficinaService.iniciarExecucao(id);
 
         return ResponseEntity.accepted().build();
     }
@@ -112,7 +101,7 @@ public class OrdemServicoController implements OrdemServicoApi {
     public ResponseEntity<OrdemServicoDTO> finalizarExecucao(
             @PathVariable UUID id
     ) {
-        ordemServicoService.finalizarExecucao(id);
+        ordemServicoOficinaService.finalizarExecucao(id);
 
         return ResponseEntity.accepted().build();
     }

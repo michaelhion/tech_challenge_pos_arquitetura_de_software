@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.docs.api;
 
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +22,7 @@ import static com.techchallenger.oficina360.docs.SwaggerConstants.*;
         name = TAG_NAME,
         description = TAG_DESCRIPTION
 )
-public interface OrdemServicoApi {
+public interface OrdemServicoOficinaApi {
 
     @Operation(
             summary = SUMMARY_LISTAR,
@@ -83,7 +83,7 @@ public interface OrdemServicoApi {
                     description = RESPONSE_ORDEM_SERVICO_CADASTRADA,
                     content = @Content(
                             mediaType = MEDIA_TYPE_JSON,
-                            schema = @Schema(implementation = OrdemServicoDTO.class)
+                            schema = @Schema(implementation = CriarOrdemServicoDTO.class)
                     )
             ),
             @ApiResponse(
@@ -92,15 +92,15 @@ public interface OrdemServicoApi {
                     content = @Content
             )
     })
-    ResponseEntity<OrdemServicoDTO> salvar(
+    ResponseEntity<CriarOrdemServicoDTO> salvar(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = REQUEST_BODY_SALVAR,
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = OrdemServicoDTO.class)
+                            schema = @Schema(implementation = CriarOrdemServicoDTO.class)
                     )
             )
-            OrdemServicoDTO ordemServicoDTO
+            CriarOrdemServicoDTO criarOrdemServicoDTO
     );
 
     @Operation(
@@ -180,52 +180,6 @@ public interface OrdemServicoApi {
             UUID id
     );
 
-    @Operation(
-            summary = SUMMARY_APROVAR,
-            description = DESCRIPTION_APROVAR
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = STATUS_CODE_OK,
-                    description = RESPONSE_ORDEM_SERVICO_APROVADA,
-                    content = @Content(
-                            mediaType = MEDIA_TYPE_JSON,
-                            schema = @Schema(implementation = OrdemServicoDTO.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_APROVAR,
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = STATUS_CODE_NOT_FOUND,
-                    description = DESCRIPTION_ORDEM_SERVICO_NOT_FOUND,
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = STATUS_CODE_CONFLICT,
-                    description = DESCRIPTION_ORDEM_SERVICO_CONFLICT_APROVAR,
-                    content = @Content
-            )
-    })
-    ResponseEntity<OrdemServicoDTO> aprovar(
-            @Parameter(
-                    description = PARAM_ID_DESCRIPTION,
-                    example = EXAMPLE_UUID,
-                    required = true
-            )
-            UUID id,
-
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = REQUEST_BODY_APROVAR,
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = AprovacaoOrdemServicoDTO.class)
-                    )
-            )
-            AprovacaoOrdemServicoDTO aprovacaoDTO
-    );
 
     @Operation(
             summary = SUMMARY_DIAGNOSTICAR,

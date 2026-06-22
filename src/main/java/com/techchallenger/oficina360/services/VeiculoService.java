@@ -14,18 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
 import static com.techchallenger.oficina360.mappers.VeiculoMapper.toDTO;
 import static com.techchallenger.oficina360.mappers.VeiculoMapper.toEntity;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
 
 @Service
 @RequiredArgsConstructor
 public class VeiculoService {
-
-    private static final String VEICULO_NAO_ENCONTRADO = "Veículo não encontrado";
-    private static final String CLIENTE_NAO_ENCONTRADO =
-            "Cliente não encontrado para o documento informado";
-    private static final String VEICULO_CADASTRADO =
-            "Já existe veículo cadastrado com essa placa";
 
     private final VeiculoRepository veiculoRepository;
     private final ClienteRepository clienteRepository;
@@ -93,24 +90,24 @@ public class VeiculoService {
 
     private Veiculo buscarVeiculoPorPlaca(String placa) {
         return veiculoRepository.findByPlaca(placa)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(VEICULO_NAO_ENCONTRADO));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(VEICULO_SERV_VEICULO_NAO_ENCONTRADO));
     }
 
     private void validarClienteExiste(String documentoCliente) {
         if (!clienteRepository.existsByDocumento(documentoCliente)) {
-            throw new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO);
+            throw new RecursoNaoEncontradoException(VEICULO_SERV_CLIENTE_NAO_ENCONTRADO);
         }
     }
 
     private void validarVeiculoExistePorPlaca(String placa) {
         if (!veiculoRepository.existsByPlaca(placa)) {
-            throw new RecursoNaoEncontradoException(VEICULO_NAO_ENCONTRADO);
+            throw new RecursoNaoEncontradoException(VEICULO_SERV_VEICULO_NAO_ENCONTRADO);
         }
     }
 
     private void validarPlacaDisponivelParaCadastro(String placa) {
         if (veiculoRepository.existsByPlaca(placa)) {
-            throw new ConflitoException(VEICULO_CADASTRADO);
+            throw new ConflitoException(VEICULO_SERV_VEICULO_CADASTRADO);
         }
     }
 
@@ -119,15 +116,7 @@ public class VeiculoService {
             Veiculo veiculoAtual
     ) {
         if (veiculoRepository.existsByPlacaAndIdNot(novaPlaca, veiculoAtual.getId())) {
-            throw new ConflitoException(VEICULO_CADASTRADO);
+            throw new ConflitoException(VEICULO_SERV_VEICULO_CADASTRADO);
         }
-    }
-
-    private String normalizarPlaca(String placa) {
-        return placa == null ? null : placa.trim().toUpperCase();
-    }
-
-    private String normalizarDocumento(String documento) {
-        return documento == null ? null : documento.trim();
     }
 }
