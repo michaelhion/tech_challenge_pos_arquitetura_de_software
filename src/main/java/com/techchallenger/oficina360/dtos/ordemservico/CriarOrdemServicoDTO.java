@@ -39,7 +39,7 @@ public record CriarOrdemServicoDTO(
         )
         @NotBlank(message = "A placa do veículo é obrigatória")
         @Pattern(
-                regexp = "^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$",
+                regexp = "^[A-Z]{3}\\d[A-Z0-9]\\d{2}$",
                 message = "A placa deve estar no padrão ABC1234 ou ABC1D23, sem hífen"
         )
         String placaVeiculo,

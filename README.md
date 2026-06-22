@@ -1,360 +1,496 @@
 # Oficina360 API
 
-API REST desenvolvida para o **Tech Challenge - Fase 1**, com o objetivo de criar a primeira versão MVP de um sistema integrado para gestão de oficina mecânica.
+## 📖 Sobre o projeto
 
-O sistema busca organizar o fluxo de atendimento, cadastro de clientes, veículos, serviços, estoque de peças/insumos e futuramente ordens de serviço, permitindo maior controle operacional e rastreabilidade dos processos internos.
+O **Oficina360** é uma API REST desenvolvida como parte do Tech Challenge da Pós-Graduação em Arquitetura de Software.
+
+O objetivo da aplicação é fornecer uma solução completa para o gerenciamento de oficinas mecânicas, contemplando desde o cadastro de clientes e veículos até o gerenciamento completo de ordens de serviço, controle de estoque, autenticação de usuários, autorização de acesso e indicadores operacionais.
+
+O projeto foi desenvolvido seguindo princípios de arquitetura em camadas, boas práticas de engenharia de software, segurança, observabilidade, testes automatizados e integração contínua.
 
 ---
 
-## 📌 Objetivo do projeto
+# 🎯 Objetivos
 
-O **Oficina360** é um backend monolítico para apoiar uma oficina mecânica na gestão dos seus principais processos administrativos e operacionais.
-
-O projeto foi desenvolvido com foco em:
+A plataforma busca oferecer suporte aos principais processos de uma oficina mecânica:
 
 - Cadastro e gestão de clientes;
 - Cadastro e gestão de veículos;
 - Cadastro e gestão de serviços;
-- Cadastro e controle de estoque de peças e insumos;
-- Reserva de itens de estoque;
-- Base para criação e acompanhamento de ordens de serviço;
-- Documentação da API via Swagger/OpenAPI;
-- Uso de boas práticas de camadas, validação e tratamento de exceções;
-- Migração de banco de dados com Flyway;
-- Testes unitários.
+- Controle de estoque de peças e insumos;
+- Controle de reservas de estoque;
+- Abertura e gerenciamento de ordens de serviço;
+- Processo de diagnóstico técnico;
+- Aprovação ou reprovação de orçamento pelo cliente;
+- Execução e finalização de serviços;
+- Controle de acesso baseado em perfis;
+- Registro de indicadores operacionais;
+- Monitoramento de qualidade e segurança do código.
 
 ---
 
-## 🧩 Funcionalidades implementadas
-
-### Clientes
-
-- Cadastrar cliente;
-- Listar clientes;
-- Buscar cliente por documento CPF/CNPJ;
-- Editar cliente;
-- Excluir cliente por documento.
-
-### Veículos
-
-- Cadastrar veículo;
-- Listar veículos;
-- Buscar veículo por placa;
-- Editar veículo por placa;
-- Excluir veículo por placa;
-- Associação fraca com cliente por meio do documento do cliente.
-
-### Serviços
-
-- Cadastrar serviço;
-- Listar serviços;
-- Buscar serviço por ID;
-- Editar serviço;
-- Excluir serviço.
-
-### Estoque
-
-- Cadastrar item de estoque;
-- Listar itens de estoque;
-- Buscar item de estoque por ID;
-- Editar item de estoque;
-- Excluir item de estoque;
-- Controlar quantidade total;
-- Controlar quantidade reservada;
-- Calcular quantidade disponível;
-- Reservar quantidade de item em estoque.
-
----
-
-## 🏗️ Arquitetura
-
-O projeto segue uma arquitetura monolítica em camadas, adequada para o MVP proposto.
-
-Principais camadas:
-
-```text
-Controller -> Service -> Repository -> Entity
-```
-
-Também foram utilizados:
-
-- DTOs para entrada e saída de dados;
-- Mappers para conversão entre DTO e Entity;
-- Exceptions personalizadas;
-- Constants para documentação Swagger;
-- Configuração centralizada do OpenAPI.
-
----
-
-## 📁 Estrutura do projeto
-
-```text
-├── .mvn
-│   └── wrapper
-├── docker
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com
-│   │   │       └── techchallenger
-│   │   │           └── oficina360
-│   │   │               ├── config
-│   │   │               ├── controllers
-│   │   │               ├── docs
-│   │   │               ├── dtos
-│   │   │               ├── entities
-│   │   │               ├── enums
-│   │   │               ├── exceptions
-│   │   │               ├── mappers
-│   │   │               ├── repositories
-│   │   │               └── services
-|   |   |               └── security
-│   │   └── resources
-│   │       ├── application.yml
-│   │       └── db
-│   │           └── migration
-│   └── test
-│       └── java
-│           └── com
-│               └── techchallenger
-│                   └── oficina360
-│                       ├── controllers
-│                       └── services
-├── Dockerfile
-├── docker-compose.yml
-├── pom.xml
-└── README.md
-```
-
----
-
-## 🛠️ Tecnologias utilizadas
+# 🛠 Tecnologias Utilizadas
 
 - Java 21
 - Spring Boot
-- Spring Web
+- Spring Web MVC
 - Spring Data JPA
-- Bean Validation
-- Flyway
+- Spring Security
+- JWT (JSON Web Token)
 - PostgreSQL
-- Docker
-- Docker Compose
-- Swagger/OpenAPI com Springdoc
-- JUnit 5
-- Mockito
+- H2 Database
+- Flyway
+- Swagger/OpenAPI
 - Lombok
 - Maven
+- Docker
+- Docker Compose
+- JUnit 5
+- Mockito
+- JaCoCo
+- SonarCloud
+- OWASP Dependency Check
+- GitHub Actions
 
 ---
 
-## 🗄️ Banco de dados
+# 🏗 Arquitetura
 
-O projeto utiliza banco relacional, com versionamento de schema via **Flyway**.
+A aplicação segue uma arquitetura monolítica em camadas.
 
-As migrations ficam em:
+```text
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+Database
+```
+
+Complementando a arquitetura:
+
+```text
+DTOs
+Mappers
+Validators
+Factories
+Security
+Exception Handlers
+Filters
+```
+
+---
+
+# 📂 Estrutura do Projeto
+
+```text
+src
+├── main
+│   ├── java
+│   │   └── com.techchallenger.oficina360
+│   │       ├── config
+│   │       ├── constants
+│   │       ├── controllers
+│   │       ├── docs
+│   │       ├── dtos
+│   │       ├── entities
+│   │       ├── enums
+│   │       ├── exceptions
+│   │       ├── mappers
+│   │       ├── repositories
+│   │       ├── security
+│   │       ├── services
+│   │       ├── utils
+│   │       └── validators
+│   │
+│   └── resources
+│       ├── application.yml
+│       └── db
+│           └── migration
+│
+└── test
+    └── java
+        └── com.techchallenger.oficina360
+```
+
+---
+
+# 🔐 Segurança
+
+A aplicação utiliza autenticação baseada em JWT.
+
+## Fluxo de autenticação
+
+1. O usuário realiza login utilizando e-mail e senha;
+2. A API valida as credenciais;
+3. Um token JWT é gerado;
+4. O cliente utiliza o token para acessar recursos protegidos.
+
+Header esperado:
+
+```http
+Authorization: Bearer <token>
+```
+
+---
+
+## Perfis
+
+A aplicação suporta os seguintes perfis:
+
+### ADMIN
+
+Possui acesso total à aplicação.
+
+Responsável por:
+
+- Gerenciar clientes;
+- Gerenciar veículos;
+- Gerenciar serviços;
+- Gerenciar estoque;
+- Gerenciar ordens de serviço;
+- Executar diagnósticos;
+- Iniciar e finalizar execuções.
+
+### CLIENTE
+
+Possui acesso limitado aos próprios recursos.
+
+Pode:
+
+- Consultar seus dados;
+- Consultar seus veículos;
+- Consultar suas ordens de serviço;
+- Aprovar orçamentos;
+- Reprovar orçamentos.
+
+---
+
+## Autorização
+
+Além do controle por perfil, a aplicação possui regras de autorização para garantir que um cliente consiga acessar apenas informações associadas ao seu documento.
+
+Exemplos:
+
+✅ Consultar sua própria ordem de serviço
+
+✅ Consultar seus próprios veículos
+
+✅ Aprovar sua própria OS
+
+❌ Visualizar dados de outro cliente
+
+❌ Aprovar orçamento de outro cliente
+
+---
+
+# 👥 Módulos Disponíveis
+
+## Clientes
+
+- Cadastrar cliente;
+- Listar clientes;
+- Buscar cliente por documento;
+- Atualizar cliente;
+- Excluir cliente.
+
+---
+
+## Veículos
+
+- Cadastrar veículo;
+- Listar veículos;
+- Buscar por placa;
+- Atualizar veículo;
+- Excluir veículo;
+- Vincular veículo ao cliente.
+
+---
+
+## Serviços
+
+- Cadastrar serviço;
+- Listar serviços;
+- Buscar serviço;
+- Atualizar serviço;
+- Excluir serviço;
+- Calcular tempo médio de execução.
+
+---
+
+## Estoque
+
+- Cadastrar item;
+- Listar itens;
+- Buscar item;
+- Atualizar item;
+- Excluir item;
+- Reservar quantidade;
+- Controlar disponibilidade.
+
+---
+
+## Ordens de Serviço
+
+- Abrir ordem de serviço;
+- Consultar ordem de serviço;
+- Atualizar descrição do problema;
+- Executar diagnóstico;
+- Associar serviços;
+- Associar peças e insumos;
+- Aprovar orçamento;
+- Reprovar orçamento;
+- Iniciar execução;
+- Finalizar execução;
+- Registrar indicadores operacionais.
+
+---
+
+# 🔄 Fluxo da Ordem de Serviço
+
+```text
+RECEBIDA
+    ↓
+EM_DIAGNOSTICO
+    ↓
+AGUARDANDO_APROVACAO
+   ↙          ↘
+REPROVADA   APROVADA
+               ↓
+         EM_EXECUCAO
+               ↓
+          FINALIZADA
+```
+
+---
+
+# 📦 Controle de Estoque
+
+Durante o diagnóstico:
+
+- Serviços podem ser adicionados à ordem;
+- Peças e insumos podem ser associados;
+- Itens do estoque são reservados automaticamente.
+
+Exemplo:
+
+```text
+Quantidade Total: 20
+Reservados: 5
+Disponíveis: 15
+```
+
+Fórmula:
+
+```text
+disponíveis = quantidade - reservados
+```
+
+---
+
+# 📈 Indicadores Operacionais
+
+Ao finalizar uma ordem de serviço:
+
+- O tempo total de execução é calculado;
+- O tempo é distribuído entre os serviços executados;
+- O histórico é armazenado;
+- O sistema calcula o tempo médio de execução dos serviços.
+
+Esses indicadores podem ser utilizados para:
+
+- Planejamento operacional;
+- Estimativas futuras;
+- Análise de produtividade.
+
+---
+
+# 📊 Observabilidade
+
+A aplicação possui log estruturado de requisições e respostas HTTP.
+
+Informações registradas:
+
+- Request ID;
+- Método HTTP;
+- URI;
+- Usuário autenticado;
+- Tempo de resposta;
+- Status HTTP;
+- Payload sanitizado.
+
+---
+
+## Proteção de dados sensíveis
+
+O filtro de logs realiza mascaramento automático de:
+
+- CPF;
+- CNPJ;
+- Senhas;
+- Tokens JWT.
+
+Exemplo:
+
+```json
+{
+  "senha":"***"
+}
+```
+
+---
+
+# 🗄 Banco de Dados
+
+O projeto utiliza PostgreSQL como banco principal.
+
+Para testes e desenvolvimento:
+
+```text
+H2 Database
+```
+
+gerenciado automaticamente pelo Spring Boot.
+
+---
+
+## Migrações
+
+Todas as alterações de banco são controladas via Flyway.
+
+Localização:
 
 ```text
 src/main/resources/db/migration
 ```
 
-Exemplo de migrations:
-
-```text
-V1__create_tables.sql
-V2__insert_massa_inicial_clientes_veiculos.sql
-```
-
 ---
 
-## 📚 Documentação da API
+# 📚 Documentação da API
 
-A documentação da API é gerada automaticamente com Swagger/OpenAPI.
-
-Após iniciar a aplicação, acesse:
+Swagger UI:
 
 ```text
 http://localhost:8080/swagger-ui/index.html
 ```
 
-Ou, dependendo da configuração:
+Caso esteja rodando no docker:
 
 ```text
-http://localhost:8080/swagger-ui.html
+http://localhost:18080/swagger-ui/index.html
 ```
 
-A documentação contém:
+A documentação inclui:
 
-- Descrição geral do sistema;
-- Endpoints separados por tags;
-- Contratos dos DTOs;
+- Endpoints;
+- DTOs;
+- Segurança JWT;
 - Exemplos de payload;
-- Possíveis códigos HTTP;
-- Configuração para autenticação JWT via botão `Authorize`.
+- Códigos HTTP.
 
 ---
 
-## 🔐 Segurança
+# 🚀 Executando Localmente
 
-O projeto foi preparado para documentação de autenticação JWT no Swagger.
+## Pré-requisitos
 
-No Swagger, o esquema configurado é:
-
-```text
-bearerAuth
-```
-
-Formato esperado:
-
-```text
-Authorization: Bearer {token}
-```
-
-> A implementação completa da autenticação JWT deve ser integrada aos endpoints administrativos conforme evolução do projeto.
+- Java 21
+- Maven
+- Docker
+- Docker Compose
 
 ---
 
-## 🚀 Como executar localmente
-
-### Pré-requisitos
-
-Antes de iniciar, tenha instalado:
-
-- Java 21;
-- Maven;
-- Docker;
-- Docker Compose.
-
-### Executando com Maven
-
-Clone o projeto:
+## Clone do Projeto
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/michaelhion/tech_challenge_pos_arquitetura_de_software.git
 ```
-
-Acesse a pasta:
 
 ```bash
 cd oficina360
 ```
+---
 
-Execute a aplicação:
+### Ambiente Linux
+
+O projeto pode ser executado nativamente em distribuições Linux compatíveis.
+
+### Ambiente Windows
+
+Para execução utilizando os scripts Linux (`start.sh`), recomenda-se:
+
+- WSL 2 (Windows Subsystem for Linux);
+
+ou
+
+- Docker Desktop instalado e configurado com suporte ao WSL 2.
+
+Caso utilize apenas Docker Desktop, certifique-se de que a virtualização e a integração com WSL estejam habilitadas.
+
+### Verificando a instalação
+
+Verifique se o Docker está disponível:
+
+```bash
+docker --version
+```
+```bash
+docker compose version
+````
+---
+
+## Executar com Maven
+
+Linux/Mac:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-No Windows:
+Windows:
 
-```bash
+```cmd
 mvnw.cmd spring-boot:run
 ```
 
-### Executando com Docker Compose
+---
 
-Suba os containers:
+## Executar com Docker
+
+Windows:
+
+```cmd
+start.bat
+```
+
+Linux:
 
 ```bash
-docker-compose up --build
+chmod +x start.sh
 ```
+```bash
+./start.sh
+````
 
-A aplicação ficará disponível em:
-
-```text
-http://localhost:8080
-```
-
-O Swagger ficará disponível em:
-
-```text
-http://localhost:8080/swagger-ui/index.html
-```
-
-Para parar os containers:
+Parar containers:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ---
 
-## 🧪 Executando os testes
+# 🔑 Login
 
-Para executar os testes unitários:
-
-```bash
-./mvnw test
-```
-
-No Windows:
-
-```bash
-mvnw.cmd test
-```
-
-Os testes cobrem principalmente:
-
-- Services;
-- Controllers;
-- Fluxos de cadastro;
-- Busca;
-- Edição;
-- Exclusão;
-- Tratamento de registros inexistentes;
-- Conflitos de regra de negócio.
-
----
-
-## 📦 Principais endpoints
-
-### Clientes
+Endpoint:
 
 ```http
-GET    /clientes/listar
-GET    /clientes/listar/{documento}
-POST   /clientes/salvar
-PUT    /clientes/editar/{id}
-DELETE /clientes/deletar/{documento}
-```
-
-### Veículos
-
-```http
-GET    /veiculos/listar
-GET    /veiculos/listar/{placa}
-POST   /veiculos/salvar
-PUT    /veiculos/editar/{placa}
-DELETE /veiculos/deletar/{placa}
-```
-
-### Serviços
-
-```http
-GET    /servicos/listar
-GET    /servicos/listar/{id}
-POST   /servicos/salvar
-PUT    /servicos/editar/{id}
-DELETE /servicos/deletar/{id}
-```
-
-### Estoque
-
-```http
-GET    /estoque/listar
-GET    /estoque/listar/{id}
-POST   /estoque/salvar
-PUT    /estoque/editar/{id}
-DELETE /estoque/deletar/{id}
-PATCH  /estoque/reservar/{id}
-```
-
----
-
-## Autenticação
-
-Para acessar endpoints administrativos, primeiro realize login:
-
 POST /auth/login
+```
+
+Administrador:
 
 ```json
 {
@@ -362,274 +498,168 @@ POST /auth/login
   "senha": "123456"
 }
 ```
----
 
-## 📥 Exemplos de payload
-
-### Cadastrar cliente
+Cliente:
 
 ```json
 {
-  "documento": "12345678901",
-  "nome": "João da Silva",
-  "email": "joao.silva@email.com",
-  "telefone": "11999999999"
-}
-```
-
-### Cadastrar veículo
-
-```json
-{
-  "placa": "ABC1D23",
-  "marca": "Volkswagen",
-  "modelo": "Gol",
-  "ano": 2020,
-  "clienteDocumento": "12345678901"
-}
-```
-
-### Cadastrar serviço
-
-```json
-{
-  "descricao": "Troca de óleo",
-  "valor": 150.00
-}
-```
-
-### Cadastrar item de estoque
-
-```json
-{
-  "nome": "Filtro de óleo",
-  "valor": 45.90,
-  "quantidade": 20,
-  "reservados": 0,
-  "disponiveis": 20
-}
-```
-
-### Reservar item de estoque
-
-```json
-{
-  "quantidade": 3
+  "email": "cliente@oficina360.com",
+  "senha": "123456"
 }
 ```
 
 ---
 
-## ⚠️ Tratamento de erros
+# 🧪 Testes
 
-O projeto utiliza exceptions personalizadas para representar erros de negócio e erros de aplicação.
+Executar todos os testes:
 
-Principais exemplos:
+```bash
+./mvnw test
+```
 
-- `RecursoNaoEncontradoException`
-- `ConflitoException`
-- `RegraDeNegocioException`
+Windows:
 
-Exemplo de resposta de erro:
+```cmd
+mvnw.cmd test
+```
+
+Executar build completo:
+
+```bash
+./mvnw clean verify
+```
+
+---
+
+## Cobertura
+
+O projeto possui testes para:
+
+- Services;
+- Controllers;
+- Security;
+- Exception Handlers;
+- Filtros HTTP;
+- Regras de negócio;
+- Fluxos de ordens de serviço.
+
+Métricas monitoradas por:
+
+- JaCoCo;
+- SonarCloud.
+
+Objetivo:
+
+```text
+Cobertura mínima de 80%
+```
+
+---
+
+# 🔍 Qualidade e Segurança
+
+A aplicação utiliza:
+
+- SonarCloud;
+- JaCoCo;
+- OWASP Dependency Check;
+- GitHub Actions.
+
+Os seguintes aspectos são monitorados:
+
+- Cobertura de testes;
+- Vulnerabilidades;
+- Code Smells;
+- Duplicação de código;
+- Segurança;
+- Manutenibilidade.
+
+---
+
+# 🔄 Integração Contínua
+
+O GitHub Actions executa automaticamente:
+
+```text
+Build
+↓
+Testes
+↓
+JaCoCo
+↓
+Dependency Check
+↓
+SonarCloud
+```
+
+a cada push e pull request.
+
+
+Dashboard SonarCloud:
+
+🔗 https://sonarcloud.io/summary/overall?id=michaelhion_tech_challenge_pos_arquitetura_de_software
+
+---
+
+---
+## 🔒 Relatório de Vulnerabilidades
+
+O relatório de vulnerabilidades encontra-se em:
+
+docs/security/OWASP-Dependency-Check.pd
+---
+
+# ⚠ Tratamento de Erros
+
+A API utiliza tratamento global de exceções.
+
+Principais exceções:
+
+- RecursoNaoEncontradoException
+- RegraDeNegocioException
+- ConflitoException
+- AccessDeniedException
+
+Exemplo:
 
 ```json
 {
   "status": 404,
   "erro": "Recurso não encontrado",
-  "mensagem": "Item de estoque não encontrado",
-  "timestamp": "2026-06-07T19:03:00"
+  "mensagem": "Cliente não encontrado"
 }
 ```
 
 ---
 
-## 🧾 Regras de negócio relevantes
-
-### Documento do cliente
-
-O cliente é identificado por CPF ou CNPJ, informado somente com números.
-
-Exemplos:
-
-```text
-CPF: 12345678901
-CNPJ: 11222333000181
-```
-
-### Placa do veículo
-
-O veículo pode ser identificado pela placa no padrão antigo ou Mercosul.
-
-Exemplos:
-
-```text
-ABC1234
-ABC1D23
-```
-
-### Estoque disponível
-
-A quantidade disponível é calculada por:
-
-```text
-disponiveis = quantidade - reservados
-```
-
-Esse valor não deve ser persistido diretamente no banco, pois é derivado dos campos `quantidade` e `reservados`.
-
-### Reserva de estoque
-
-Ao reservar um item, o sistema aumenta a quantidade de `reservados`, reduzindo a quantidade disponível para novas ordens de serviço.
-
-Exemplo:
-
-```text
-quantidade = 20
-reservados = 5
-disponiveis = 15
-```
-
-Se o usuário tentar reservar uma quantidade maior que a disponível, o sistema deve retornar erro de estoque indisponível.
-
----
-
-## 🧱 Decisões técnicas
-
-### Associação fraca entre veículo e cliente
-
-Para simplificar o MVP, a associação entre veículo e cliente é feita por meio do campo:
-
-```text
-clienteDocumento
-```
-
-Essa abordagem evita complexidade inicial com relacionamentos JPA como `@ManyToOne` e `@OneToMany`, mantendo o vínculo por meio de um identificador de negócio conhecido pelo usuário.
-
-### Uso de DTOs
-
-Os controllers utilizam DTOs em vez de expor diretamente as entidades JPA.
-
-Benefícios:
-
-- Menor acoplamento;
-- Maior segurança;
-- Melhor documentação no Swagger;
-- Facilidade de validação;
-- Melhor controle do contrato da API.
-
-### Uso de Mappers
-
-As conversões entre DTO e Entity são feitas em classes Mapper, evitando que controllers ou entidades assumam responsabilidades indevidas.
-
-### Configuração centralizada do Swagger
-
-O projeto utiliza uma configuração central de OpenAPI para documentar:
-
-- Nome e descrição da API;
-- Versão;
-- Contato;
-- Autenticação JWT;
-- Tags dos módulos;
-- Servidores disponíveis.
-
----
-
-## 🧪 Cobertura de testes
-
-O projeto possui testes unitários para:
-
-- `ClienteService`
-- `ClientesController`
-- `VeiculoService`
-- `VeiculosController`
-- `ServicoService`
-- `ServicosController`
-- Demais serviços e controllers conforme evolução do MVP.
-
-Objetivo de cobertura:
-
-```text
-mínimo de 80% nos domínios críticos
-```
-
----
-
-## 🐳 Docker
-
-O projeto deve conter:
-
-```text
-Dockerfile
-docker-compose.yml
-```
-
-Exemplo de execução:
-
-```bash
-docker-compose up --build
-```
-
-Para parar os containers:
-
-```bash
-docker-compose down
-```
-
----
-
-## 📌 Status do projeto
-
-Projeto em desenvolvimento para entrega do MVP da Fase 1.
-
-Funcionalidades concluídas ou em andamento:
+# ✅ Funcionalidades Implementadas
 
 - [x] CRUD de clientes
 - [x] CRUD de veículos
 - [x] CRUD de serviços
 - [x] CRUD de estoque
 - [x] Reserva de estoque
+- [x] Autenticação JWT
+- [x] Controle de acesso por perfil
+- [x] Controle de acesso por proprietário
+- [x] Abertura de ordem de serviço
+- [x] Diagnóstico técnico
+- [x] Aprovação de orçamento
+- [x] Reprovação de orçamento
+- [x] Execução de serviços
+- [x] Finalização de ordens de serviço
+- [x] Cálculo de tempo médio de execução
 - [x] Swagger/OpenAPI
 - [x] Flyway
-- [x] Testes unitários
-- [ ] Autenticação JWT completa
-- [ ] Gestão completa de ordens de serviço
-- [ ] Acompanhamento de status da OS
-- [ ] Relatório de vulnerabilidades
+- [x] Docker
+- [x] Testes automatizados
+- [x] JaCoCo
+- [x] SonarCloud
+- [x] OWASP Dependency Check
 
 ---
 
-## 👥 Grupo
+# 👨‍💻 Autor
 
-Preencher antes da entrega:
-
-```text
-Nome do grupo:
-Participantes:
-Discord usernames:
-Link da documentação DDD:
-Link do repositório:
-```
-
----
-
-## 📄 Entrega
-
-Este projeto faz parte do Tech Challenge da Fase 1.
-
-Entregáveis esperados:
-
-- Código-fonte em repositório privado;
-- README com instruções de execução;
-- Dockerfile;
-- docker-compose.yml;
-- APIs documentadas via Swagger;
-- Testes automatizados;
-- Documentação DDD;
-- Relatório de vulnerabilidades;
-- Documento final em PDF com links e informações do grupo.
-
----
-
-## 👨‍💻 Autor
-
-Projeto desenvolvido para fins acadêmicos no contexto do Tech Challenge.
+Projeto desenvolvido para fins acadêmicos no contexto do Tech Challenge da Pós-Graduação em Arquitetura de Software.

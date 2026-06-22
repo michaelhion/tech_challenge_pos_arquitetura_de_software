@@ -25,6 +25,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrdemServico {
 
+    private static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "ID", nullable = false, updatable = false)
@@ -170,7 +171,7 @@ public class OrdemServico {
             throw new ConflitoException("A execução só pode ser iniciada após aprovação do orçamento");
         }
 
-        this.dtHoraInicioExecucao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+        this.dtHoraInicioExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));
         this.dtHoraFimExecucao = null;
         this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_EXECUCAO;
     }
@@ -184,7 +185,7 @@ public class OrdemServico {
             throw new ConflitoException("A execução não possui data/hora de início registrada");
         }
 
-        this.dtHoraFimExecucao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+        this.dtHoraFimExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));
         this.ordemDeServicoStatus = OrdemDeServicoStatus.FINALIZADA;
     }
 
@@ -194,7 +195,7 @@ public class OrdemServico {
             throw new ConflitoException("A ordem de serviço só pode ser entregue após finalização");
         }
 
-        this.dtHoraFechamento = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+        this.dtHoraFechamento = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));
         this.ordemDeServicoStatus = OrdemDeServicoStatus.ENTREGUE;
     }
 

@@ -14,6 +14,7 @@ import java.time.ZoneOffset;
 @Service
 public class JwtService {
 
+    private  static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
     @Value("${api.security.jwt.secret}")
     private String secret;
 
@@ -45,7 +46,7 @@ public class JwtService {
     }
 
     private Instant dataExpiracao() {
-        return LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
+        return LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))
                 .plusHours(expirationHours)
                 .toInstant(ZoneOffset.of("-03:00"));
     }

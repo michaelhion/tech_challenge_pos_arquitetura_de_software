@@ -61,6 +61,7 @@ public class OrdemServicoOficinaService {
             OrdemDeServicoStatus.EM_EXECUCAO,
             OrdemDeServicoStatus.FINALIZADA
     );
+    private static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
 
     private final OrdemServicosRepository ordemServicosRepository;
     private final ClienteRepository clienteRepository;
@@ -193,7 +194,7 @@ public class OrdemServicoOficinaService {
             TempoExecucaoServico tempoExecucaoServico = TempoExecucaoServico.builder()
                     .servicoID(oss.getServicoId())
                     .tempoExecucaoMinutos(tempoPorServico)
-                    .dataExecucao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")))
+                    .dataExecucao(LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)))
                     .build();
 
             tempoExecucaoServicoRepository.save(tempoExecucaoServico);

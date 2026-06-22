@@ -22,6 +22,8 @@ import java.time.ZoneId;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
+
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ResponseEntity<ErroResponse> handleRecursoNaoEncontrado(
             RecursoNaoEncontradoException ex
@@ -53,7 +55,7 @@ public class GlobalExceptionHandler {
                 "Regra de negócio violada",
                 ex.getMessage(),
                 ex.getMensagens(),
-                LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
+                LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))
         );
 
         return ResponseEntity
@@ -189,7 +191,7 @@ public class GlobalExceptionHandler {
                                 status.value(),
                                 erro,
                                 mensagem,
-                                LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
+                                LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))
                         )
                 );
     }

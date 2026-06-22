@@ -4,7 +4,6 @@ import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
-import com.techchallenger.oficina360.entities.Usuario;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.services.OrdemServicoOficinaService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,9 +24,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrdemServicoOficinaControllerTest {
 
-    public static final String CPF = "12345678901";
-    public static final String PLACA = "ABC1D23";
-    public static final String RECLAMACAO_CLIENTE = "Veículo apresenta ruído ao frear e vibração no volante.";
+    private static final String CPF = "12345678901";
+    private static final String PLACA = "ABC1D23";
+    private static final String RECLAMACAO_CLIENTE = "Veículo apresenta ruído ao frear e vibração no volante.";
     @Mock
     private OrdemServicoOficinaService ordemServicoOficinaService;
 
@@ -37,7 +36,6 @@ class OrdemServicoOficinaControllerTest {
 
     private OrdemServicoDTO ordemServicoDTO;
     private CriarOrdemServicoDTO criarOrdemServicoDTO;
-    private Usuario usuario;
 
     @BeforeEach
     void setUp() {
@@ -60,12 +58,6 @@ class OrdemServicoOficinaControllerTest {
                 RECLAMACAO_CLIENTE,
                 OrdemDeServicoStatus.RECEBIDA
         );
-        usuario = Usuario
-                .builder()
-                .senha("senha123")
-                .email("email@teste.com")
-                .documento("12312312312")
-                .build();
     }
 
     @Test

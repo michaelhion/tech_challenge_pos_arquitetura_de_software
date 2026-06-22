@@ -2,7 +2,6 @@ package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.entities.Usuario;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.services.OrdemServicoClienteService;
 import org.junit.jupiter.api.BeforeEach;

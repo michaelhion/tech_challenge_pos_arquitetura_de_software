@@ -1,8 +1,6 @@
 package com.techchallenger.oficina360.security;
 
 import com.techchallenger.oficina360.entities.Usuario;
-
-import com.techchallenger.oficina360.repositories.ClienteRepository;
 import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
 import com.techchallenger.oficina360.repositories.VeiculoRepository;
 import lombok.RequiredArgsConstructor;
