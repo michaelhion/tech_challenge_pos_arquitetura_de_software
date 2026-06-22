@@ -58,16 +58,6 @@ public class AutorizacaoClienteService {
         return ordemServicosRepository.findById(ordemServicoId).map(os -> usuario.getDocumento().equals(os.getDocumentoCliente())).orElse(false);
     }
 
-    public boolean podeListarVeiculosDoCliente(String documento, Authentication authentication) {
-        Usuario usuario = obterUsuario(authentication);
-
-        if (!usuarioClienteValido(usuario)) {
-            return false;
-        }
-
-        return usuario.getDocumento().equals(normalizarDocumento(documento));
-    }
-
     private Usuario obterUsuario(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof Usuario usuario)) {
             return null;

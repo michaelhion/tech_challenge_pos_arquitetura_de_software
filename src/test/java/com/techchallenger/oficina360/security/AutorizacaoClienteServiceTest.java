@@ -41,7 +41,6 @@ class AutorizacaoClienteServiceTest {
     @BeforeEach
     void setup() {
         service = new AutorizacaoClienteService(
-//                clienteRepository,
                 veiculoRepository,
                 ordemServicosRepository
         );
@@ -260,44 +259,6 @@ class AutorizacaoClienteServiceTest {
         boolean resultado =
                 service.podeAcessarOrdemServico(
                         id,
-                        authentication
-                );
-
-        assertFalse(resultado);
-    }
-
-    @Test
-    void devePermitirListagemDosPropriosVeiculos() {
-
-        Usuario usuario = Usuario.builder()
-                .documento("12345678901")
-                .build();
-
-        when(authentication.getPrincipal())
-                .thenReturn(usuario);
-
-        boolean resultado =
-                service.podeListarVeiculosDoCliente(
-                        "12345678901",
-                        authentication
-                );
-
-        assertTrue(resultado);
-    }
-
-    @Test
-    void naoDevePermitirListagemDeVeiculosDeOutroCliente() {
-
-        Usuario usuario = Usuario.builder()
-                .documento("12345678901")
-                .build();
-
-        when(authentication.getPrincipal())
-                .thenReturn(usuario);
-
-        boolean resultado =
-                service.podeListarVeiculosDoCliente(
-                        "99999999999",
                         authentication
                 );
 

@@ -54,6 +54,10 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 
     private void logRequest(ContentCachingRequestWrapper request, String requestId) {
 
+        if (!log.isInfoEnabled()) {
+            return;
+        }
+
         String body = getBody(request.getContentAsByteArray());
         body = sanitizePayload(body);
 
@@ -73,6 +77,10 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
     }
 
     private void logResponse(ContentCachingResponseWrapper response, long duration, String requestId) {
+
+        if (!log.isInfoEnabled()) {
+            return;
+        }
 
         String body = getBody(response.getContentAsByteArray());
         body = sanitizePayload(body);

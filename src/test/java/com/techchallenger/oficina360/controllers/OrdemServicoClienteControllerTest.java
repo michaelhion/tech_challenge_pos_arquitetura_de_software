@@ -25,39 +25,23 @@ class OrdemServicoClienteControllerTest {
     @Mock
     private OrdemServicoClienteService ordemServicoClienteService;
 
+    @Mock
     private OrdemServicoClienteController ordemServicoClienteController;
 
     private UUID ordemServicoId;
 
-    private OrdemServicoDTO ordemServicoDTO;
-    private Usuario usuario;
 
     @BeforeEach
     void setUp() {
         ordemServicoClienteController = new OrdemServicoClienteController(ordemServicoClienteService);
 
         ordemServicoId = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
-
-        ordemServicoDTO = new OrdemServicoDTO(
-                ordemServicoId,
-                "12345678901",
-                "ABC1D23",
-                "Veículo apresenta ruído ao frear e vibração no volante.",
-                OrdemDeServicoStatus.RECEBIDA,
-                null
-        );
-        usuario = Usuario
-                .builder()
-                .senha("senha123")
-                .email("email@teste.com")
-                .documento("12312312312")
-                .build();
     }
 
 
     @Test
     void deveAprovarOrdemServicoComSucesso() {
-        AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(true,null);
+        AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(true, null);
 
         OrdemServicoDTO ordemServicoAprovada = new OrdemServicoDTO(
                 ordemServicoId,
@@ -86,7 +70,7 @@ class OrdemServicoClienteControllerTest {
 
     @Test
     void deveReprovarOrdemServicoComSucesso() {
-        AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(false,"muito caro");
+        AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(false, "muito caro");
 
         OrdemServicoDTO ordemServicoReprovada = new OrdemServicoDTO(
                 ordemServicoId,
