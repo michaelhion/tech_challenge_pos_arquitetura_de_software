@@ -1,0 +1,43 @@
+@startuml
+!theme plain
+
+package "Atendimento" {
+
+class Cliente
+class Veiculo
+class OrdemServico
+
+Cliente "1" -- "*" Veiculo
+Cliente "1" -- "*" OrdemServico
+
+Veiculo "1" -- "*" OrdemServico
+
+}
+
+package "Execução" {
+
+class OrdemServicoServico
+class TempoExecucaoServico
+
+OrdemServico "1" -- "*" OrdemServicoServico
+OrdemServicoServico "1" -- "*" TempoExecucaoServico
+
+}
+
+package "Estoque" {
+
+class Estoque
+class OrdemServicoItemEstoque
+
+Estoque "1" -- "*" OrdemServicoItemEstoque
+OrdemServico "1" -- "*" OrdemServicoItemEstoque
+
+}
+
+package "Segurança" {
+
+class Usuario
+
+}
+
+@enduml

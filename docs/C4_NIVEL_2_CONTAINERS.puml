@@ -1,0 +1,29 @@
+workspace {
+
+    model {
+
+        cliente = person "Cliente"
+
+        oficina360 = softwareSystem "Oficina360" {
+
+            api = container "API Oficina360" "API REST" "Spring Boot"
+
+            banco = container "Banco de Dados" "Persistência" "PostgreSQL"
+
+            swagger = container "Swagger/OpenAPI" "Documentação" "SpringDoc"
+        }
+
+        cliente -> api "HTTPS"
+
+        api -> banco "JPA/Hibernate"
+
+        swagger -> api "Documenta APIs"
+    }
+
+    views {
+        container oficina360 {
+            include *
+            autolayout lr
+        }
+    }
+}

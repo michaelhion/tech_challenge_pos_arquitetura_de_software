@@ -29,6 +29,7 @@ import com.techchallenger.oficina360.services.factories.OrdemServicoFactory;
 import com.techchallenger.oficina360.services.validators.DiagnosticoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -50,6 +51,7 @@ import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPl
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrdemServicoOficinaService {
 
 
@@ -72,6 +74,7 @@ public class OrdemServicoOficinaService {
     private final DiagnosticoFactory diagnosticoFactory;
     private final DiagnosticoValidator diagnosticoValidator;
     private final TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
+    private final EmailService emailService;
 
     public List<OrdemServicoDTO> findAll() {
         return ordemServicosRepository.findAll()
@@ -151,7 +154,21 @@ public class OrdemServicoOficinaService {
         ordemServico.finalizarDiagnostico();
 
         OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);
+        Optional<Cliente> cliente = clienteRepository.findByDocumento(ordemServico.getDocumentoCliente());
+        try {
+            emailService.enviarOrcamentoParaAprovacao(
+                    cliente.get().getEmail(),
+                    ordemServico.getId().toString()
+            );
 
+        } catch (Exception ex) {
+
+            log.error(
+                    "Erro ao enviar email da OS {}",
+                    ordemServico.getId(),
+                    ex
+            );
+        }
         return toDTO(ordemServicoAtualizada);
     }
 
