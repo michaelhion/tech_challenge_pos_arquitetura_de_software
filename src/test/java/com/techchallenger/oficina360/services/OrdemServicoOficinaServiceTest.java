@@ -47,6 +47,8 @@ import static org.mockito.Mockito.*;
 class OrdemServicoOficinaServiceTest {
 
     private static final String CPF = "***8901";
+    private static final String PLACA = "ABC***23";
+
     @Mock
     private OrdemServicosRepository ordemServicosRepository;
 
@@ -86,10 +88,8 @@ class OrdemServicoOficinaServiceTest {
     private Cliente cliente;
     private Veiculo veiculo;
     private OrdemServico ordemServico;
-    private OrdemServicoDTO ordemServicoDTO;
     private Servico servico;
     private Estoque estoque;
-    private Usuario usuario;
 
 
     @BeforeEach
@@ -102,7 +102,7 @@ class OrdemServicoOficinaServiceTest {
 
         cliente = Cliente.builder()
                 .id(clienteId)
-                .documento("12345678901")
+                .documento(OrdemServicoOficinaServiceTest.CPF)
                 .nome("João da Silva")
                 .email("joao.silva@email.com")
                 .telefone("11999999999")
@@ -110,17 +110,17 @@ class OrdemServicoOficinaServiceTest {
 
         veiculo = Veiculo.builder()
                 .id(veiculoId)
-                .placa("ABC1D23")
+                .placa(PLACA)
                 .marca("Volkswagen")
                 .modelo("Gol")
                 .ano("2020")
-                .clienteDocumento("12345678901")
+                .clienteDocumento(OrdemServicoOficinaServiceTest.CPF)
                 .build();
 
         ordemServico = OrdemServico.builder()
                 .id(ordemServicoId)
-                .documentoCliente("12345678901")
-                .placaVeiculo("ABC1D23")
+                .documentoCliente(OrdemServicoOficinaServiceTest.CPF)
+                .placaVeiculo(PLACA)
                 .descricaoProblema("Veículo apresenta ruído ao frear.")
                 .dtHoraAbertura(LocalDateTime.now())
                 .ordemDeServicoStatus(OrdemDeServicoStatus.RECEBIDA)
@@ -128,15 +128,6 @@ class OrdemServicoOficinaServiceTest {
                 .valorPecasInsumos(BigDecimal.ZERO)
                 .valorOs(BigDecimal.ZERO)
                 .build();
-
-        ordemServicoDTO = new OrdemServicoDTO(
-                ordemServicoId,
-                "12345678901",
-                "ABC1D23",
-                "Veículo apresenta ruído ao frear.",
-                OrdemDeServicoStatus.RECEBIDA,
-                null
-        );
 
         servico = Servico.builder()
                 .id(servicoId)
@@ -154,13 +145,6 @@ class OrdemServicoOficinaServiceTest {
                 .reservados(0)
                 .build();
 
-        usuario = Usuario
-                .builder()
-                .senha("senha123")
-                .email("email@teste.com")
-                .documento("12312312312")
-                .build();
-
     }
 
     @Test
@@ -174,7 +158,7 @@ class OrdemServicoOficinaServiceTest {
         assertEquals(1, resultado.size());
         assertEquals(ordemServicoId, resultado.get(0).id());
         assertEquals(CPF, resultado.get(0).documentoCliente());
-        assertEquals("ABC1D23", resultado.get(0).placaVeiculo());
+        assertEquals(PLACA, resultado.get(0).placaVeiculo());
         assertEquals("Veículo apresenta ruído ao frear.", resultado.get(0).descricaoProblema());
         assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.get(0).ordemDeServicoStatus());
 
@@ -191,7 +175,7 @@ class OrdemServicoOficinaServiceTest {
         assertTrue(resultado.isPresent());
         assertEquals(ordemServicoId, resultado.get().id());
         assertEquals(CPF, resultado.get().documentoCliente());
-        assertEquals("ABC1D23", resultado.get().placaVeiculo());
+        assertEquals(PLACA, resultado.get().placaVeiculo());
 
         verify(ordemServicosRepository, times(1)).findById(ordemServicoId);
     }
@@ -212,16 +196,16 @@ class OrdemServicoOficinaServiceTest {
     void deveSalvarOrdemServicoComSucesso() {
         CriarOrdemServicoDTO request = new CriarOrdemServicoDTO(
                 null,
-                "12345678901",
-                "abc1d23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Veículo apresenta ruído ao frear.",
                 null
         );
 
-        when(clienteRepository.findByDocumento("12345678901"))
+        when(clienteRepository.findByDocumento(OrdemServicoOficinaServiceTest.CPF))
                 .thenReturn(Optional.of(cliente));
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
+        when(veiculoRepository.findByPlaca(PLACA))
                 .thenReturn(Optional.of(veiculo));
 
         when(ordemServicosRepository.findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(any(), anyList()))
@@ -237,12 +221,12 @@ class OrdemServicoOficinaServiceTest {
 
         assertNotNull(resultado);
         assertEquals(ordemServicoId, resultado.id());
-        assertEquals("12345678901", resultado.documentoCliente());
-        assertEquals("ABC1D23", resultado.placaVeiculo());
+        assertEquals(OrdemServicoOficinaServiceTest.CPF, resultado.documentoCliente());
+        assertEquals(PLACA, resultado.placaVeiculo());
         assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.ordemDeServicoStatus());
 
-        verify(clienteRepository, times(1)).findByDocumento("12345678901");
-        verify(veiculoRepository, times(1)).findByPlaca("ABC1D23");
+        verify(clienteRepository, times(1)).findByDocumento(OrdemServicoOficinaServiceTest.CPF);
+        verify(veiculoRepository, times(1)).findByPlaca(PLACA);
         verify(ordemServicosRepository, times(1))
                 .findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(any(), anyList());
         verify(ordemServicoFactory, times(1)).criar(request, cliente, veiculo);
@@ -253,13 +237,13 @@ class OrdemServicoOficinaServiceTest {
     void naoDeveSalvarQuandoClienteNaoForEncontrado() {
         CriarOrdemServicoDTO request = new CriarOrdemServicoDTO(
                 null,
-                "12345678901",
-                "ABC1D23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Veículo apresenta ruído ao frear.",
                 null
         );
 
-        when(clienteRepository.findByDocumento("12345678901"))
+        when(clienteRepository.findByDocumento(OrdemServicoOficinaServiceTest.CPF))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
@@ -269,7 +253,7 @@ class OrdemServicoOficinaServiceTest {
 
         assertEquals("Cliente não encontrado", exception.getMessage());
 
-        verify(clienteRepository, times(1)).findByDocumento("12345678901");
+        verify(clienteRepository, times(1)).findByDocumento(OrdemServicoOficinaServiceTest.CPF);
         verify(veiculoRepository, never()).findByPlaca(any());
         verify(ordemServicosRepository, never()).save(any());
     }
@@ -278,16 +262,16 @@ class OrdemServicoOficinaServiceTest {
     void naoDeveSalvarQuandoVeiculoNaoForEncontrado() {
         CriarOrdemServicoDTO request = new CriarOrdemServicoDTO(
                 null,
-                "12345678901",
-                "ABC1D23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Veículo apresenta ruído ao frear.",
                 null
         );
 
-        when(clienteRepository.findByDocumento("12345678901"))
+        when(clienteRepository.findByDocumento(OrdemServicoOficinaServiceTest.CPF))
                 .thenReturn(Optional.of(cliente));
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
+        when(veiculoRepository.findByPlaca(PLACA))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
@@ -297,8 +281,8 @@ class OrdemServicoOficinaServiceTest {
 
         assertEquals("Veículo não encontrado", exception.getMessage());
 
-        verify(clienteRepository, times(1)).findByDocumento("12345678901");
-        verify(veiculoRepository, times(1)).findByPlaca("ABC1D23");
+        verify(clienteRepository, times(1)).findByDocumento(OrdemServicoOficinaServiceTest.CPF);
+        verify(veiculoRepository, times(1)).findByPlaca(PLACA);
         verify(ordemServicosRepository, never()).save(any());
     }
 
@@ -306,25 +290,25 @@ class OrdemServicoOficinaServiceTest {
     void naoDeveSalvarQuandoVeiculoNaoPertencerAoCliente() {
         CriarOrdemServicoDTO request = new CriarOrdemServicoDTO(
                 null,
-                "12345678901",
-                "ABC1D23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Veículo apresenta ruído ao frear.",
                 null
         );
 
         Veiculo veiculoDeOutroCliente = Veiculo.builder()
                 .id(veiculoId)
-                .placa("ABC1D23")
+                .placa(PLACA)
                 .marca("Volkswagen")
                 .modelo("Gol")
                 .ano("2020")
                 .clienteDocumento("00000000000")
                 .build();
 
-        when(clienteRepository.findByDocumento("12345678901"))
+        when(clienteRepository.findByDocumento(OrdemServicoOficinaServiceTest.CPF))
                 .thenReturn(Optional.of(cliente));
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
+        when(veiculoRepository.findByPlaca(PLACA))
                 .thenReturn(Optional.of(veiculoDeOutroCliente));
 
         RegraDeNegocioException exception = assertThrows(
@@ -334,8 +318,8 @@ class OrdemServicoOficinaServiceTest {
 
         assertEquals("O veículo não pertence ao cliente informado", exception.getMessage());
 
-        verify(clienteRepository, times(1)).findByDocumento("12345678901");
-        verify(veiculoRepository, times(1)).findByPlaca("ABC1D23");
+        verify(clienteRepository, times(1)).findByDocumento(OrdemServicoOficinaServiceTest.CPF);
+        verify(veiculoRepository, times(1)).findByPlaca(PLACA);
         verify(ordemServicosRepository, never()).save(any());
     }
 
@@ -343,25 +327,25 @@ class OrdemServicoOficinaServiceTest {
     void naoDeveSalvarQuandoJaExistirOrdemServicoAtivaParaVeiculo() {
         CriarOrdemServicoDTO request = new CriarOrdemServicoDTO(
                 null,
-                "12345678901",
-                "ABC1D23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Veículo apresenta ruído ao frear.",
                 null
         );
 
         OrdemServico ordemServicoAtiva = OrdemServico.builder()
                 .id(UUID.fromString("99999999-9999-9999-9999-999999999999"))
-                .documentoCliente("12345678901")
-                .placaVeiculo("ABC1D23")
+                .documentoCliente(OrdemServicoOficinaServiceTest.CPF)
+                .placaVeiculo(PLACA)
                 .descricaoProblema("Outra OS ativa.")
                 .dtHoraAbertura(LocalDateTime.now())
                 .ordemDeServicoStatus(OrdemDeServicoStatus.EM_DIAGNOSTICO)
                 .build();
 
-        when(clienteRepository.findByDocumento("12345678901"))
+        when(clienteRepository.findByDocumento(OrdemServicoOficinaServiceTest.CPF))
                 .thenReturn(Optional.of(cliente));
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
+        when(veiculoRepository.findByPlaca(PLACA))
                 .thenReturn(Optional.of(veiculo));
 
         when(ordemServicosRepository.findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(any(), anyList()))
@@ -374,8 +358,8 @@ class OrdemServicoOficinaServiceTest {
 
         assertTrue(exception.getMessage().contains("Já existe uma ordem de serviço ativa para o veículo"));
 
-        verify(clienteRepository, times(1)).findByDocumento("12345678901");
-        verify(veiculoRepository, times(1)).findByPlaca("ABC1D23");
+        verify(clienteRepository, times(1)).findByDocumento(OrdemServicoOficinaServiceTest.CPF);
+        verify(veiculoRepository, times(1)).findByPlaca(PLACA);
         verify(ordemServicosRepository, times(1))
                 .findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(any(), anyList());
         verify(ordemServicoFactory, never()).criar(any(), any(), any());
@@ -386,8 +370,8 @@ class OrdemServicoOficinaServiceTest {
     void deveEditarDescricaoProblemaDaOrdemServicoComSucesso() {
         OrdemServicoDTO dtoAtualizado = new OrdemServicoDTO(
                 ordemServicoId,
-                "12345678901",
-                "ABC1D23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Descrição atualizada do problema.",
                 OrdemDeServicoStatus.RECEBIDA,
                 null
@@ -413,8 +397,8 @@ class OrdemServicoOficinaServiceTest {
     void naoDeveEditarQuandoOrdemServicoNaoForEncontrada() {
         OrdemServicoDTO dtoAtualizado = new OrdemServicoDTO(
                 ordemServicoId,
-                "12345678901",
-                "ABC1D23",
+                OrdemServicoOficinaServiceTest.CPF,
+                PLACA,
                 "Descrição atualizada do problema.",
                 OrdemDeServicoStatus.RECEBIDA,
                 null
@@ -598,8 +582,7 @@ class OrdemServicoOficinaServiceTest {
                 LocalDateTime.now()
         );
 
-        OrdemServicoServico servicoDaOs =
-                OrdemServicoServico.builder()
+        OrdemServicoServico servicoDaOs = OrdemServicoServico.builder()
                         .servicoId(servicoId)
                         .build();
 
@@ -611,33 +594,25 @@ class OrdemServicoOficinaServiceTest {
         when(ordemServicosRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        ordemServico.setOrdemDeServicoStatus(
-                OrdemDeServicoStatus.EM_EXECUCAO
-        );
+        ordemServico.setOrdemDeServicoStatus(OrdemDeServicoStatus.EM_EXECUCAO);
 
-
-        OrdemServicoDTO resultado =
-                ordemServicoOficinaService
+        OrdemServicoDTO resultado = ordemServicoOficinaService
                         .finalizarExecucao(ordemServicoId);
 
         assertNotNull(resultado);
         assertEquals(OrdemDeServicoStatus.FINALIZADA,resultado.ordemDeServicoStatus());
 
-        verify(ordemServicosRepository)
-                .save(any());
+        verify(ordemServicosRepository).save(any());
 
-        verify(tempoExecucaoServicoRepository)
-                .save(any(TempoExecucaoServico.class));
+        verify(tempoExecucaoServicoRepository).save(any(TempoExecucaoServico.class));
     }
 
     @Test
     void naoDeveFinalizarDiagnosticoSemServicos() {
 
-        DiagnosticoDTO dto =
-                new DiagnosticoDTO(
+        DiagnosticoDTO dto = new DiagnosticoDTO(
                         List.of(),
-                        List.of()
-                );
+                        List.of());
 
         when(ordemServicosRepository.findById(ordemServicoId))
                 .thenReturn(Optional.of(ordemServico));
@@ -645,11 +620,9 @@ class OrdemServicoOficinaServiceTest {
         assertThrows(
                 ConflitoException.class,
                 () -> ordemServicoOficinaService
-                        .diagnosticar(ordemServicoId, dto)
-        );
+                        .diagnosticar(ordemServicoId, dto));
 
-        verify(ordemServicosRepository, never())
-                .save(any());
+        verify(ordemServicosRepository, never()).save(any());
     }
 
     @Test
@@ -661,8 +634,7 @@ class OrdemServicoOficinaServiceTest {
                                 "SRV-TROCA-OLEO",
                                 "SRV-TROCA-OLEO"
                         ),
-                        List.of()
-                );
+                        List.of());
 
         when(ordemServicosRepository.findById(ordemServicoId))
                 .thenReturn(Optional.of(ordemServico));
@@ -674,16 +646,139 @@ class OrdemServicoOficinaServiceTest {
                 .thenReturn(
                         OrdemServicoServico.builder()
                                 .servicoId(servicoId)
-                                .build()
-                );
+                                .build());
 
         when(ordemServicosRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        ordemServicoOficinaService
-                .diagnosticar(ordemServicoId, dto);
+        ordemServicoOficinaService.diagnosticar(ordemServicoId, dto);
 
-        verify(servicoRepository)
-                .findByCodigoIn(List.of("SRV-TROCA-OLEO"));
+        verify(servicoRepository).findByCodigoIn(List.of("SRV-TROCA-OLEO"));
+    }
+
+    @Test
+    void deveTratarDiagnosticoNulo() {
+
+        when(ordemServicosRepository.findById(ordemServicoId))
+                .thenReturn(Optional.of(ordemServico));
+
+        assertThrows(
+                ConflitoException.class,
+                () -> ordemServicoOficinaService
+                        .diagnosticar(ordemServicoId, null));
+
+        verify(diagnosticoValidator).validar(
+                        anyList(),
+                        anyMap(),
+                        anyMap(),
+                        anyMap());
+    }
+
+    @Test
+    void deveSomarQuantidadeDeItensDuplicadosNoDiagnostico() {
+
+        DiagnosticoDTO diagnosticoDTO =
+                new DiagnosticoDTO(
+                        List.of("SRV-TROCA-OLEO"),
+                        List.of(
+                                new DiagnosticoEstoqueDTO(
+                                        "EST-FILTRO-OLEO",
+                                        2
+                                ),
+                                new DiagnosticoEstoqueDTO(
+                                        "EST-FILTRO-OLEO",
+                                        3)));
+
+        OrdemServicoServico servicoDaOs = OrdemServicoServico.builder()
+                        .servicoId(servicoId)
+                        .build();
+
+        OrdemServicoItemEstoque itemDaOs = OrdemServicoItemEstoque.criar(
+                        estoque.getId(),
+                        estoque.getNome(),
+                        estoque.getValor(),
+                        5);
+
+        when(ordemServicosRepository.findById(ordemServicoId))
+                .thenReturn(Optional.of(ordemServico));
+
+        when(servicoRepository.findByCodigoIn(anyList()))
+                .thenReturn(List.of(servico));
+
+        when(estoqueRepository.findByCodigoIn(anyList()))
+                .thenReturn(List.of(estoque));
+
+        when(diagnosticoFactory.criarServicoDaOs(any()))
+                .thenReturn(servicoDaOs);
+
+        when(diagnosticoFactory.criarItemEstoqueDaOs(
+                any(),
+                eq(5)))
+                .thenReturn(itemDaOs);
+
+        when(ordemServicosRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(estoqueRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ordemServicoOficinaService
+                .diagnosticar(
+                        ordemServicoId,
+                        diagnosticoDTO);
+
+        verify(diagnosticoFactory).criarItemEstoqueDaOs(any(), eq(5));
+    }
+
+    @Test
+    void deveFinalizarExecucaoSemSalvarTempoQuandoNaoExistiremServicos() {
+
+        ordemServico.setOrdemDeServicoStatus(OrdemDeServicoStatus.EM_EXECUCAO);
+
+        ordemServico.setDtHoraInicioExecucao(LocalDateTime.now().minusMinutes(30));
+
+        ordemServico.setDtHoraFimExecucao(LocalDateTime.now());
+
+        when(ordemServicosRepository.findById(ordemServicoId))
+                .thenReturn(Optional.of(ordemServico));
+
+        when(ordemServicosRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrdemServicoDTO resultado =
+                ordemServicoOficinaService.finalizarExecucao(ordemServicoId);
+
+        assertNotNull(resultado);
+
+        verify(tempoExecucaoServicoRepository,never()).save(any());
+    }
+
+    @Test
+    void deveIgnorarCodigosEmBrancoNoDiagnostico() {
+
+        DiagnosticoDTO dto = new DiagnosticoDTO(
+                        List.of(
+                                " ",
+                                "\t",
+                                "SRV-TROCA-OLEO"),
+                        List.of());
+
+        when(ordemServicosRepository.findById(ordemServicoId))
+                .thenReturn(Optional.of(ordemServico));
+
+        when(servicoRepository.findByCodigoIn(anyList()))
+                .thenReturn(List.of(servico));
+
+        when(diagnosticoFactory.criarServicoDaOs(any()))
+                .thenReturn(OrdemServicoServico.builder()
+                                .servicoId(servicoId)
+                                .build());
+
+        when(ordemServicosRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ordemServicoOficinaService.diagnosticar(ordemServicoId, dto);
+
+        verify(servicoRepository).findByCodigoIn(List.of("SRV-TROCA-OLEO"));
     }
 }

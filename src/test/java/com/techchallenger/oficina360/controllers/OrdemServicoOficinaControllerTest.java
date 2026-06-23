@@ -249,4 +249,49 @@ class OrdemServicoOficinaControllerTest {
         verify(ordemServicoOficinaService, times(1))
                 .diagnosticar(ordemServicoId, diagnosticoDTO);
     }
+
+    @Test
+    void deveIniciarExecucaoComSucesso() {
+
+
+        when(ordemServicoOficinaService.iniciarExecucao(ordemServicoId))
+                .thenReturn(ordemServicoDTO);
+        ;
+
+        ResponseEntity<OrdemServicoDTO> response = ordemServicoOficinaController
+                        .iniciarExecucao(ordemServicoId);
+
+        assertNotNull(response);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+
+        assertFalse(response.hasBody());
+
+        assertNull(response.getBody());
+
+        verify(ordemServicoOficinaService, times(1)).iniciarExecucao(ordemServicoId);
+
+        verifyNoMoreInteractions(ordemServicoOficinaService);
+    }
+
+    @Test
+    void deveFinalizarExecucaoComSucesso() {
+
+
+
+        ResponseEntity<OrdemServicoDTO> response = ordemServicoOficinaController
+                        .finalizarExecucao(ordemServicoId);
+
+        assertNotNull(response);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+
+        assertFalse(response.hasBody());
+
+        assertNull(response.getBody());
+
+        verify(ordemServicoOficinaService, times(1)).finalizarExecucao(ordemServicoId);
+
+        verifyNoMoreInteractions(ordemServicoOficinaService);
+    }
 }

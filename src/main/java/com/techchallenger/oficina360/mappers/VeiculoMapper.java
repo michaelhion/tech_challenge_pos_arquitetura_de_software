@@ -3,13 +3,15 @@ package com.techchallenger.oficina360.mappers;
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
 import com.techchallenger.oficina360.entities.Veiculo;
 
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
+
 public class VeiculoMapper {
 
     private VeiculoMapper(){}
 
     public static VeiculoDTO toDTO(Veiculo veiculoEntity) {
         return new VeiculoDTO(
-                veiculoEntity.getPlaca(),
+                mascararPlaca(veiculoEntity.getPlaca()),
                 veiculoEntity.getMarca(),
                 veiculoEntity.getModelo(),
                 Integer.parseInt(veiculoEntity.getAno()),

@@ -73,34 +73,28 @@ public class DiagnosticoValidator {
     private void validarDisponibilidadeEstoque(
             Map<String, Integer> quantidadeEstoquePorCodigo,
             Map<String, Estoque> estoquesPorCodigo,
-            List<String> erros
-    ) {
+            List<String> erros) {
         if (quantidadeEstoquePorCodigo == null || quantidadeEstoquePorCodigo.isEmpty()) {
             return;
         }
 
         for (Map.Entry<String, Integer> entry : quantidadeEstoquePorCodigo.entrySet()) {
+
             String codigo = entry.getKey();
             Integer quantidadeSolicitada = entry.getValue();
 
             Estoque estoque = estoquesPorCodigo.get(codigo);
 
-            if (estoque == null) {
-                continue;
-            }
+            if (estoque != null) {
 
-            if (quantidadeSolicitada == null || quantidadeSolicitada <= 0) {
-                erros.add("Quantidade inválida para o item de estoque " + codigo);
-                continue;
-            }
+                if (quantidadeSolicitada == null || quantidadeSolicitada <= 0) {
 
-            if (quantidadeSolicitada > estoque.getDisponiveis()) {
-                erros.add(String.format(
-                        "Estoque insuficiente para %s. Solicitado: %d, disponível: %d",
-                        codigo,
-                        quantidadeSolicitada,
-                        estoque.getDisponiveis()
-                ));
+                    erros.add("Quantidade inválida para o item de estoque "+ codigo);
+
+                } else if (quantidadeSolicitada> estoque.getDisponiveis()) {
+                    erros.add(String.format("Estoque insuficiente para %s. Solicitado: %d, disponível: %d",
+                                    codigo,quantidadeSolicitada,estoque.getDisponiveis()));
+                }
             }
         }
     }

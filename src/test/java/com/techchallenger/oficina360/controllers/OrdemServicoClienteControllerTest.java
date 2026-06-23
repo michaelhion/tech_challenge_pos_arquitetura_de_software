@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,5 +96,48 @@ class OrdemServicoClienteControllerTest {
 
         verify(ordemServicoClienteService, times(1))
                 .aprovar(ordemServicoId, aprovacaoDTO);
+    }
+
+    @Test
+    void deveBuscarOrdemServicoPorIdComSucesso() {
+
+        OrdemServicoDTO ordemServicoDTO =
+                new OrdemServicoDTO(
+                        ordemServicoId,
+                        "12345678901",
+                        "ABC1D23",
+                        "Problema no freio",
+                        OrdemDeServicoStatus.RECEBIDA,
+                        null
+                );
+
+        when(ordemServicoClienteService.findById(ordemServicoId))
+                .thenReturn(Optional.of(ordemServicoDTO));
+
+        ResponseEntity<OrdemServicoDTO> response = ordemServicoClienteController
+                        .buscarPorId(ordemServicoId);
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+
+        assertNotNull(response.getBody());
+
+        assertEquals(ordemServicoId,response.getBody().id());
+
+        verify(ordemServicoClienteService)
+                .findById(ordemServicoId);
+    }
+
+    @Test
+    void deveRetornar404QuandoOrdemServicoNaoExistir() {
+
+        when(ordemServicoClienteService.findById(ordemServicoId))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<OrdemServicoDTO> response = ordemServicoClienteController
+                        .buscarPorId(ordemServicoId);
+
+        assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
+
+        verify(ordemServicoClienteService).findById(ordemServicoId);
     }
 }

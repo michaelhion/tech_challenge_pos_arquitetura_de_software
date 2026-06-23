@@ -123,6 +123,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 
         body = body.replaceAll("(?i)\"token\"\\s*:\\s*\"[^\"]*+\"","\"token\":\"***\""
         );
+        body = body.replaceAll("\\b[A-Z]{3}\\d[A-Z0-9]\\d{2}\\b","***PLACA***");
 
         return body;
     }

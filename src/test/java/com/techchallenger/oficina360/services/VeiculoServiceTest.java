@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VeiculoServiceTest {
 
-    private static final String PLACA_GOL = "ABC1D23";
+    private static final String PLACA_GOL = "ABC***23";
     private static final String VOLKSWAGEN = "Volkswagen";
     private static final String GOL = "Gol";
     private static final String DOCUMENTO_JOAO = "12345678901";
@@ -33,6 +33,7 @@ class VeiculoServiceTest {
             "Cliente não encontrado para o documento informado";
     private static final String JA_EXISTE_VEICULO_CADASTRADO_COM_ESSA_PLACA =
             "Já existe veículo cadastrado com essa placa";
+    public static final String PLACA = "ABC***23";
 
     @Mock
     private VeiculoRepository veiculoRepository;
@@ -45,7 +46,6 @@ class VeiculoServiceTest {
 
     private VeiculoDTO veiculoDTO;
     private Veiculo veiculo;
-    private Cliente cliente;
     private UUID veiculoId;
 
     @BeforeEach
@@ -66,14 +66,6 @@ class VeiculoServiceTest {
                 .modelo(GOL)
                 .ano("2020")
                 .clienteDocumento(DOCUMENTO_JOAO)
-                .build();
-
-        cliente = Cliente.builder()
-                .id(UUID.randomUUID())
-                .documento(DOCUMENTO_JOAO)
-                .nome("João da Silva")
-                .email("joao@email.com")
-                .telefone("11999999999")
                 .build();
     }
 
@@ -179,7 +171,7 @@ class VeiculoServiceTest {
     @Test
     void deveEditarVeiculoComSucesso() {
         VeiculoDTO dtoAtualizado = new VeiculoDTO(
-                "ABC1D23",
+                PLACA,
                 "Volkswagen",
                 "Polo",
                 2022,
@@ -188,35 +180,35 @@ class VeiculoServiceTest {
 
         Veiculo veiculoExistente = Veiculo.builder()
                 .id(veiculoId)
-                .placa("ABC1D23")
+                .placa(PLACA)
                 .marca("Volkswagen")
                 .modelo("Gol")
                 .ano("2020")
                 .clienteDocumento("12345678901")
                 .build();
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
+        when(veiculoRepository.findByPlaca(PLACA))
                 .thenReturn(Optional.of(veiculoExistente));
 
         when(clienteRepository.existsByDocumento("12345678901"))
                 .thenReturn(true);
 
-        when(veiculoRepository.existsByPlacaAndIdNot("ABC1D23", veiculoId))
+        when(veiculoRepository.existsByPlacaAndIdNot(PLACA, veiculoId))
                 .thenReturn(false);
 
         when(veiculoRepository.save(any(Veiculo.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        VeiculoDTO resultado = veiculoService.edit("ABC1D23", dtoAtualizado );
+        VeiculoDTO resultado = veiculoService.edit(PLACA, dtoAtualizado );
 
         assertNotNull(resultado);
-        assertEquals("ABC1D23", resultado.placa());
+        assertEquals(PLACA, resultado.placa());
         assertEquals("Polo", resultado.modelo());
         assertEquals(2022, resultado.ano());
 
-        verify(veiculoRepository, times(1)).findByPlaca("ABC1D23");
+        verify(veiculoRepository, times(1)).findByPlaca(PLACA);
         verify(clienteRepository, times(1)).existsByDocumento("12345678901");
-        verify(veiculoRepository, times(1)).existsByPlacaAndIdNot("ABC1D23", veiculoId);
+        verify(veiculoRepository, times(1)).existsByPlacaAndIdNot(PLACA, veiculoId);
         verify(veiculoRepository, times(1)).save(any(Veiculo.class));
     }
 

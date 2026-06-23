@@ -3,6 +3,8 @@ package com.techchallenger.oficina360.mappers;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.entities.OrdemServico;
 
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
+
 public class CriarOrdemServicoMapper {
 
     private CriarOrdemServicoMapper() {
@@ -16,7 +18,7 @@ public class CriarOrdemServicoMapper {
         return new CriarOrdemServicoDTO(
                 ordemServicoEntity.getId(),
                 ordemServicoEntity.getDocumentoCliente(),
-                ordemServicoEntity.getPlacaVeiculo(),
+                mascararPlaca(ordemServicoEntity.getPlacaVeiculo()),
                 ordemServicoEntity.getDescricaoProblema(),
                 ordemServicoEntity.getOrdemDeServicoStatus()
         );
