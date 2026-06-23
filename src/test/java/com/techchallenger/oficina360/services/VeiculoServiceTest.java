@@ -28,7 +28,7 @@ class VeiculoServiceTest {
     private static final String PLACA_GOL = "ABC***23";
     private static final String VOLKSWAGEN = "Volkswagen";
     private static final String GOL = "Gol";
-    private static final String DOCUMENTO_JOAO = "12345678901";
+    private static final String DOCUMENTO_JOAO = "***8901";
     private static final String CLIENTE_NAO_ENCONTRADO_PARA_O_DOCUMENTO_INFORMADO =
             "Cliente não encontrado para o documento informado";
     private static final String JA_EXISTE_VEICULO_CADASTRADO_COM_ESSA_PLACA =
