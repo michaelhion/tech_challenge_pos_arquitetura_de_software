@@ -1,7 +1,6 @@
 package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
-import com.techchallenger.oficina360.entities.Cliente;
 import com.techchallenger.oficina360.entities.Veiculo;
 import com.techchallenger.oficina360.exceptions.ConflitoException;
 import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;

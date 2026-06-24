@@ -69,15 +69,25 @@ class DiagnosticoValidatorTest {
 
     @Test
     void deveLancarErroQuandoServicoNaoForEncontrado() {
-        RegraDeNegocioException exception = assertThrows(
-                RegraDeNegocioException.class,
-                () -> diagnosticoValidator.validar(
-                        List.of("SRV-TROCA-OLEO", "SRV-ALINHAMENTO"),
-                        Map.of(),
-                        Map.of(),
-                        Map.of()
-                )
-        );
+
+        List<String> codigosServicos = List.of("SRV-TROCA-OLEO","SRV-ALINHAMENTO");
+
+        Map<String, Integer> quantidadeEstoquePorCodigo = Map.of();
+
+        Map<String, Servico> servicosPorCodigo = Map.of();
+
+        Map<String, Estoque> estoquesPorCodigo = Map.of();
+
+        RegraDeNegocioException exception =
+                assertThrows(
+                        RegraDeNegocioException.class,
+                        () -> diagnosticoValidator.validar(
+                                codigosServicos,
+                                quantidadeEstoquePorCodigo,
+                                servicosPorCodigo,
+                                estoquesPorCodigo
+                        )
+                );
 
         assertEquals("Diagnóstico inválido", exception.getMessage());
         assertTrue(exception.getMensagens()

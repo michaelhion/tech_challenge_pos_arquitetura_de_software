@@ -11,7 +11,6 @@ import com.techchallenger.oficina360.entities.OrdemServicoItemEstoque;
 import com.techchallenger.oficina360.entities.OrdemServicoServico;
 import com.techchallenger.oficina360.entities.Servico;
 import com.techchallenger.oficina360.entities.TempoExecucaoServico;
-import com.techchallenger.oficina360.entities.Usuario;
 import com.techchallenger.oficina360.entities.Veiculo;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.exceptions.ConflitoException;

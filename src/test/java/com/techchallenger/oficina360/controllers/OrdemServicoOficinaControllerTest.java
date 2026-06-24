@@ -256,7 +256,6 @@ class OrdemServicoOficinaControllerTest {
 
         when(ordemServicoOficinaService.iniciarExecucao(ordemServicoId))
                 .thenReturn(ordemServicoDTO);
-        ;
 
         ResponseEntity<OrdemServicoDTO> response = ordemServicoOficinaController
                         .iniciarExecucao(ordemServicoId);
