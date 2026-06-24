@@ -9,7 +9,7 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # Instala o Java/Maven se o seu projeto precisar construir a árvore de dependências
+      # Importante para projetos Java/Maven montarem a árvore de dependências
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -17,15 +17,18 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Varredura de Dependências do Maven (SCA)
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@master
+      # 1. Instala a CLI oficial do Snyk no corredor do GitHub
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      # Varredura do seu Código Próprio (SAST) - Opcional
-      - name: Run Snyk Code to check for code issues
-        uses: snyk/actions/code@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # 2. Executa a varredura do seu código próprio (SAST)
+      - name: Snyk Code Test
+        run: snyk code test
+
+      # 3. Executa a varredura das dependências do Maven (SCA)
+      - name: Snyk Open Source Test (Maven)
+        run: snyk test --maven
+
 

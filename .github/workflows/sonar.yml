@@ -29,11 +29,11 @@ jobs:
       - name: Build
         run: mvn clean test jacoco:report
 
-      - name: Dependency check
-        continue-on-error: true
-        run: mvn dependency-check:check
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+#      - name: Dependency check
+ #       continue-on-error: true
+  #      run: mvn dependency-check:check
+   #     env:
+    #      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
 
       - name: SonarCloud
