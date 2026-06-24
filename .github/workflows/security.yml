@@ -5,30 +5,27 @@ on: [push, pull_request]
 jobs:
   snyk-scan:
     runs-on: ubuntu-latest
+
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # Importante para projetos Java/Maven montarem a árvore de dependências
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
 
-      # 1. Instala a CLI oficial do Snyk no corredor do GitHub
       - name: Setup Snyk CLI
         uses: snyk/actions/setup@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      # 2. Executa a varredura do seu código próprio (SAST)
       - name: Snyk Code Test
         run: snyk code test
 
-      # 3. Executa a varredura das dependências do Maven (SCA)
       - name: Snyk Open Source Test (Maven)
         run: snyk test --maven
-
 
