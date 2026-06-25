@@ -1,12 +1,70 @@
 # Oficina360 API
 
-## 📖 Sobre o projeto
+## 📖 Sobre o Projeto
 
 O **Oficina360** é uma API REST desenvolvida como parte do Tech Challenge da Pós-Graduação em Arquitetura de Software.
 
 O objetivo da aplicação é fornecer uma solução completa para o gerenciamento de oficinas mecânicas, contemplando desde o cadastro de clientes e veículos até o gerenciamento completo de ordens de serviço, controle de estoque, autenticação de usuários, autorização de acesso e indicadores operacionais.
 
-O projeto foi desenvolvido seguindo princípios de arquitetura em camadas, boas práticas de engenharia de software, segurança, observabilidade, testes automatizados e integração contínua.
+O projeto foi desenvolvido seguindo princípios de:
+
+- Domain-Driven Design (DDD);
+- Arquitetura em Camadas;
+- Boas Práticas de Engenharia de Software;
+- Segurança;
+- Observabilidade;
+- Testes Automatizados;
+- Integração Contínua;
+- Documentação Arquitetural baseada no Modelo C4.
+
+---
+
+# 📚 Documentação
+
+Toda a documentação arquitetural encontra-se na pasta:
+
+```text
+docs/
+```
+
+## Documentação Principal
+
+📄 [Arquitetura da Solução](docs/ARQUITETURA.md)
+
+## Documentos de Apoio
+
+📄 [Documento de Requisitos](docs/requisitos/Documento_Requisitos_Oficina360.md)
+
+📄 [Linguagem Ubíqua](docs/requisitos/LINGUAGEM-UBIQUA.md)
+
+---
+
+# 🧠 Domain-Driven Design (DDD)
+
+A modelagem do domínio foi construída utilizando conceitos de Domain-Driven Design (DDD).
+
+## Artefatos Produzidos
+
+- Domain Storytelling;
+- Linguagem Ubíqua;
+- Classificação dos Subdomínios;
+- Context Map;
+- Modelo C4.
+
+## Core Domain
+
+- Ordem de Serviço
+
+## Supporting Domains
+
+- Cliente Context
+- Veículo Context
+- Serviço Context
+- Estoque Context
+
+Documentação completa:
+
+📄 [Arquitetura da Solução](docs/ARQUITETURA.md)
 
 ---
 
@@ -31,6 +89,8 @@ A plataforma busca oferecer suporte aos principais processos de uma oficina mec�
 
 # 🛠 Tecnologias Utilizadas
 
+## Backend
+
 - Java 21
 - Spring Boot
 - Spring Web MVC
@@ -40,21 +100,37 @@ A plataforma busca oferecer suporte aos principais processos de uma oficina mec�
 - PostgreSQL
 - H2 Database
 - Flyway
+
+## Documentação
+
 - Swagger/OpenAPI
-- Lombok
-- Maven
-- Docker
-- Docker Compose
+- Structurizr DSL
+- Domain Storytelling
+
+## Qualidade
+
 - JUnit 5
 - Mockito
 - JaCoCo
 - SonarCloud
+
+## Segurança
+
+- Spring Security
+- JWT
 - OWASP Dependency Check
+- Dependabot
+- Snyk
+
+## DevOps
+
+- Docker
+- Docker Compose
 - GitHub Actions
 
 ---
 
-# 🏗 Arquitetura
+# 🏗 Arquitetura da Solução
 
 A aplicação segue uma arquitetura monolítica em camadas.
 
@@ -78,6 +154,28 @@ Factories
 Security
 Exception Handlers
 Filters
+```
+
+## Modelo C4
+
+A arquitetura foi documentada utilizando o modelo C4.
+
+### Nível 1 - Contexto
+
+Apresenta os usuários que interagem com a solução e a visão macro do sistema.
+
+### Nível 2 - Containers
+
+Apresenta a divisão lógica da aplicação em seus principais containers tecnológicos.
+
+### Nível 3 - Componentes
+
+Apresenta a estrutura interna da API e seus principais componentes.
+
+📄 Documentação completa:
+
+```text
+docs/ARQUITETURA.md
 ```
 
 ---
@@ -120,7 +218,7 @@ src
 
 A aplicação utiliza autenticação baseada em JWT.
 
-## Fluxo de autenticação
+## Fluxo de Autenticação
 
 1. O usuário realiza login utilizando e-mail e senha;
 2. A API valida as credenciais;
@@ -133,45 +231,31 @@ Header esperado:
 Authorization: Bearer <token>
 ```
 
----
-
 ## Perfis
-
-A aplicação suporta os seguintes perfis:
 
 ### ADMIN
 
 Possui acesso total à aplicação.
 
-Responsável por:
-
-- Gerenciar clientes;
-- Gerenciar veículos;
-- Gerenciar serviços;
-- Gerenciar estoque;
-- Gerenciar ordens de serviço;
-- Executar diagnósticos;
-- Iniciar e finalizar execuções.
-
 ### CLIENTE
 
-Possui acesso limitado aos próprios recursos.
+Possui acesso apenas aos próprios recursos.
 
-Pode:
+### ATENDENTE
 
-- Consultar seus dados;
-- Consultar seus veículos;
-- Consultar suas ordens de serviço;
-- Aprovar orçamentos;
-- Reprovar orçamentos.
+Responsável pelo atendimento e gerenciamento operacional.
+
+### MECANICO
+
+Responsável pelos diagnósticos e execução dos serviços.
 
 ---
 
 ## Autorização
 
-Além do controle por perfil, a aplicação possui regras de autorização para garantir que um cliente consiga acessar apenas informações associadas ao seu documento.
+Além do controle por perfil, a aplicação possui regras de autorização para garantir que um cliente consiga acessar apenas informações associadas à sua conta.
 
-Exemplos:
+### Exemplos
 
 ✅ Consultar sua própria ordem de serviço
 
@@ -179,9 +263,27 @@ Exemplos:
 
 ✅ Aprovar sua própria OS
 
-❌ Visualizar dados de outro cliente
+❌ Consultar dados de outro cliente
 
 ❌ Aprovar orçamento de outro cliente
+
+---
+
+## Ferramentas de Segurança
+
+- Spring Security;
+- JWT;
+- OWASP Dependency Check;
+- Dependabot;
+- SonarCloud;
+- Snyk.
+
+Objetivos:
+
+- Identificação de vulnerabilidades;
+- Proteção de dependências;
+- Controle de acesso;
+- Segurança contínua da aplicação.
 
 ---
 
@@ -195,8 +297,6 @@ Exemplos:
 - Atualizar cliente;
 - Excluir cliente.
 
----
-
 ## Veículos
 
 - Cadastrar veículo;
@@ -206,8 +306,6 @@ Exemplos:
 - Excluir veículo;
 - Vincular veículo ao cliente.
 
----
-
 ## Serviços
 
 - Cadastrar serviço;
@@ -216,8 +314,6 @@ Exemplos:
 - Atualizar serviço;
 - Excluir serviço;
 - Calcular tempo médio de execução.
-
----
 
 ## Estoque
 
@@ -229,16 +325,11 @@ Exemplos:
 - Reservar quantidade;
 - Controlar disponibilidade.
 
----
-
 ## Ordens de Serviço
 
 - Abrir ordem de serviço;
 - Consultar ordem de serviço;
-- Atualizar descrição do problema;
 - Executar diagnóstico;
-- Associar serviços;
-- Associar peças e insumos;
 - Aprovar orçamento;
 - Reprovar orçamento;
 - Iniciar execução;
@@ -284,7 +375,7 @@ Disponíveis: 15
 Fórmula:
 
 ```text
-disponíveis = quantidade - reservados
+Disponíveis = Quantidade - Reservados
 ```
 
 ---
@@ -294,15 +385,14 @@ disponíveis = quantidade - reservados
 Ao finalizar uma ordem de serviço:
 
 - O tempo total de execução é calculado;
-- O tempo é distribuído entre os serviços executados;
 - O histórico é armazenado;
-- O sistema calcula o tempo médio de execução dos serviços.
+- O sistema calcula automaticamente o tempo médio dos serviços executados.
 
-Esses indicadores podem ser utilizados para:
+Esses dados auxiliam:
 
 - Planejamento operacional;
-- Estimativas futuras;
-- Análise de produtividade.
+- Controle de produtividade;
+- Estimativas futuras.
 
 ---
 
@@ -320,11 +410,9 @@ Informações registradas:
 - Status HTTP;
 - Payload sanitizado.
 
----
+## Proteção de Dados Sensíveis
 
-## Proteção de dados sensíveis
-
-O filtro de logs realiza mascaramento automático de:
+Campos protegidos:
 
 - CPF;
 - CNPJ;
@@ -335,7 +423,7 @@ Exemplo:
 
 ```json
 {
-  "senha":"***"
+  "senha": "***"
 }
 ```
 
@@ -343,21 +431,21 @@ Exemplo:
 
 # 🗄 Banco de Dados
 
-O projeto utiliza PostgreSQL como banco principal.
+Banco principal:
 
-Para testes e desenvolvimento:
+```text
+PostgreSQL
+```
+
+Banco para testes e desenvolvimento:
 
 ```text
 H2 Database
 ```
 
-gerenciado automaticamente pelo Spring Boot.
-
----
-
 ## Migrações
 
-Todas as alterações de banco são controladas via Flyway.
+Controladas através do Flyway.
 
 Localização:
 
@@ -375,7 +463,7 @@ Swagger UI:
 http://localhost:8080/swagger-ui/index.html
 ```
 
-Caso esteja rodando no docker:
+Docker:
 
 ```text
 http://localhost:18080/swagger-ui/index.html
@@ -386,7 +474,7 @@ A documentação inclui:
 - Endpoints;
 - DTOs;
 - Segurança JWT;
-- Exemplos de payload;
+- Exemplos de Payloads;
 - Códigos HTTP.
 
 ---
@@ -400,8 +488,6 @@ A documentação inclui:
 - Docker
 - Docker Compose
 
----
-
 ## Clone do Projeto
 
 ```bash
@@ -409,36 +495,9 @@ git clone https://github.com/michaelhion/tech_challenge_pos_arquitetura_de_softw
 ```
 
 ```bash
-cd oficina360
+cd tech_challenge_pos_arquitetura_de_software
 ```
----
 
-### Ambiente Linux
-
-O projeto pode ser executado nativamente em distribuições Linux compatíveis.
-
-### Ambiente Windows
-
-Para execução utilizando os scripts Linux (`start.sh`), recomenda-se:
-
-- WSL 2 (Windows Subsystem for Linux);
-
-ou
-
-- Docker Desktop instalado e configurado com suporte ao WSL 2.
-
-Caso utilize apenas Docker Desktop, certifique-se de que a virtualização e a integração com WSL estejam habilitadas.
-
-### Verificando a instalação
-
-Verifique se o Docker está disponível:
-
-```bash
-docker --version
-```
-```bash
-docker compose version
-````
 ---
 
 ## Executar com Maven
@@ -469,10 +528,8 @@ Linux:
 
 ```bash
 chmod +x start.sh
-```
-```bash
 ./start.sh
-````
+```
 
 Parar containers:
 
@@ -512,16 +569,10 @@ Cliente:
 
 # 🧪 Testes
 
-Executar todos os testes:
+Executar os testes:
 
 ```bash
 ./mvnw test
-```
-
-Windows:
-
-```cmd
-mvnw.cmd test
 ```
 
 Executar build completo:
@@ -530,21 +581,9 @@ Executar build completo:
 ./mvnw clean verify
 ```
 
----
-
 ## Cobertura
 
-O projeto possui testes para:
-
-- Services;
-- Controllers;
-- Security;
-- Exception Handlers;
-- Filtros HTTP;
-- Regras de negócio;
-- Fluxos de ordens de serviço.
-
-Métricas monitoradas por:
+Monitorada por:
 
 - JaCoCo;
 - SonarCloud.
@@ -559,20 +598,23 @@ Cobertura mínima de 80%
 
 # 🔍 Qualidade e Segurança
 
-A aplicação utiliza:
+## Ferramentas Utilizadas
 
 - SonarCloud;
 - JaCoCo;
 - OWASP Dependency Check;
+- Dependabot;
+- Snyk;
 - GitHub Actions.
 
-Os seguintes aspectos são monitorados:
+## Métricas Monitoradas
 
-- Cobertura de testes;
+- Bugs;
 - Vulnerabilidades;
+- Security Hotspots;
+- Cobertura de Testes;
 - Code Smells;
-- Duplicação de código;
-- Segurança;
+- Duplicação de Código;
 - Manutenibilidade.
 
 ---
@@ -593,8 +635,7 @@ Dependency Check
 SonarCloud
 ```
 
-a cada push e pull request.
-
+A cada push e pull request.
 
 Dashboard SonarCloud:
 
@@ -602,12 +643,33 @@ Dashboard SonarCloud:
 
 ---
 
+# 🔒 Relatórios de Segurança
+
+Os relatórios de segurança encontram-se em:
+
+```text
+docs/security/
+```
+
+Incluindo:
+
+- OWASP Dependency Check;
+- Relatórios de Vulnerabilidades;
+- Evidências de Segurança.
+
 ---
-## 🔒 Relatório de Vulnerabilidades
 
-O relatório de vulnerabilidades encontra-se em:
+# 📖 Documentação Complementar
 
-docs/security/OWASP-Dependency-Check.pd
+| Documento | Localização |
+|------------|------------|
+| Arquitetura | docs/ARQUITETURA.md |
+| Requisitos | docs/requisitos/Documento_Requisitos_Oficina360.md |
+| Linguagem Ubíqua | docs/requisitos/LINGUAGEM-UBIQUA.md |
+| Domain Storytelling | docs/ddd |
+| Diagramas C4 | docs/c4 |
+| Relatórios de Segurança | docs/security |
+
 ---
 
 # ⚠ Tratamento de Erros
@@ -616,10 +678,10 @@ A API utiliza tratamento global de exceções.
 
 Principais exceções:
 
-- RecursoNaoEncontradoException
-- RegraDeNegocioException
-- ConflitoException
-- AccessDeniedException
+- RecursoNaoEncontradoException;
+- RegraDeNegocioException;
+- ConflitoException;
+- AccessDeniedException.
 
 Exemplo:
 
@@ -635,28 +697,28 @@ Exemplo:
 
 # ✅ Funcionalidades Implementadas
 
-- [x] CRUD de clientes
-- [x] CRUD de veículos
-- [x] CRUD de serviços
-- [x] CRUD de estoque
-- [x] Reserva de estoque
+- [x] CRUD de Clientes
+- [x] CRUD de Veículos
+- [x] CRUD de Serviços
+- [x] CRUD de Estoque
+- [x] Reserva de Estoque
 - [x] Autenticação JWT
-- [x] Controle de acesso por perfil
-- [x] Controle de acesso por proprietário
-- [x] Abertura de ordem de serviço
-- [x] Diagnóstico técnico
-- [x] Aprovação de orçamento
-- [x] Reprovação de orçamento
-- [x] Execução de serviços
-- [x] Finalização de ordens de serviço
-- [x] Cálculo de tempo médio de execução
-- [x] Swagger/OpenAPI
+- [x] Controle de Acesso por Perfil
+- [x] Controle de Propriedade
+- [x] Ordem de Serviço
+- [x] Diagnóstico Técnico
+- [x] Aprovação de Orçamento
+- [x] Execução de Serviços
+- [x] Cálculo de Tempo Médio
 - [x] Flyway
+- [x] Swagger/OpenAPI
 - [x] Docker
-- [x] Testes automatizados
+- [x] Testes Automatizados
 - [x] JaCoCo
 - [x] SonarCloud
 - [x] OWASP Dependency Check
+- [x] Dependabot
+- [x] Snyk
 
 ---
 
