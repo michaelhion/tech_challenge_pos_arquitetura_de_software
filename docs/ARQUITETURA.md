@@ -193,3 +193,22 @@ Service
 Repository
       ↓
 Banco de Dados
+```
+
+---
+
+# Segurança
+
+Relatorio do snyk sobre pom.xml
+
+![Relatorio pom](security/relatorio-snyk-pom.png)
+
+Relatorio do snyk sobre dockerfile
+
+![Relatorio dockerfile](security/relatorio-snyk-dockerfile.png)
+
+Relatorio sonar (tambem disponivel em https://sonarcloud.io/project/overview?id=michaelhion_tech_challenge_pos_arquitetura_de_software)
+
+Obs.: Apresenta um falso positivo (no caso de uma api puramente rest) sobre desabilitar o csrf, se futuramente esta api tiver integração com um front end será necessário corrigir
+
+![Relatorio sonar](security/relatorio-sonar.png)
