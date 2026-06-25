@@ -31,6 +31,28 @@ O Domain Storytelling foi utilizado para compreender os processos da oficina e a
 
 ---
 
+## Context Map
+
+![Context Map](ddd/context-map.png)
+
+### Relacionamentos
+
+- Cliente Context → Ordem de Serviço Context
+- Veículo Context → Ordem de Serviço Context
+- Serviço Context → Ordem de Serviço Context
+- Estoque Context → Ordem de Serviço Context
+
+---
+
+## Event Storming
+
+O Event Storming foi utilizado para identificar eventos de domínio, comandos, agregados e fluxos de negócio do sistema.
+
+Devido à dimensão do diagrama, a versão navegável encontra-se disponível no Miro:
+
+🔗 https://miro.com/app/board/uXjVHWRAXWE=/
+---
+
 ## Linguagem Ubíqua
 
 A Linguagem Ubíqua define os principais termos utilizados no domínio da aplicação, garantindo alinhamento entre negócio e desenvolvimento.
