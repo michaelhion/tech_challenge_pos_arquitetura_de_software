@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.techchallenger.oficina360.docs.EstoqueSwaggerConstants.*;
 import static com.techchallenger.oficina360.docs.SwaggerConstants.*;
@@ -38,7 +37,7 @@ public interface EstoqueApi {
             ),
             @ApiResponse(
                     responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_ID,
+                    description = DESCRIPTION_BAD_REQUEST_CODIGO,
                     content = @Content
             ),
             @ApiResponse(
@@ -123,10 +122,10 @@ public interface EstoqueApi {
     ResponseEntity<EstoqueDTO> editar(
             @Parameter(
                     description = PARAM_ID_DESCRIPTION,
-                    example = EXAMPLE_UUID,
+                    example = EXAMPLE_CODIGO,
                     required = true
             )
-            UUID id,
+            String codigo,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = REQUEST_BODY_EDITAR,
@@ -150,7 +149,7 @@ public interface EstoqueApi {
             ),
             @ApiResponse(
                     responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_ID,
+                    description = DESCRIPTION_BAD_REQUEST_CODIGO,
                     content = @Content
             ),
             @ApiResponse(
@@ -166,11 +165,11 @@ public interface EstoqueApi {
     })
     ResponseEntity<Void> deletar(
             @Parameter(
-                    description = PARAM_ID_DELETE_DESCRIPTION,
-                    example = EXAMPLE_UUID,
+                    description = PARAM_CODIGO_DELETE_DESCRIPTION,
+                    example = EXAMPLE_CODIGO,
                     required = true
             )
-            UUID id
+            String codigo
     );
 
     @Operation(
@@ -220,11 +219,11 @@ public interface EstoqueApi {
     })
     ResponseEntity<EstoqueDTO> reservar(
             @Parameter(
-                    description = PARAM_ID_DESCRIPTION,
-                    example = EXAMPLE_UUID,
+                    description = PARAM_CODIGO_DESCRIPTION,
+                    example = EXAMPLE_CODIGO,
                     required = true
             )
-            UUID id,
+            String codigo,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = REQUEST_BODY_RESERVAR,

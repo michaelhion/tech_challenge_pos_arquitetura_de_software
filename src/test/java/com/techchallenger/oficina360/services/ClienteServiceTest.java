@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 class ClienteServiceTest {
 
     private  static final String CPF = "***8901";
+    public static final String DOCUMENTO = "12345678901";
 
     @Mock
     private ClienteRepository clienteRepository;
@@ -39,7 +40,7 @@ class ClienteServiceTest {
         clienteId = UUID.randomUUID();
 
         clienteDTO = new ClienteDTO(
-                "12345678901",
+                DOCUMENTO,
                 "João da Silva",
                 "joao.silva@email.com",
                 "11999999999"
@@ -47,7 +48,7 @@ class ClienteServiceTest {
 
         cliente = Cliente.builder()
                 .id(clienteId)
-                .documento("12345678901")
+                .documento(DOCUMENTO)
                 .nome("João da Silva")
                 .email("joao.silva@email.com")
                 .telefone("11999999999")
@@ -87,10 +88,10 @@ class ClienteServiceTest {
 
     @Test
     void deveBuscarClientePorDocumentoQuandoExistir() {
-        when(clienteRepository.findByDocumento("12345678901"))
+        when(clienteRepository.findByDocumento(DOCUMENTO))
                 .thenReturn(Optional.of(cliente));
 
-        Optional<ClienteDTO> resultado = clienteService.findByDocumento("12345678901");
+        Optional<ClienteDTO> resultado = clienteService.findByDocumento(DOCUMENTO);
 
         assertTrue(resultado.isPresent());
         assertEquals(CPF, resultado.get().documento());
@@ -98,7 +99,7 @@ class ClienteServiceTest {
         assertEquals("joao.silva@email.com", resultado.get().email());
         assertEquals("11999999999", resultado.get().telefone());
 
-        verify(clienteRepository, times(1)).findByDocumento("12345678901");
+        verify(clienteRepository, times(1)).findByDocumento(DOCUMENTO);
     }
 
     @Test
@@ -132,7 +133,7 @@ class ClienteServiceTest {
     @Test
     void deveEditarClienteComSucesso() {
         ClienteDTO dtoAtualizado = new ClienteDTO(
-                "12345678901",
+                DOCUMENTO,
                 "João da Silva Atualizado",
                 "joao.atualizado@email.com",
                 "11888888888"
@@ -140,19 +141,19 @@ class ClienteServiceTest {
 
         Cliente clienteAtualizado = Cliente.builder()
                 .id(clienteId)
-                .documento("12345678901")
+                .documento(DOCUMENTO)
                 .nome("João da Silva Atualizado")
                 .email("joao.atualizado@email.com")
                 .telefone("11888888888")
                 .build();
 
-        when(clienteRepository.findById(clienteId))
+        when(clienteRepository.findByDocumento(DOCUMENTO))
                 .thenReturn(Optional.of(cliente));
 
         when(clienteRepository.save(any(Cliente.class)))
                 .thenReturn(clienteAtualizado);
 
-        ClienteDTO resultado = clienteService.edit(clienteId, dtoAtualizado);
+        ClienteDTO resultado = clienteService.edit(DOCUMENTO, dtoAtualizado);
 
         assertNotNull(resultado);
         assertEquals(CPF, resultado.documento());
@@ -160,34 +161,34 @@ class ClienteServiceTest {
         assertEquals("joao.atualizado@email.com", resultado.email());
         assertEquals("11888888888", resultado.telefone());
 
-        verify(clienteRepository, times(1)).findById(clienteId);
+        verify(clienteRepository, times(1)).findByDocumento(DOCUMENTO);
         verify(clienteRepository, times(1)).save(any(Cliente.class));
     }
 
     @Test
     void naoDeveEditarClienteQuandoNaoEncontrado() {
-        when(clienteRepository.findById(clienteId))
+        when(clienteRepository.findByDocumento(DOCUMENTO))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> clienteService.edit(clienteId, clienteDTO)
+                () -> clienteService.edit(DOCUMENTO, clienteDTO)
         );
 
         assertEquals("Cliente não encontrado", exception.getMessage());
 
-        verify(clienteRepository, times(1)).findById(clienteId);
+        verify(clienteRepository, times(1)).findByDocumento(DOCUMENTO);
         verify(clienteRepository, never()).save(any(Cliente.class));
     }
 
     @Test
     void deveDeletarClientePorDocumento() {
         doNothing().when(clienteRepository)
-                .deleteByDocumento("12345678901");
+                .deleteByDocumento(DOCUMENTO);
 
-        clienteService.delete("12345678901");
+        clienteService.delete(DOCUMENTO);
 
         verify(clienteRepository, times(1))
-                .deleteByDocumento("12345678901");
+                .deleteByDocumento(DOCUMENTO);
     }
 }

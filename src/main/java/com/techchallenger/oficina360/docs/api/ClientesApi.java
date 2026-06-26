@@ -123,10 +123,10 @@ public interface ClientesApi {
     ResponseEntity<ClienteDTO> editar(
             @Parameter(
                     description = PARAM_ID_DESCRIPTION,
-                    example = EXAMPLE_UUID,
+                    example = EXAMPLE_DOCUMENTO,
                     required = true
             )
-            UUID id,
+            String documento,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = REQUEST_BODY_EDITAR,

@@ -55,7 +55,7 @@ public interface OrdemServicoOficinaApi {
             ),
             @ApiResponse(
                     responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_ID,
+                    description = DESCRIPTION_BAD_REQUEST_CODIGO,
                     content = @Content
             ),
             @ApiResponse(
@@ -157,7 +157,7 @@ public interface OrdemServicoOficinaApi {
             ),
             @ApiResponse(
                     responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_ID,
+                    description = DESCRIPTION_BAD_REQUEST_CODIGO,
                     content = @Content
             ),
             @ApiResponse(
@@ -243,7 +243,7 @@ public interface OrdemServicoOficinaApi {
             ),
             @ApiResponse(
                     responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_ID,
+                    description = DESCRIPTION_BAD_REQUEST_CODIGO,
                     content = @Content
             ),
             @ApiResponse(
@@ -281,7 +281,7 @@ public interface OrdemServicoOficinaApi {
             ),
             @ApiResponse(
                     responseCode = STATUS_CODE_BAD_REQUEST,
-                    description = DESCRIPTION_BAD_REQUEST_ID,
+                    description = DESCRIPTION_BAD_REQUEST_CODIGO,
                     content = @Content
             ),
             @ApiResponse(

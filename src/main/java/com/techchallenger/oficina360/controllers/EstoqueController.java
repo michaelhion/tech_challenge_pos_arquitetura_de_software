@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/estoque")
@@ -47,21 +46,21 @@ public class EstoqueController implements EstoqueApi {
     }
 
     @Override
-    @PutMapping("/editar/{id}")
+    @PutMapping("/editar/{codigo}")
     public ResponseEntity<EstoqueDTO> editar(
-            @PathVariable UUID id,
+            @PathVariable String codigo,
             @Valid @RequestBody EstoqueDTO estoqueDTO
     ) {
-        EstoqueDTO estoqueAtualizado = estoqueService.edit(id, estoqueDTO);
+        EstoqueDTO estoqueAtualizado = estoqueService.edit(codigo, estoqueDTO);
         return ResponseEntity.ok(estoqueAtualizado);
     }
 
     @Override
-    @DeleteMapping("/deletar/{id}")
+    @DeleteMapping("/deletar/{codigo}")
     public ResponseEntity<Void> deletar(
-            @PathVariable UUID id
+            @PathVariable String codigo
     ) {
-        estoqueService.delete(id);
+        estoqueService.delete(codigo);
         return ResponseEntity.noContent().build();
     }
 
@@ -73,12 +72,12 @@ public class EstoqueController implements EstoqueApi {
     }
 
     @Override
-    @PatchMapping("/reservar/{id}")
+    @PatchMapping("/reservar/{codigo}")
     public ResponseEntity<EstoqueDTO> reservar(
-            @PathVariable UUID id,
+            @PathVariable String codigo,
             @Valid @RequestBody ReservaEstoqueDTO reservaDTO
     ) {
-        EstoqueDTO estoqueAtualizado = estoqueService.reservar(id, reservaDTO);
+        EstoqueDTO estoqueAtualizado = estoqueService.reservar(codigo, reservaDTO);
         return ResponseEntity.ok(estoqueAtualizado);
     }
 }

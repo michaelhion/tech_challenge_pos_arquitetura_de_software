@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ServicoServiceTest {
 
+    private static final String TROCA_DE_OLEO = "TROCA-DE-OLEO";
+    private static final String ALINHAMENTO_E_BALANCEAMENTO = "ALINHAMENTO-E-BALANCEAMENTO";
     @Mock
     private ServicoRepository servicoRepository;
 
@@ -43,7 +45,7 @@ class ServicoServiceTest {
         servicoId = UUID.fromString("2b3ded6d-2e43-4f2f-8ea3-26714b1398f8");
 
         servicoDTO = new ServicoDTO(
-                "TROCA-DE-OLEO",
+                TROCA_DE_OLEO,
                 "Troca de óleo",
                 BigDecimal.valueOf(150.00),
                 1
@@ -90,7 +92,7 @@ class ServicoServiceTest {
         when(servicoRepository.findByCodigo(servicoDTO.codigo()))
                 .thenReturn(Optional.of(servico));
 
-        Optional<ServicoDTO> resultado = servicoService.findById(servicoDTO.codigo());
+        Optional<ServicoDTO> resultado = servicoService.findByCodigo(servicoDTO.codigo());
 
         assertTrue(resultado.isPresent());
         assertEquals("Troca de óleo", resultado.get().descricao());
@@ -104,7 +106,7 @@ class ServicoServiceTest {
         when(servicoRepository.findByCodigo(servicoDTO.codigo()))
                 .thenReturn(Optional.empty());
 
-        Optional<ServicoDTO> resultado = servicoService.findById(servicoDTO.codigo());
+        Optional<ServicoDTO> resultado = servicoService.findByCodigo(servicoDTO.codigo());
 
         assertTrue(resultado.isEmpty());
 
@@ -128,7 +130,7 @@ class ServicoServiceTest {
     @Test
     void deveEditarServicoComSucesso() {
         ServicoDTO dtoAtualizado = new ServicoDTO(
-                "ALINHAMENTO-E-BALANCEAMENTO",
+                ALINHAMENTO_E_BALANCEAMENTO,
                 "Alinhamento e balanceamento",
                 BigDecimal.valueOf(220.00),
                 1
@@ -140,65 +142,65 @@ class ServicoServiceTest {
                 .valor(BigDecimal.valueOf(220.00))
                 .build();
 
-        when(servicoRepository.findById(servicoId))
+        when(servicoRepository.findByCodigo(ALINHAMENTO_E_BALANCEAMENTO))
                 .thenReturn(Optional.of(servico));
 
         when(servicoRepository.save(any(Servico.class)))
                 .thenReturn(servicoAtualizado);
 
-        ServicoDTO resultado = servicoService.edit(servicoId, dtoAtualizado);
+        ServicoDTO resultado = servicoService.edit(ALINHAMENTO_E_BALANCEAMENTO, dtoAtualizado);
 
         assertNotNull(resultado);
         assertEquals("Alinhamento e balanceamento", resultado.descricao());
         assertEquals(BigDecimal.valueOf(220.00), resultado.valor());
 
-        verify(servicoRepository, times(1)).findById(servicoId);
+        verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
         verify(servicoRepository, times(1)).save(any(Servico.class));
     }
 
     @Test
     void naoDeveEditarServicoQuandoNaoEncontrado() {
-        when(servicoRepository.findById(servicoId))
+        when(servicoRepository.findByCodigo(ALINHAMENTO_E_BALANCEAMENTO))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> servicoService.edit(servicoId, servicoDTO)
+                () -> servicoService.edit(ALINHAMENTO_E_BALANCEAMENTO, servicoDTO)
         );
 
         assertEquals("Serviço não encontrado", exception.getMessage());
 
-        verify(servicoRepository, times(1)).findById(servicoId);
+        verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
         verify(servicoRepository, never()).save(any(Servico.class));
     }
 
     @Test
     void deveDeletarServicoComSucesso() {
-        when(servicoRepository.findById(servicoId))
+        when(servicoRepository.findByCodigo(ALINHAMENTO_E_BALANCEAMENTO))
                 .thenReturn(Optional.of(servico));
 
         doNothing().when(servicoRepository)
-                .deleteById(servicoId);
+                .deleteByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
 
-        servicoService.delete(servicoId);
+        servicoService.delete(ALINHAMENTO_E_BALANCEAMENTO);
 
-        verify(servicoRepository, times(1)).findById(servicoId);
-        verify(servicoRepository, times(1)).deleteById(servicoId);
+        verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
+        verify(servicoRepository, times(1)).deleteByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
     }
 
     @Test
     void naoDeveDeletarServicoQuandoNaoEncontrado() {
-        when(servicoRepository.findById(servicoId))
+        when(servicoRepository.findByCodigo(ALINHAMENTO_E_BALANCEAMENTO))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> servicoService.delete(servicoId)
+                () -> servicoService.delete(ALINHAMENTO_E_BALANCEAMENTO)
         );
 
         assertEquals("Serviço não encontrado", exception.getMessage());
 
-        verify(servicoRepository, times(1)).findById(servicoId);
+        verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
         verify(servicoRepository, never()).delete(any(Servico.class));
     }
 

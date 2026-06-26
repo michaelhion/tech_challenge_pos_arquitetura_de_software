@@ -11,5 +11,6 @@ import java.util.UUID;
 @Repository
 public interface ServicoRepository extends JpaRepository<Servico, UUID> {
     Optional<Servico> findByCodigo(String codigo);
+    void deleteByCodigo(String codigo);
     List<Servico> findByCodigoIn(List<String> codigos);
 }

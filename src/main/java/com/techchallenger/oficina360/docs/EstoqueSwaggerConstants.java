@@ -86,8 +86,8 @@ public final class EstoqueSwaggerConstants {
     public static final String RESPONSE_ESTOQUE_EXCLUIDO =
             "Item de estoque excluído com sucesso.";
 
-    public static final String PARAM_ID_DELETE_DESCRIPTION =
-            "Identificador único do item de estoque que será excluído.";
+    public static final String PARAM_CODIGO_DELETE_DESCRIPTION =
+            "Codigo único do item de estoque que será excluído.";
 
     public static final String DESCRIPTION_ESTOQUE_CONFLICT_VINCULO =
             "Item de estoque possui vínculo com ordem de serviço e não pode ser excluído.";

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ServicosControllerTest {
 
+    private static final String ALINHAMENTO_E_BALANCEAMENTO = "ALINHAMENTO-E-BALANCEAMENTO";
     @Mock
     private ServicoService servicoService;
 
@@ -45,7 +46,7 @@ class ServicosControllerTest {
 
     @Test
     void deveBuscarServicoPorIdComSucesso() {
-        when(servicoService.findById(servicoDTO.codigo()))
+        when(servicoService.findByCodigo(servicoDTO.codigo()))
                 .thenReturn(Optional.of(servicoDTO));
 
         ResponseEntity<ServicoDTO> response = servicosController.buscarPorId(servicoDTO.codigo());
@@ -55,12 +56,12 @@ class ServicosControllerTest {
         assertEquals("Troca de óleo", response.getBody().descricao());
         assertEquals(BigDecimal.valueOf(150.00), response.getBody().valor());
 
-        verify(servicoService, times(1)).findById(servicoDTO.codigo());
+        verify(servicoService, times(1)).findByCodigo(servicoDTO.codigo());
     }
 
     @Test
     void deveRetornarNotFoundQuandoBuscarServicoPorIdInexistente() {
-        when(servicoService.findById(servicoDTO.codigo()))
+        when(servicoService.findByCodigo(servicoDTO.codigo()))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<ServicoDTO> response = servicosController.buscarPorId(servicoDTO.codigo());
@@ -68,7 +69,7 @@ class ServicosControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(servicoService, times(1)).findById(servicoDTO.codigo());
+        verify(servicoService, times(1)).findByCodigo(servicoDTO.codigo());
     }
 
     @Test
@@ -89,36 +90,36 @@ class ServicosControllerTest {
     @Test
     void deveEditarServicoComSucesso() {
         ServicoDTO servicoAtualizado = new ServicoDTO(
-                "ALINHAMENTO-E-BALANCEAMENTO",
+                ALINHAMENTO_E_BALANCEAMENTO,
                 "Alinhamento e balanceamento",
                 BigDecimal.valueOf(220.00),
                 1
         );
 
-        when(servicoService.edit(servicoId, servicoAtualizado))
+        when(servicoService.edit(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado))
                 .thenReturn(servicoAtualizado);
 
-        ResponseEntity<ServicoDTO> response = servicosController.editar(servicoId, servicoAtualizado);
+        ResponseEntity<ServicoDTO> response = servicosController.editar(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Alinhamento e balanceamento", response.getBody().descricao());
         assertEquals(BigDecimal.valueOf(220.00), response.getBody().valor());
 
-        verify(servicoService, times(1)).edit(servicoId, servicoAtualizado);
+        verify(servicoService, times(1)).edit(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado);
     }
 
     @Test
     void deveDeletarServicoComSucesso() {
         doNothing().when(servicoService)
-                .delete(servicoId);
+                .delete(ALINHAMENTO_E_BALANCEAMENTO);
 
-        ResponseEntity<Void> response = servicosController.deletar(servicoId);
+        ResponseEntity<Void> response = servicosController.deletar(ALINHAMENTO_E_BALANCEAMENTO);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(servicoService, times(1)).delete(servicoId);
+        verify(servicoService, times(1)).delete(ALINHAMENTO_E_BALANCEAMENTO);
     }
 
     @Test

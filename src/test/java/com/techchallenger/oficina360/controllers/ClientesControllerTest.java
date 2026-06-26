@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ClientesControllerTest {
 
+    public static final String DOCUMENTO = "12345678901";
     @Mock
     private ClienteService clienteService;
 
@@ -33,7 +34,7 @@ class ClientesControllerTest {
         clientesController = new ClientesController(clienteService);
 
         clienteDTO = new ClienteDTO(
-                "12345678901",
+                DOCUMENTO,
                 "João da Silva",
                 "joao.silva@email.com",
                 "11999999999"
@@ -42,7 +43,7 @@ class ClientesControllerTest {
 
     @Test
     void deveBuscarClientePorDocumentoComSucesso() {
-        String documento = "12345678901";
+        String documento = DOCUMENTO;
 
         when(clienteService.findByDocumento(documento))
                 .thenReturn(Optional.of(clienteDTO));
@@ -51,7 +52,7 @@ class ClientesControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("12345678901", response.getBody().documento());
+        assertEquals(DOCUMENTO, response.getBody().documento());
         assertEquals("João da Silva", response.getBody().nome());
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
@@ -83,7 +84,7 @@ class ClientesControllerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("12345678901", response.getBody().documento());
+        assertEquals(DOCUMENTO, response.getBody().documento());
         assertEquals("João da Silva", response.getBody().nome());
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
@@ -96,30 +97,30 @@ class ClientesControllerTest {
         UUID id = UUID.randomUUID();
 
         ClienteDTO clienteAtualizado = new ClienteDTO(
-                "12345678901",
+                DOCUMENTO,
                 "João da Silva Atualizado",
                 "joao.atualizado@email.com",
                 "11888888888"
         );
 
-        when(clienteService.edit(id, clienteAtualizado))
+        when(clienteService.edit(DOCUMENTO, clienteAtualizado))
                 .thenReturn(clienteAtualizado);
 
-        ResponseEntity<ClienteDTO> response = clientesController.editar(id, clienteAtualizado);
+        ResponseEntity<ClienteDTO> response = clientesController.editar(DOCUMENTO, clienteAtualizado);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("12345678901", response.getBody().documento());
+        assertEquals(DOCUMENTO, response.getBody().documento());
         assertEquals("João da Silva Atualizado", response.getBody().nome());
         assertEquals("joao.atualizado@email.com", response.getBody().email());
         assertEquals("11888888888", response.getBody().telefone());
 
-        verify(clienteService, times(1)).edit(id, clienteAtualizado);
+        verify(clienteService, times(1)).edit(DOCUMENTO, clienteAtualizado);
     }
 
     @Test
     void deveDeletarClientePorDocumentoComSucesso() {
-        String documento = "12345678901";
+        String documento = DOCUMENTO;
 
         doNothing().when(clienteService).delete(documento);
 
@@ -149,7 +150,7 @@ class ClientesControllerTest {
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
 
-        assertEquals("12345678901", response.getBody().get(0).documento());
+        assertEquals(DOCUMENTO, response.getBody().get(0).documento());
         assertEquals("João da Silva", response.getBody().get(0).nome());
         assertEquals("joao.silva@email.com", response.getBody().get(0).email());
         assertEquals("11999999999", response.getBody().get(0).telefone());

@@ -40,8 +40,8 @@ public final class SwaggerConstants {
     public static final String DESCRIPTION_ID_UUID =
             "Identificador único no formato UUID.";
 
-    public static final String DESCRIPTION_BAD_REQUEST_ID =
-            "ID inválido. O identificador deve estar no formato UUID.";
+    public static final String DESCRIPTION_BAD_REQUEST_CODIGO =
+            "Codigo inválido. Codigo deve estar em maiusculo, ser separado por hifen ou underline caso precise e não ter caracter especial";
 
     public static final String DESCRIPTION_BAD_REQUEST_PLACA =
             "Placa inválida. Informe a placa no padrão antigo ABC1234 ou Mercosul ABC1D23, sem hífen.";

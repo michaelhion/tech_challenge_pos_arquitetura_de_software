@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
 import static com.techchallenger.oficina360.mappers.EstoqueMapper.toDTO;
@@ -28,10 +27,10 @@ public class EstoqueService {
         return estoqueRepository.findAll().stream().map(EstoqueMapper::toDTO).toList();
     }
 
-    public void delete(UUID id) {
-        estoqueRepository.findById(id)
+    public void delete(String codigo) {
+        estoqueRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(ESTOQUE_ITEM_DE_ESTOQUE_NAO_DISPONIVEL));
-        estoqueRepository.deleteById(id);
+        estoqueRepository.deleteByCodigo(codigo);
     }
 
     public Optional<EstoqueDTO> findByCodigo(String codigo) {
@@ -47,8 +46,8 @@ public class EstoqueService {
     }
 
 
-    public EstoqueDTO edit(UUID id, EstoqueDTO estoqueDTO) {
-        Estoque estoque = estoqueRepository.findById(id)
+    public EstoqueDTO edit(String codigo, EstoqueDTO estoqueDTO) {
+        Estoque estoque = estoqueRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(ESTOQUE_ITEM_DE_ESTOQUE_NAO_DISPONIVEL));
 
         EstoqueMapper.updateEntityFromDto(estoqueDTO, estoque);
@@ -59,8 +58,8 @@ public class EstoqueService {
     }
 
 
-    public EstoqueDTO reservar(UUID id, ReservaEstoqueDTO reservaDTO) {
-        Estoque estoque = estoqueRepository.findById(id)
+    public EstoqueDTO reservar(String codigo, ReservaEstoqueDTO reservaDTO) {
+        Estoque estoque = estoqueRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(ESTOQUE_ITEM_NAO_ENCONTRADO));
 
         estoque.reservar(reservaDTO.quantidade());

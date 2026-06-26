@@ -26,6 +26,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EstoqueServiceTest {
 
+    private static final String FILTRO_DE_OLEO = "FILTRO_DE_OLEO";
+    private static final String FILTRO_DE_OLEO_PREMIUM = "FILTRO-DE-OLEO-PREMIUM";
     @Mock
     private EstoqueRepository estoqueRepository;
 
@@ -140,7 +142,7 @@ class EstoqueServiceTest {
     void deveEditarItemDeEstoqueComSucesso() {
         EstoqueDTO dtoAtualizado = new EstoqueDTO(
                 estoqueId,
-                "FILTRO-DE-OLEO-PREMIUM",
+                FILTRO_DE_OLEO_PREMIUM,
                 "Filtro de óleo premium",
                 BigDecimal.valueOf(60.00),
                 30,
@@ -156,13 +158,13 @@ class EstoqueServiceTest {
                 .reservados(10)
                 .build();
 
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO_PREMIUM))
                 .thenReturn(Optional.of(estoque));
 
         when(estoqueRepository.save(any(Estoque.class)))
                 .thenReturn(estoqueAtualizado);
 
-        EstoqueDTO resultado = estoqueService.edit(estoqueId, dtoAtualizado);
+        EstoqueDTO resultado = estoqueService.edit(FILTRO_DE_OLEO_PREMIUM, dtoAtualizado);
 
         assertNotNull(resultado);
         assertEquals("Filtro de óleo premium", resultado.nome());
@@ -171,50 +173,50 @@ class EstoqueServiceTest {
         assertEquals(10, resultado.reservados());
         assertEquals(20, resultado.disponiveis());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO_PREMIUM);
         verify(estoqueRepository, times(1)).save(any(Estoque.class));
     }
 
     @Test
     void naoDeveEditarItemDeEstoqueQuandoNaoEncontrado() {
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO_PREMIUM))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> estoqueService.edit(estoqueId, estoqueDTO)
+                () -> estoqueService.edit(FILTRO_DE_OLEO_PREMIUM, estoqueDTO)
         );
 
         assertEquals("Item de estoque não disponível", exception.getMessage());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO_PREMIUM);
         verify(estoqueRepository, never()).save(any(Estoque.class));
     }
 
     @Test
     void deveDeletarItemDeEstoqueComSucesso() {
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO))
                 .thenReturn(Optional.of(estoque));
 
-        estoqueService.delete(estoqueId);
+        estoqueService.delete(FILTRO_DE_OLEO);
 
-        verify(estoqueRepository, times(1)).deleteById(estoqueId);
+        verify(estoqueRepository, times(1)).deleteByCodigo(FILTRO_DE_OLEO);
     }
 
     @Test
     void naoDeveDeletarItemDeEstoqueQuandoNaoEncontrado() {
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> estoqueService.delete(estoqueId)
+                () -> estoqueService.delete(FILTRO_DE_OLEO)
         );
 
         assertEquals("Item de estoque não disponível", exception.getMessage());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
-        verify(estoqueRepository, never()).deleteById(any(UUID.class));
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO);
+        verify(estoqueRepository, never()).deleteByCodigo(FILTRO_DE_OLEO);
     }
 
     @Test
@@ -222,6 +224,7 @@ class EstoqueServiceTest {
         ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(3);
 
         Estoque estoqueReservado = Estoque.builder()
+                .codigo(FILTRO_DE_OLEO)
                 .id(estoqueId)
                 .nome("Filtro de óleo")
                 .valor(BigDecimal.valueOf(45.90))
@@ -229,13 +232,13 @@ class EstoqueServiceTest {
                 .reservados(8)
                 .build();
 
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO))
                 .thenReturn(Optional.of(estoque));
 
         when(estoqueRepository.save(any(Estoque.class)))
                 .thenReturn(estoqueReservado);
 
-        EstoqueDTO resultado = estoqueService.reservar(estoqueId, reservaDTO);
+        EstoqueDTO resultado = estoqueService.reservar(FILTRO_DE_OLEO, reservaDTO);
 
         assertNotNull(resultado);
         assertEquals("Filtro de óleo", resultado.nome());
@@ -244,7 +247,7 @@ class EstoqueServiceTest {
         assertEquals(8, resultado.reservados());
         assertEquals(12, resultado.disponiveis());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO);
         verify(estoqueRepository, times(1)).save(any(Estoque.class));
     }
 
@@ -252,17 +255,17 @@ class EstoqueServiceTest {
     void naoDeveReservarItemDeEstoqueQuandoNaoEncontrado() {
         ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(3);
 
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO))
                 .thenReturn(Optional.empty());
 
         RecursoNaoEncontradoException exception = assertThrows(
                 RecursoNaoEncontradoException.class,
-                () -> estoqueService.reservar(estoqueId, reservaDTO)
+                () -> estoqueService.reservar(FILTRO_DE_OLEO, reservaDTO)
         );
 
         assertEquals("Item de estoque não encontrado", exception.getMessage());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO);
         verify(estoqueRepository, never()).save(any(Estoque.class));
     }
 
@@ -270,17 +273,17 @@ class EstoqueServiceTest {
     void naoDeveReservarQuandoQuantidadeForMaiorQueDisponivel() {
         ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(30);
 
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO))
                 .thenReturn(Optional.of(estoque));
 
         ConflitoException exception = assertThrows(
                 ConflitoException.class,
-                () -> estoqueService.reservar(estoqueId, reservaDTO)
+                () -> estoqueService.reservar(FILTRO_DE_OLEO, reservaDTO)
         );
 
         assertEquals("Quantidade indisponível em estoque", exception.getMessage());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO);
         verify(estoqueRepository, never()).save(any(Estoque.class));
     }
 
@@ -288,17 +291,17 @@ class EstoqueServiceTest {
     void naoDeveReservarQuandoQuantidadeForZero() {
         ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(0);
 
-        when(estoqueRepository.findById(estoqueId))
+        when(estoqueRepository.findByCodigo(FILTRO_DE_OLEO))
                 .thenReturn(Optional.of(estoque));
 
         ConflitoException exception = assertThrows(
                 ConflitoException.class,
-                () -> estoqueService.reservar(estoqueId, reservaDTO)
+                () -> estoqueService.reservar(FILTRO_DE_OLEO, reservaDTO)
         );
 
         assertEquals("Quantidade a reservar deve ser maior que zero", exception.getMessage());
 
-        verify(estoqueRepository, times(1)).findById(estoqueId);
+        verify(estoqueRepository, times(1)).findByCodigo(FILTRO_DE_OLEO);
         verify(estoqueRepository, never()).save(any(Estoque.class));
     }
 }

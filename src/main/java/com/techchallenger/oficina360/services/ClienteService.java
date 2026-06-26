@@ -47,8 +47,8 @@ public class ClienteService {
         return clienteRepository.findByDocumento(documento).map(ClienteMapper::toDTO);
     }
 
-    public ClienteDTO edit(UUID id, ClienteDTO dto) {
-        Cliente cliente = clienteRepository.findById(id)
+    public ClienteDTO edit(String documento, ClienteDTO dto) {
+        Cliente cliente = clienteRepository.findByDocumento(documento)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));
 
         ClienteMapper.updateEntityFromDto(dto, cliente);

@@ -90,8 +90,8 @@ public final class ServicoSwaggerConstants {
     public static final String RESPONSE_SERVICO_EXCLUIDO =
             "Serviço excluído com sucesso.";
 
-    public static final String PARAM_ID_DELETE_DESCRIPTION =
-            "Identificador único do serviço que será excluído.";
+    public static final String PARAM_CODIGO_DELETE_DESCRIPTION =
+            "Código único do serviço que será excluído.";
 
     public static final String DESCRIPTION_SERVICO_CONFLICT_VINCULO =
             "Serviço possui vínculo com ordem de serviço e não pode ser excluído.";

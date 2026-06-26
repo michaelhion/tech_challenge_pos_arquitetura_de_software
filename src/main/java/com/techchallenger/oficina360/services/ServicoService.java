@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.SERVICO_NAO_ENCONTRADO;
 import static com.techchallenger.oficina360.mappers.ServicoMapper.toDTO;
@@ -35,14 +34,14 @@ public class ServicoService {
     }
 
 
-    public void delete(UUID id) {
-       servicoRepository.findById(id)
+    public void delete(String codigo) {
+       servicoRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));
 
-        servicoRepository.deleteById(id);
+        servicoRepository.deleteByCodigo(codigo);
     }
 
-    public Optional<ServicoDTO> findById(String codigo) {
+    public Optional<ServicoDTO> findByCodigo(String codigo) {
         return servicoRepository.findByCodigo(codigo)
                 .map(ServicoMapper::toDTO);
     }
@@ -55,8 +54,8 @@ public class ServicoService {
         return toDTO(servicoSalvo);
     }
 
-    public ServicoDTO edit(UUID id, ServicoDTO servicoDTO) {
-        Servico servico = servicoRepository.findById(id)
+    public ServicoDTO edit(String codigo, ServicoDTO servicoDTO) {
+        Servico servico = servicoRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));
 
         ServicoMapper.updateEntityFromDto(servicoDTO, servico);

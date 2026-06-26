@@ -45,12 +45,12 @@ public class ClientesController implements ClientesApi {
     }
 
     @Override
-    @PutMapping("/editar/{id}")
+    @PutMapping("/editar/{documento}")
     public ResponseEntity<ClienteDTO> editar(
-            @PathVariable UUID id,
+            @PathVariable String documento,
             @Valid @RequestBody ClienteDTO cliente
     ) {
-        ClienteDTO clienteAtualizado = clienteService.edit(id, cliente);
+        ClienteDTO clienteAtualizado = clienteService.edit(documento, cliente);
         return ResponseEntity.ok(clienteAtualizado);
     }
 

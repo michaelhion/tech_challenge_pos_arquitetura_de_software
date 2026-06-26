@@ -22,6 +22,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EstoqueControllerTest {
 
+    private static final String FILTRO_DE_OLEO = "FILTRO-DE-OLEO";
+    private static final String FILTRO_DE_OLEO_PREMIUM = "FILTRO-DE-OLEO-PREMIUM";
     @Mock
     private EstoqueService estoqueService;
 
@@ -39,7 +41,7 @@ class EstoqueControllerTest {
 
         estoqueDTO = new EstoqueDTO(
                 estoqueId,
-                "FILTRO-DE-OLEO",
+                FILTRO_DE_OLEO,
                 "Filtro de óleo",
                 BigDecimal.valueOf(45.90),
                 20,
@@ -101,7 +103,7 @@ class EstoqueControllerTest {
     void deveEditarComSucesso() {
         EstoqueDTO estoqueAtualizado = new EstoqueDTO(
                 estoqueId,
-                "FILTRO-DE-OLEO-PREMIUM",
+                FILTRO_DE_OLEO_PREMIUM,
                 "Filtro de óleo premium",
                 BigDecimal.valueOf(60.00),
                 30,
@@ -109,10 +111,10 @@ class EstoqueControllerTest {
                 20
         );
 
-        when(estoqueService.edit(estoqueId, estoqueAtualizado))
+        when(estoqueService.edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado))
                 .thenReturn(estoqueAtualizado);
 
-        ResponseEntity<EstoqueDTO> response = estoqueController.editar(estoqueId, estoqueAtualizado);
+        ResponseEntity<EstoqueDTO> response = estoqueController.editar(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -122,19 +124,19 @@ class EstoqueControllerTest {
         assertEquals(10, response.getBody().reservados());
         assertEquals(20, response.getBody().disponiveis());
 
-        verify(estoqueService, times(1)).edit(estoqueId, estoqueAtualizado);
+        verify(estoqueService, times(1)).edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
     }
 
     @Test
     void deveDeletarComSucesso() {
-        doNothing().when(estoqueService).delete(estoqueId);
+        doNothing().when(estoqueService).delete(FILTRO_DE_OLEO);
 
-        ResponseEntity<Void> response = estoqueController.deletar(estoqueId);
+        ResponseEntity<Void> response = estoqueController.deletar(FILTRO_DE_OLEO);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(estoqueService, times(1)).delete(estoqueId);
+        verify(estoqueService, times(1)).delete(FILTRO_DE_OLEO);
     }
 
     @Test
@@ -193,7 +195,7 @@ class EstoqueControllerTest {
 
         EstoqueDTO estoqueReservado = new EstoqueDTO(
                 estoqueId,
-                "FILTRO-DE-OLEO",
+                FILTRO_DE_OLEO,
                 "Filtro de óleo",
                 BigDecimal.valueOf(45.90),
                 20,
@@ -201,10 +203,10 @@ class EstoqueControllerTest {
                 12
         );
 
-        when(estoqueService.reservar(estoqueId, reservaDTO))
+        when(estoqueService.reservar(FILTRO_DE_OLEO, reservaDTO))
                 .thenReturn(estoqueReservado);
 
-        ResponseEntity<EstoqueDTO> response = estoqueController.reservar(estoqueId, reservaDTO);
+    ResponseEntity<EstoqueDTO> response = estoqueController.reservar(FILTRO_DE_OLEO, reservaDTO);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -214,6 +216,6 @@ class EstoqueControllerTest {
         assertEquals(8, response.getBody().reservados());
         assertEquals(12, response.getBody().disponiveis());
 
-        verify(estoqueService, times(1)).reservar(estoqueId, reservaDTO);
+        verify(estoqueService, times(1)).reservar(FILTRO_DE_OLEO, reservaDTO);
     }
 }

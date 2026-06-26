@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/servicos")
@@ -30,7 +29,7 @@ public class ServicosController implements ServicosApi {
     public ResponseEntity<ServicoDTO> buscarPorId(
             @PathVariable String codigo
     ) {
-        return servicoService.findById(codigo)
+        return servicoService.findByCodigo(codigo)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -45,21 +44,21 @@ public class ServicosController implements ServicosApi {
     }
 
     @Override
-    @PutMapping("/editar/{id}")
+    @PutMapping("/editar/{codigo}")
     public ResponseEntity<ServicoDTO> editar(
-            @PathVariable UUID id,
+            @PathVariable String codigo,
             @Valid @RequestBody ServicoDTO servico
     ) {
-        ServicoDTO servicoAtualizado = servicoService.edit(id, servico);
+        ServicoDTO servicoAtualizado = servicoService.edit(codigo, servico);
         return ResponseEntity.ok(servicoAtualizado);
     }
 
     @Override
-    @DeleteMapping("/deletar/{id}")
+    @DeleteMapping("/deletar/{codigo}")
     public ResponseEntity<Void> deletar(
-            @PathVariable UUID id
+            @PathVariable String codigo
     ) {
-        servicoService.delete(id);
+        servicoService.delete(codigo);
         return ResponseEntity.noContent().build();
     }
 
