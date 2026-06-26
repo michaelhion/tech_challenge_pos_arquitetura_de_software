@@ -6,4 +6,4 @@ echo "Building application..."
 
 echo "Starting containers..."
 
-docker compose up -d; docker compose logs -f
+docker compose up

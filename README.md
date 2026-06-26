@@ -518,23 +518,9 @@ mvnw.cmd spring-boot:run
 
 ## Executar com Docker
 
-Windows:
-
-```cmd
-start.bat
-```
-
-Linux:
-
 ```bash
 chmod +x start.sh
 ./start.sh
-```
-
-Parar containers:
-
-```bash
-docker compose down
 ```
 
 ---

@@ -193,28 +193,6 @@
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>12.2.2</version>
-
-                <configuration>
-                    <!-- Mantém a leitura segura da sua chave via variável de ambiente -->
-                    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
-
-                    <!-- Evita quebrar o build do projeto caso ocorra algum erro de rede -->
-                    <failOnError>false</failOnError>
-
-                    <!-- Seus formatos originais salvos na pasta /target -->
-                    <formats>
-                        <format>HTML</format>
-                        <format>JSON</format>
-                    </formats>
-
-                    <!-- SOLUÇÃO DO TIMEOUT: Ignora a API comum e puxa os blocos compactados -->
-                    <nvdDatafeedUrl>https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-{0}.json.gz</nvdDatafeedUrl>
-
-                    <!-- Aumenta a tolerância para servidores engasgados (5 minutos) -->
-                    <connectionTimeout>300000</connectionTimeout>
-                    <readTimeout>300000</readTimeout>
-                </configuration>
-
                 <executions>
                     <execution>
                         <goals>

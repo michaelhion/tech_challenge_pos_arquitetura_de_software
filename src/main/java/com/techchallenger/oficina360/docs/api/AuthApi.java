@@ -1,5 +1,6 @@
 package com.techchallenger.oficina360.docs.api;
 
+import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+
+import static com.techchallenger.oficina360.docs.SwaggerConstants.MEDIA_TYPE_JSON;
 
 @Tag(
         name = "1 - Autenticação",
@@ -40,5 +43,44 @@ public interface AuthApi {
                     content = @Content
             )
     })
-    ResponseEntity<LoginResponseDTO> login(LoginRequestDTO loginRequestDTO);
+    ResponseEntity<LoginResponseDTO> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+
+            required = true,
+            content = @Content(
+                    mediaType = MEDIA_TYPE_JSON,
+                    schema = @Schema(implementation = LoginRequestDTO.class)
+            )
+    )LoginRequestDTO loginRequestDTO);
+
+    @Operation(
+            summary = "Criar usuário",
+            description = "Cria um novo usuário no sistema."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuário criado com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Acesso negado"
+            )
+    })
+    ResponseEntity<String> criarUsuario(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MEDIA_TYPE_JSON,
+                            schema = @Schema(implementation = CriarUsuarioRequestDTO.class)
+                    )
+            )
+            CriarUsuarioRequestDTO criarUsuarioRequestDTO
+    );
+
+
 }
