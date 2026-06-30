@@ -8,6 +8,7 @@ import com.techchallenger.oficina360.services.OrdemServicoOficinaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/ordem-servico")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('MECANICO','ADMIN')")
 public class OrdemServicoOficinaController implements OrdemServicoOficinaApi {
 
     private final OrdemServicoOficinaService ordemServicoOficinaService;
