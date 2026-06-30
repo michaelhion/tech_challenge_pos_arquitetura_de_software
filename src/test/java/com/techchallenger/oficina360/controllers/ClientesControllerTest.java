@@ -94,7 +94,6 @@ class ClientesControllerTest {
 
     @Test
     void deveEditarClienteComSucesso() {
-        UUID id = UUID.randomUUID();
 
         ClienteDTO clienteAtualizado = new ClienteDTO(
                 DOCUMENTO,

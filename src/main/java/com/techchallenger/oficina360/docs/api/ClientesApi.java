@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.techchallenger.oficina360.docs.ClienteSwaggerConstants.*;
 import static com.techchallenger.oficina360.docs.SwaggerConstants.*;

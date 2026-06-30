@@ -74,7 +74,6 @@ public class OrdemServicoOficinaService {
     private final DiagnosticoFactory diagnosticoFactory;
     private final DiagnosticoValidator diagnosticoValidator;
     private final TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
-    private final EmailService emailService;
 
     public List<OrdemServicoDTO> findAll() {
         return ordemServicosRepository.findAll()
@@ -154,21 +153,7 @@ public class OrdemServicoOficinaService {
         ordemServico.finalizarDiagnostico();
 
         OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);
-        Optional<Cliente> cliente = clienteRepository.findByDocumento(ordemServico.getDocumentoCliente());
-        try {
-            emailService.enviarOrcamentoParaAprovacao(
-                    cliente.get().getEmail(),
-                    ordemServico.getId().toString()
-            );
 
-        } catch (Exception ex) {
-
-            log.error(
-                    "Erro ao enviar email da OS {}",
-                    ordemServico.getId(),
-                    ex
-            );
-        }
         return toDTO(ordemServicoAtualizada);
     }
 

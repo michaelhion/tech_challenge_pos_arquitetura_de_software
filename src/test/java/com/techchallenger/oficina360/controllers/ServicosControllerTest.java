@@ -27,14 +27,12 @@ class ServicosControllerTest {
 
     private ServicosController servicosController;
 
-    private UUID servicoId;
     private ServicoDTO servicoDTO;
 
     @BeforeEach
     void setUp() {
         servicosController = new ServicosController(servicoService);
 
-        servicoId = UUID.randomUUID();
 
         servicoDTO = new ServicoDTO(
                 "TROCA-DE-OLEO",
