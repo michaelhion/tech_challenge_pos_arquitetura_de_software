@@ -201,6 +201,8 @@ Banco de Dados
 
 Relatorio do snyk sobre pom.xml
 
+Obs.: vulnerabilidade média sem solução no momento (30/06/26)
+
 ![Relatorio pom](security/relatorio-snyk-pom.png)
 
 Relatorio do snyk sobre dockerfile
