@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: oficina360-config
+  namespace: oficina360
+
+data:
+  SPRING_PROFILES_ACTIVE: "docker"
+
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  SPRING_DATASOURCE_USERNAME: "oficina360"
+
+  JWT_ISSUER: "oficina360"

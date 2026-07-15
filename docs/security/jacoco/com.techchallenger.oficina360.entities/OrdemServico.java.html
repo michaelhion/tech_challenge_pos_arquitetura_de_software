@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServico.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.entities</a> &gt; <span class="el_source">OrdemServico.java</span></div><h1>OrdemServico.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.entities;
+
+import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.exceptions.ConflitoException;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;ORDEM_SERVICO&quot;)
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrdemServico {
+
+    private static final String AMERICA_SAO_PAULO = &quot;America/Sao_Paulo&quot;;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = &quot;ID&quot;, nullable = false, updatable = false)
+    private UUID id;
+
+    @Column(name = &quot;DOCUMENTO_CLIENTE&quot;, nullable = false, length = 50)
+    private String documentoCliente;
+
+    @Column(name = &quot;PLACA_VEICULO&quot;, nullable = false, updatable = false, length = 20)
+    private String placaVeiculo;
+
+    @Column(name = &quot;DT_HORA_ABERTURA&quot;, nullable = false)
+    private LocalDateTime dtHoraAbertura;
+
+    @Column(name = &quot;DT_HORA_FECHAMENTO&quot;)
+    private LocalDateTime dtHoraFechamento;
+
+    @Column(name = &quot;DESCRICAO_PROBLEMA&quot;, length = 2000)
+    private String descricaoProblema;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;ORDEM_DE_SERVICO_STATUS&quot;, nullable = false, length = 50)
+    private OrdemDeServicoStatus ordemDeServicoStatus;
+
+    @Column(name = &quot;OBSERVACAO_CLIENTE&quot;, length = 200)
+    private String observacaoCliente;
+
+    @Builder.Default
+    @OneToMany(
+            mappedBy = &quot;ordemServico&quot;,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List&lt;OrdemServicoServico&gt; servicos = new ArrayList&lt;&gt;();
+
+    @Builder.Default
+    @OneToMany(
+            mappedBy = &quot;ordemServico&quot;,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List&lt;OrdemServicoItemEstoque&gt; itensEstoque = new ArrayList&lt;&gt;();
+
+    @Builder.Default
+    @Column(name = &quot;VALOR_SERVICOS&quot;, precision = 10, scale = 2)
+    private BigDecimal valorServicos = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = &quot;VALOR_PECAS_INSUMOS&quot;, precision = 10, scale = 2)
+    private BigDecimal valorPecasInsumos = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = &quot;VALOR_OS&quot;, precision = 10, scale = 2)
+    private BigDecimal valorOs = BigDecimal.ZERO;
+
+    @Column(name = &quot;DT_HORA_INICIO_EXECUCAO&quot;)
+    private LocalDateTime dtHoraInicioExecucao;
+
+    @Column(name = &quot;DT_HORA_FIM_EXECUCAO&quot;)
+    private LocalDateTime dtHoraFimExecucao;
+
+    public void iniciarDiagnostico() {
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (this.ordemDeServicoStatus == OrdemDeServicoStatus.RECEBIDA) {</span>
+<span class="fc" id="L94">            this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_DIAGNOSTICO;</span>
+<span class="fc" id="L95">            return;</span>
+        }
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (this.ordemDeServicoStatus == OrdemDeServicoStatus.EM_DIAGNOSTICO) {</span>
+<span class="nc" id="L99">            return;</span>
+        }
+
+<span class="nc" id="L102">        throw new ConflitoException(&quot;A ordem de serviço não permite início de diagnóstico no status atual&quot;);</span>
+    }
+
+    public void limparDiagnosticoAtual() {
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (this.servicos != null) {</span>
+<span class="fc" id="L107">            this.servicos.clear();</span>
+        }
+
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if (this.itensEstoque != null) {</span>
+<span class="fc" id="L111">            this.itensEstoque.clear();</span>
+        }
+
+<span class="fc" id="L114">        recalcularValores();</span>
+<span class="fc" id="L115">    }</span>
+
+    public void adicionarServico(OrdemServicoServico servico) {
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (servico == null) {</span>
+<span class="nc" id="L119">            throw new IllegalArgumentException(&quot;Serviço da ordem de serviço é obrigatório&quot;);</span>
+        }
+
+<span class="fc" id="L122">        servico.setOrdemServico(this);</span>
+<span class="fc" id="L123">        this.servicos.add(servico);</span>
+
+<span class="fc" id="L125">        recalcularValores();</span>
+<span class="fc" id="L126">    }</span>
+
+    public void adicionarItemEstoque(OrdemServicoItemEstoque itemEstoque) {
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (itemEstoque == null) {</span>
+<span class="nc" id="L130">            throw new IllegalArgumentException(&quot;Item de estoque da ordem de serviço é obrigatório&quot;);</span>
+        }
+
+<span class="fc" id="L133">        itemEstoque.setOrdemServico(this);</span>
+<span class="fc" id="L134">        this.itensEstoque.add(itemEstoque);</span>
+
+<span class="fc" id="L136">        recalcularValores();</span>
+<span class="fc" id="L137">    }</span>
+
+    public void finalizarDiagnostico() {
+<span class="pc bpc" id="L140" title="3 of 4 branches missed.">        if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_DIAGNOSTICO</span>
+                &amp;&amp; this.ordemDeServicoStatus != OrdemDeServicoStatus.RECEBIDA) {
+<span class="nc" id="L142">            throw new ConflitoException(&quot;A ordem de serviço não está em diagnóstico&quot;);</span>
+        }
+
+<span class="pc bpc" id="L145" title="1 of 4 branches missed.">        if (this.servicos == null || this.servicos.isEmpty()) {</span>
+<span class="fc" id="L146">            throw new ConflitoException(&quot;A ordem de serviço precisa ter ao menos um serviço definido&quot;);</span>
+        }
+
+<span class="fc" id="L149">        recalcularValores();</span>
+<span class="fc" id="L150">        this.ordemDeServicoStatus = OrdemDeServicoStatus.AGUARDANDO_APROVACAO;</span>
+<span class="fc" id="L151">    }</span>
+
+    public void registrarAprovacao(Boolean aprovado) {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (aprovado == null) {</span>
+<span class="nc" id="L155">            throw new IllegalArgumentException(&quot;Informe se o orçamento foi aprovado ou reprovado&quot;);</span>
+        }
+
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if (this.ordemDeServicoStatus != OrdemDeServicoStatus.AGUARDANDO_APROVACAO) {</span>
+<span class="nc" id="L159">            throw new ConflitoException(&quot;A ordem de serviço não está aguardando aprovação&quot;);</span>
+        }
+
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (Boolean.TRUE.equals(aprovado)) {</span>
+<span class="fc" id="L163">            this.ordemDeServicoStatus = OrdemDeServicoStatus.ORCAMENTO_APROVADO;</span>
+        } else {
+<span class="fc" id="L165">            this.ordemDeServicoStatus = OrdemDeServicoStatus.ORCAMENTO_REPROVADO;</span>
+        }
+<span class="fc" id="L167">    }</span>
+
+    public void iniciarExecucao() {
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (this.ordemDeServicoStatus != OrdemDeServicoStatus.ORCAMENTO_APROVADO) {</span>
+<span class="nc" id="L171">            throw new ConflitoException(&quot;A execução só pode ser iniciada após aprovação do orçamento&quot;);</span>
+        }
+
+<span class="fc" id="L174">        this.dtHoraInicioExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));</span>
+<span class="fc" id="L175">        this.dtHoraFimExecucao = null;</span>
+<span class="fc" id="L176">        this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_EXECUCAO;</span>
+<span class="fc" id="L177">    }</span>
+
+    public void finalizarExecucao() {
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_EXECUCAO) {</span>
+<span class="nc" id="L181">            throw new ConflitoException(&quot;A execução só pode ser finalizada quando estiver em execução&quot;);</span>
+        }
+
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">        if (this.dtHoraInicioExecucao == null) {</span>
+<span class="nc" id="L185">            throw new ConflitoException(&quot;A execução não possui data/hora de início registrada&quot;);</span>
+        }
+
+<span class="fc" id="L188">        this.dtHoraFimExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));</span>
+<span class="fc" id="L189">        this.ordemDeServicoStatus = OrdemDeServicoStatus.FINALIZADA;</span>
+<span class="fc" id="L190">    }</span>
+
+
+    public void entregar() {
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (this.ordemDeServicoStatus != OrdemDeServicoStatus.FINALIZADA) {</span>
+<span class="nc" id="L195">            throw new ConflitoException(&quot;A ordem de serviço só pode ser entregue após finalização&quot;);</span>
+        }
+
+<span class="nc" id="L198">        this.dtHoraFechamento = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));</span>
+<span class="nc" id="L199">        this.ordemDeServicoStatus = OrdemDeServicoStatus.ENTREGUE;</span>
+<span class="nc" id="L200">    }</span>
+
+    public void recalcularValores() {
+<span class="fc" id="L203">        this.valorServicos = calcularValorServicos();</span>
+<span class="fc" id="L204">        this.valorPecasInsumos = calcularValorPecasInsumos();</span>
+<span class="fc" id="L205">        this.valorOs = this.valorServicos.add(this.valorPecasInsumos);</span>
+<span class="fc" id="L206">    }</span>
+
+    private BigDecimal calcularValorServicos() {
+<span class="pc bpc" id="L209" title="1 of 4 branches missed.">        if (this.servicos == null || this.servicos.isEmpty()) {</span>
+<span class="fc" id="L210">            return BigDecimal.ZERO;</span>
+        }
+
+<span class="fc" id="L213">        return this.servicos.stream()</span>
+<span class="fc" id="L214">                .map(OrdemServicoServico::getValorTotal)</span>
+<span class="fc" id="L215">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+    }
+
+    private BigDecimal calcularValorPecasInsumos() {
+<span class="pc bpc" id="L219" title="1 of 4 branches missed.">        if (this.itensEstoque == null || this.itensEstoque.isEmpty()) {</span>
+<span class="fc" id="L220">            return BigDecimal.ZERO;</span>
+        }
+
+<span class="fc" id="L223">        return this.itensEstoque.stream()</span>
+<span class="fc" id="L224">                .map(OrdemServicoItemEstoque::getValorTotal)</span>
+<span class="fc" id="L225">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

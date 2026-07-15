@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoOficinaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.services</a> &gt; <span class="el_source">OrdemServicoOficinaService.java</span></div><h1>OrdemServicoOficinaService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.services;
+
+
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
+import com.techchallenger.oficina360.entities.Cliente;
+import com.techchallenger.oficina360.entities.Estoque;
+import com.techchallenger.oficina360.entities.OrdemServico;
+import com.techchallenger.oficina360.entities.OrdemServicoItemEstoque;
+import com.techchallenger.oficina360.entities.OrdemServicoServico;
+import com.techchallenger.oficina360.entities.Servico;
+import com.techchallenger.oficina360.entities.TempoExecucaoServico;
+import com.techchallenger.oficina360.entities.Veiculo;
+import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
+import com.techchallenger.oficina360.mappers.CriarOrdemServicoMapper;
+import com.techchallenger.oficina360.mappers.OrdemServicoMapper;
+import com.techchallenger.oficina360.repositories.ClienteRepository;
+import com.techchallenger.oficina360.repositories.EstoqueRepository;
+import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
+import com.techchallenger.oficina360.repositories.ServicoRepository;
+import com.techchallenger.oficina360.repositories.TempoExecucaoServicoRepository;
+import com.techchallenger.oficina360.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.services.factories.DiagnosticoFactory;
+import com.techchallenger.oficina360.services.factories.OrdemServicoFactory;
+import com.techchallenger.oficina360.services.validators.DiagnosticoValidator;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
+import static com.techchallenger.oficina360.mappers.OrdemServicoMapper.toDTO;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
+
+@Service
+@RequiredArgsConstructor
+<span class="fc" id="L54">@Slf4j</span>
+public class OrdemServicoOficinaService {
+
+
+<span class="fc" id="L58">    private static final List&lt;OrdemDeServicoStatus&gt; STATUS_OS_ATIVA = List.of(</span>
+            OrdemDeServicoStatus.RECEBIDA,
+            OrdemDeServicoStatus.EM_DIAGNOSTICO,
+            OrdemDeServicoStatus.AGUARDANDO_APROVACAO,
+            OrdemDeServicoStatus.ORCAMENTO_APROVADO,
+            OrdemDeServicoStatus.EM_EXECUCAO,
+            OrdemDeServicoStatus.FINALIZADA
+    );
+    private static final String AMERICA_SAO_PAULO = &quot;America/Sao_Paulo&quot;;
+
+    private final OrdemServicosRepository ordemServicosRepository;
+    private final ClienteRepository clienteRepository;
+    private final VeiculoRepository veiculoRepository;
+    private final ServicoRepository servicoRepository;
+    private final EstoqueRepository estoqueRepository;
+    private final OrdemServicoFactory ordemServicoFactory;
+    private final DiagnosticoFactory diagnosticoFactory;
+    private final DiagnosticoValidator diagnosticoValidator;
+    private final TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
+
+    public List&lt;OrdemServicoDTO&gt; findAll() {
+<span class="fc" id="L79">        return ordemServicosRepository.findAll()</span>
+<span class="fc" id="L80">                .stream()</span>
+<span class="fc" id="L81">                .map(OrdemServicoMapper::toDTO)</span>
+<span class="fc" id="L82">                .toList();</span>
+    }
+
+    public Optional&lt;OrdemServicoDTO&gt; findById(UUID id) {
+<span class="fc" id="L86">        return ordemServicosRepository.findById(id)</span>
+<span class="fc" id="L87">                .map(OrdemServicoMapper::toDTO);</span>
+    }
+
+    public CriarOrdemServicoDTO save(CriarOrdemServicoDTO criarOrdemServicoDTO) {
+<span class="fc" id="L91">        String documentoCliente = normalizarDocumento(criarOrdemServicoDTO.documentoCliente());</span>
+<span class="fc" id="L92">        String placaVeiculo = normalizarPlaca(criarOrdemServicoDTO.placaVeiculo());</span>
+
+<span class="fc" id="L94">        Cliente cliente = buscarClientePorDocumento(documentoCliente);</span>
+<span class="fc" id="L95">        Veiculo veiculo = buscarVeiculoPorPlaca(placaVeiculo);</span>
+
+<span class="fc" id="L97">        validarVeiculoPertenceAoCliente(veiculo.getClienteDocumento(), cliente.getDocumento());</span>
+<span class="fc" id="L98">        validarNaoExisteOrdemServicoAtivaParaVeiculo(placaVeiculo);</span>
+
+<span class="fc" id="L100">        OrdemServico ordemServico = ordemServicoFactory.criar(criarOrdemServicoDTO, cliente, veiculo);</span>
+
+<span class="fc" id="L102">        OrdemServico ordemServicoSalva = ordemServicosRepository.save(ordemServico);</span>
+
+<span class="fc" id="L104">        return CriarOrdemServicoMapper.toDTO(ordemServicoSalva);</span>
+    }
+
+    public OrdemServicoDTO edit(UUID id, OrdemServicoDTO dto) {
+<span class="fc" id="L108">        OrdemServico ordemServico = buscarOrdemServicoPorId(id);</span>
+
+<span class="fc" id="L110">        ordemServico.setDescricaoProblema(dto.descricaoProblema());</span>
+
+<span class="fc" id="L112">        OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);</span>
+
+<span class="fc" id="L114">        return toDTO(ordemServicoAtualizada);</span>
+    }
+
+    public void delete(UUID id) {
+<span class="fc" id="L118">        OrdemServico ordemServico = buscarOrdemServicoPorId(id);</span>
+<span class="fc" id="L119">        ordemServicosRepository.delete(ordemServico);</span>
+<span class="fc" id="L120">    }</span>
+
+
+
+    @Transactional
+    public OrdemServicoDTO diagnosticar(UUID id, DiagnosticoDTO diagnosticoDTO) {
+<span class="fc" id="L126">        OrdemServico ordemServico = buscarOrdemServicoPorId(id);</span>
+
+<span class="fc" id="L128">        List&lt;String&gt; codigosServicos = obterCodigosServicos(diagnosticoDTO);</span>
+<span class="fc" id="L129">        List&lt;DiagnosticoEstoqueDTO&gt; itensEstoque = obterItensEstoque(diagnosticoDTO);</span>
+
+<span class="fc" id="L131">        Map&lt;String, Integer&gt; quantidadeEstoquePorCodigo =</span>
+<span class="fc" id="L132">                agruparQuantidadeEstoquePorCodigo(itensEstoque);</span>
+
+<span class="fc" id="L134">        Map&lt;String, Servico&gt; servicosPorCodigo =</span>
+<span class="fc" id="L135">                buscarServicosPorCodigo(codigosServicos);</span>
+
+<span class="fc" id="L137">        Map&lt;String, Estoque&gt; estoquesPorCodigo =</span>
+<span class="fc" id="L138">                buscarEstoquesPorCodigo(quantidadeEstoquePorCodigo);</span>
+
+<span class="fc" id="L140">        diagnosticoValidator.validar(</span>
+                codigosServicos,
+                quantidadeEstoquePorCodigo,
+                servicosPorCodigo,
+                estoquesPorCodigo
+        );
+
+<span class="fc" id="L147">        ordemServico.iniciarDiagnostico();</span>
+<span class="fc" id="L148">        ordemServico.limparDiagnosticoAtual();</span>
+
+<span class="fc" id="L150">        adicionarServicosNaOrdemServico(ordemServico, codigosServicos, servicosPorCodigo);</span>
+<span class="fc" id="L151">        adicionarItensEstoqueNaOrdemServico(ordemServico, quantidadeEstoquePorCodigo, estoquesPorCodigo);</span>
+
+<span class="fc" id="L153">        ordemServico.finalizarDiagnostico();</span>
+
+<span class="fc" id="L155">        OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);</span>
+
+<span class="fc" id="L157">        return toDTO(ordemServicoAtualizada);</span>
+    }
+
+    @Transactional
+    public OrdemServicoDTO iniciarExecucao(UUID id) {
+<span class="fc" id="L162">        OrdemServico ordemServico = buscarOrdemServicoPorId(id);</span>
+
+<span class="fc" id="L164">        ordemServico.iniciarExecucao();</span>
+
+<span class="fc" id="L166">        OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);</span>
+
+<span class="fc" id="L168">        return toDTO(ordemServicoAtualizada);</span>
+    }
+
+    @Transactional
+    public OrdemServicoDTO finalizarExecucao(UUID id) {
+<span class="fc" id="L173">        OrdemServico ordemServico = buscarOrdemServicoPorId(id);</span>
+
+<span class="fc" id="L175">        ordemServico.finalizarExecucao();</span>
+
+<span class="fc" id="L177">        OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);</span>
+<span class="fc" id="L178">        calcularTempoExecucaoESalvar(ordemServico);</span>
+<span class="fc" id="L179">        return toDTO(ordemServicoAtualizada);</span>
+    }
+
+    private void calcularTempoExecucaoESalvar(OrdemServico ordemServico) {
+
+<span class="fc" id="L184">        int tempoTotal = (int) Duration</span>
+<span class="fc" id="L185">                .between(ordemServico.getDtHoraInicioExecucao(), ordemServico.getDtHoraFimExecucao())</span>
+<span class="fc" id="L186">                .toMinutes();</span>
+
+<span class="fc" id="L188">        int quantidadeServicos = ordemServico.getServicos().size();</span>
+
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        int tempoPorServico = quantidadeServicos &gt; 0</span>
+<span class="fc" id="L191">                ? tempoTotal / quantidadeServicos</span>
+<span class="fc" id="L192">                : tempoTotal;</span>
+
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        for (OrdemServicoServico oss : ordemServico.getServicos()) {</span>
+
+<span class="fc" id="L196">            TempoExecucaoServico tempoExecucaoServico = TempoExecucaoServico.builder()</span>
+<span class="fc" id="L197">                    .servicoID(oss.getServicoId())</span>
+<span class="fc" id="L198">                    .tempoExecucaoMinutos(tempoPorServico)</span>
+<span class="fc" id="L199">                    .dataExecucao(LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)))</span>
+<span class="fc" id="L200">                    .build();</span>
+
+<span class="fc" id="L202">            tempoExecucaoServicoRepository.save(tempoExecucaoServico);</span>
+<span class="fc" id="L203">        }</span>
+<span class="fc" id="L204">    }</span>
+
+    private OrdemServico buscarOrdemServicoPorId(UUID id) {
+<span class="fc" id="L207">        return ordemServicosRepository.findById(id)</span>
+<span class="fc" id="L208">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(OS_ORDEM_DE_SERVICO_NAO_ENCONTRADA));</span>
+    }
+
+    private Cliente buscarClientePorDocumento(String documentoCliente) {
+<span class="fc" id="L212">        return clienteRepository.findByDocumento(documentoCliente)</span>
+<span class="fc" id="L213">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(OS_CLIENTE_NAO_ENCONTRADO));</span>
+    }
+
+    private Veiculo buscarVeiculoPorPlaca(String placaVeiculo) {
+<span class="fc" id="L217">        return veiculoRepository.findByPlaca(placaVeiculo)</span>
+<span class="fc" id="L218">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(OS_VEICULO_NAO_ENCONTRADO));</span>
+    }
+
+    private void validarVeiculoPertenceAoCliente(String documentoVeiculo, String documentoCliente) {
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (!documentoVeiculo.equals(documentoCliente)) {</span>
+<span class="fc" id="L223">            throw new RegraDeNegocioException(OS_VEICULO_NAO_PERTENCE_AO_CLIENTE);</span>
+        }
+<span class="fc" id="L225">    }</span>
+
+    private void validarNaoExisteOrdemServicoAtivaParaVeiculo(String placaVeiculo) {
+<span class="fc" id="L228">        ordemServicosRepository</span>
+<span class="fc" id="L229">                .findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(placaVeiculo, STATUS_OS_ATIVA)</span>
+<span class="fc" id="L230">                .ifPresent(os -&gt; {</span>
+<span class="fc" id="L231">                    throw new RegraDeNegocioException(</span>
+<span class="fc" id="L232">                            String.format(</span>
+                                    OS_ORDEM_DE_SERVICO_ATIVA_PARA_O_VEICULO,
+<span class="fc" id="L234">                                    os.getPlacaVeiculo(),</span>
+<span class="fc" id="L235">                                    os.getId(),</span>
+<span class="fc" id="L236">                                    os.getOrdemDeServicoStatus()</span>
+                            )
+                    );
+                });
+<span class="fc" id="L240">    }</span>
+
+    private List&lt;String&gt; obterCodigosServicos(DiagnosticoDTO diagnosticoDTO) {
+<span class="pc bpc" id="L243" title="1 of 4 branches missed.">        if (diagnosticoDTO == null || diagnosticoDTO.codigosServicos() == null) {</span>
+<span class="fc" id="L244">            return List.of();</span>
+        }
+
+<span class="fc" id="L247">        return diagnosticoDTO.codigosServicos()</span>
+<span class="fc" id="L248">                .stream()</span>
+<span class="fc" id="L249">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L250">                .map(String::trim)</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">                .filter(codigo -&gt; !codigo.isBlank())</span>
+<span class="fc" id="L252">                .distinct()</span>
+<span class="fc" id="L253">                .toList();</span>
+    }
+
+    private List&lt;DiagnosticoEstoqueDTO&gt; obterItensEstoque(DiagnosticoDTO diagnosticoDTO) {
+<span class="pc bpc" id="L257" title="1 of 4 branches missed.">        if (diagnosticoDTO == null || diagnosticoDTO.itensEstoque() == null) {</span>
+<span class="fc" id="L258">            return List.of();</span>
+        }
+
+<span class="fc" id="L261">        return diagnosticoDTO.itensEstoque()</span>
+<span class="fc" id="L262">                .stream()</span>
+<span class="fc" id="L263">                .filter(Objects::nonNull)</span>
+<span class="fc" id="L264">                .toList();</span>
+    }
+
+    private Map&lt;String, Integer&gt; agruparQuantidadeEstoquePorCodigo(List&lt;DiagnosticoEstoqueDTO&gt; itensEstoque) {
+<span class="pc bpc" id="L268" title="1 of 4 branches missed.">        if (itensEstoque == null || itensEstoque.isEmpty()) {</span>
+<span class="fc" id="L269">            return new LinkedHashMap&lt;&gt;();</span>
+        }
+
+<span class="fc" id="L272">        return itensEstoque.stream()</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">                .filter(item -&gt; item.codigo() != null)</span>
+<span class="fc" id="L274">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L275">                        item -&gt; item.codigo().trim(),</span>
+                        DiagnosticoEstoqueDTO::quantidade,
+                        Integer::sum,
+                        LinkedHashMap::new
+                ));
+    }
+
+    private Map&lt;String, Servico&gt; buscarServicosPorCodigo(List&lt;String&gt; codigosServicos) {
+<span class="pc bpc" id="L283" title="1 of 4 branches missed.">        if (codigosServicos == null || codigosServicos.isEmpty()) {</span>
+<span class="fc" id="L284">            return Map.of();</span>
+        }
+
+<span class="fc" id="L287">        return servicoRepository.findByCodigoIn(codigosServicos)</span>
+<span class="fc" id="L288">                .stream()</span>
+<span class="fc" id="L289">                .collect(Collectors.toMap(</span>
+                        Servico::getCodigo,
+<span class="fc" id="L291">                        servico -&gt; servico</span>
+                ));
+    }
+
+    private Map&lt;String, Estoque&gt; buscarEstoquesPorCodigo(Map&lt;String, Integer&gt; quantidadeEstoquePorCodigo) {
+<span class="pc bpc" id="L296" title="1 of 4 branches missed.">        if (quantidadeEstoquePorCodigo == null || quantidadeEstoquePorCodigo.isEmpty()) {</span>
+<span class="fc" id="L297">            return Map.of();</span>
+        }
+
+<span class="fc" id="L300">        return estoqueRepository.findByCodigoIn(new ArrayList&lt;&gt;(quantidadeEstoquePorCodigo.keySet()))</span>
+<span class="fc" id="L301">                .stream()</span>
+<span class="fc" id="L302">                .collect(Collectors.toMap(</span>
+                        Estoque::getCodigo,
+<span class="fc" id="L304">                        estoque -&gt; estoque</span>
+                ));
+    }
+
+    private void adicionarServicosNaOrdemServico(
+            OrdemServico ordemServico,
+            List&lt;String&gt; codigosServicos,
+            Map&lt;String, Servico&gt; servicosPorCodigo
+    ) {
+<span class="fc bfc" id="L313" title="All 2 branches covered.">        for (String codigoServico : codigosServicos) {</span>
+<span class="fc" id="L314">            Servico servico = servicosPorCodigo.get(codigoServico);</span>
+<span class="fc" id="L315">            OrdemServicoServico servicoDaOs = diagnosticoFactory.criarServicoDaOs(servico);</span>
+<span class="fc" id="L316">            ordemServico.adicionarServico(servicoDaOs);</span>
+<span class="fc" id="L317">        }</span>
+<span class="fc" id="L318">    }</span>
+
+    private void adicionarItensEstoqueNaOrdemServico(
+            OrdemServico ordemServico,
+            Map&lt;String, Integer&gt; quantidadeEstoquePorCodigo,
+            Map&lt;String, Estoque&gt; estoquesPorCodigo
+    ) {
+<span class="fc bfc" id="L325" title="All 2 branches covered.">        for (Map.Entry&lt;String, Integer&gt; entry : quantidadeEstoquePorCodigo.entrySet()) {</span>
+<span class="fc" id="L326">            String codigoEstoque = entry.getKey();</span>
+<span class="fc" id="L327">            Integer quantidade = entry.getValue();</span>
+
+<span class="fc" id="L329">            Estoque estoque = estoquesPorCodigo.get(codigoEstoque);</span>
+
+<span class="fc" id="L331">            estoque.reservar(quantidade);</span>
+
+<span class="fc" id="L333">            OrdemServicoItemEstoque itemDaOs =</span>
+<span class="fc" id="L334">                    diagnosticoFactory.criarItemEstoqueDaOs(estoque, quantidade);</span>
+
+<span class="fc" id="L336">            ordemServico.adicionarItemEstoque(itemDaOs);</span>
+
+<span class="fc" id="L338">            estoqueRepository.save(estoque);</span>
+<span class="fc" id="L339">        }</span>
+<span class="fc" id="L340">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

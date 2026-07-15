@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServicoDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dtos.servicos</a> &gt; <span class="el_source">ServicoDTO.java</span></div><h1>ServicoDTO.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dtos.servicos;
+
+import com.techchallenger.oficina360.validators.CodigoValido;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+
+@Schema(
+        name = &quot;ServicoDTO&quot;,
+        description = &quot;DTO utilizado para cadastro e atualização dos serviços oferecidos pela oficina.&quot;
+)
+<span class="fc" id="L15">public record ServicoDTO(</span>
+
+        @Schema(
+                description = &quot;Código funcional do serviço. Deve conter apenas letras maiúsculas, números, hífen ou underline, sem espaços ou acentos.&quot;,
+                example = &quot;SRV-TROCA-OLEO&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotBlank(message = &quot;O código do serviço é obrigatório&quot;)
+        @CodigoValido
+        String codigo,
+
+        @Schema(
+                description = &quot;Descrição do serviço oferecido pela oficina.&quot;,
+                example = &quot;Troca de óleo&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotBlank(message = &quot;A descrição do serviço é obrigatória&quot;)
+        String descricao,
+
+        @Schema(
+                description = &quot;Valor cobrado pelo serviço.&quot;,
+                example = &quot;150.00&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotNull(message = &quot;O valor do serviço é obrigatório&quot;)
+        @DecimalMin(value = &quot;0.01&quot;, message = &quot;O valor do serviço deve ser maior que zero&quot;)
+        BigDecimal valor,
+        @Schema(
+                description = &quot;Tempo médio de duração de execução do serviço em minutos.&quot;,
+                example = &quot;120&quot;,
+                readOnly = true
+        )
+        Integer tempoDeExecucaoMedio
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

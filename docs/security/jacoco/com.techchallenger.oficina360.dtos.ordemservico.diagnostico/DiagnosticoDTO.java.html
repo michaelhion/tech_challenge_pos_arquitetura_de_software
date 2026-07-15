@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiagnosticoDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dtos.ordemservico.diagnostico</a> &gt; <span class="el_source">DiagnosticoDTO.java</span></div><h1>DiagnosticoDTO.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dtos.ordemservico.diagnostico;
+
+import com.techchallenger.oficina360.dtos.validators.CodigoPattern;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+
+import java.util.List;
+
+@Schema(
+        name = &quot;DiagnosticoDTO&quot;,
+        description = &quot;DTO utilizado para registrar o diagnóstico da ordem de serviço com serviços e itens de estoque.&quot;
+)
+<span class="fc" id="L15">public record DiagnosticoDTO(</span>
+
+        @Schema(
+                description = &quot;Lista de códigos dos serviços definidos no diagnóstico. Os códigos devem seguir o padrão sem espaços, usando hífen ou underline.&quot;,
+                example = &quot;[\&quot;SRV-TROCA-OLEO\&quot;, \&quot;SRV-ALINHAMENTO\&quot;]&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotEmpty(message = &quot;Informe ao menos um serviço&quot;)
+        List&lt;
+                @Pattern(
+                        regexp = CodigoPattern.REGEX,
+                        message = CodigoPattern.MESSAGE
+                )
+                        String
+                &gt; codigosServicos,
+
+        @Schema(
+                description = &quot;Lista de peças ou insumos necessários para a ordem de serviço.&quot;
+        )
+        @Valid
+        List&lt;DiagnosticoEstoqueDTO&gt; itensEstoque
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

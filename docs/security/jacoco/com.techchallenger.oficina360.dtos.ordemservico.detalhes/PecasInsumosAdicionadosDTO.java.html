@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PecasInsumosAdicionadosDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dtos.ordemservico.detalhes</a> &gt; <span class="el_source">PecasInsumosAdicionadosDTO.java</span></div><h1>PecasInsumosAdicionadosDTO.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dtos.ordemservico.detalhes;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.math.BigDecimal;
+
+@Schema(
+        name = &quot;PecasInsumosAdicionadosDTO&quot;,
+        description = &quot;DTO utilizado para representar uma peça ou insumo adicionado à ordem de serviço.&quot;
+)
+<span class="fc" id="L11">public record PecasInsumosAdicionadosDTO(</span>
+
+        @Schema(
+                description = &quot;Nome da peça ou insumo adicionado à ordem de serviço.&quot;,
+                example = &quot;Filtro de óleo&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        String nome,
+
+        @Schema(
+                description = &quot;Valor unitário da peça ou insumo no momento em que foi adicionado à ordem de serviço.&quot;,
+                example = &quot;45.90&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        BigDecimal valorUnitario,
+
+        @Schema(
+                description = &quot;Quantidade da peça ou insumo adicionada à ordem de serviço.&quot;,
+                example = &quot;2&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        Integer quantidade,
+        @Schema(
+                description = &quot;Valor total da peça ou insumo no momento em que foi adicionado à ordem de serviço.&quot;,
+                example = &quot;91.80&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        BigDecimal valorTotal
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

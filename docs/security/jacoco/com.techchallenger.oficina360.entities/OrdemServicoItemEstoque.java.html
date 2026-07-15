@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoItemEstoque.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.entities</a> &gt; <span class="el_source">OrdemServicoItemEstoque.java</span></div><h1>OrdemServicoItemEstoque.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;ORDEM_SERVICO_ITEM_ESTOQUE&quot;)
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrdemServicoItemEstoque {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = &quot;ID&quot;, nullable = false, updatable = false)
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;ORDEM_SERVICO_ID&quot;, nullable = false)
+    private OrdemServico ordemServico;
+
+    @Column(name = &quot;ESTOQUE_ID&quot;, nullable = false)
+    private UUID estoqueId;
+
+    @Column(name = &quot;NOME&quot;, nullable = false, length = 255)
+    private String nome;
+
+    @Column(name = &quot;VALOR_UNITARIO&quot;, nullable = false, precision = 10, scale = 2)
+    private BigDecimal valorUnitario;
+
+    @Column(name = &quot;QUANTIDADE&quot;, nullable = false)
+    private Integer quantidade;
+
+    @Column(name = &quot;VALOR_TOTAL&quot;, nullable = false, precision = 10, scale = 2)
+    private BigDecimal valorTotal;
+
+    public BigDecimal getValorTotal() {
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        return valorTotal != null ? valorTotal : BigDecimal.ZERO;</span>
+    }
+
+    public static OrdemServicoItemEstoque criar(
+            UUID estoqueId,
+            String nome,
+            BigDecimal valorUnitario,
+            Integer quantidade
+    ) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        BigDecimal valorSeguro = valorUnitario != null ? valorUnitario : BigDecimal.ZERO;</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        Integer quantidadeSegura = quantidade != null ? quantidade : 0;</span>
+
+<span class="fc" id="L67">        return OrdemServicoItemEstoque.builder()</span>
+<span class="fc" id="L68">                .estoqueId(estoqueId)</span>
+<span class="fc" id="L69">                .nome(nome)</span>
+<span class="fc" id="L70">                .valorUnitario(valorSeguro)</span>
+<span class="fc" id="L71">                .quantidade(quantidadeSegura)</span>
+<span class="fc" id="L72">                .valorTotal(valorSeguro.multiply(BigDecimal.valueOf(quantidadeSegura)))</span>
+<span class="fc" id="L73">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

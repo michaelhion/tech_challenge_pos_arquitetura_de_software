@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EstoqueMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.mappers</a> &gt; <span class="el_source">EstoqueMapper.java</span></div><h1>EstoqueMapper.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.mappers;
+
+import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
+import com.techchallenger.oficina360.entities.Estoque;
+
+public class EstoqueMapper {
+
+    private EstoqueMapper(){}
+
+    public static EstoqueDTO toDTO(Estoque estoqueEntity) {
+<span class="fc" id="L11">        return new EstoqueDTO(</span>
+<span class="fc" id="L12">                estoqueEntity.getId(),</span>
+<span class="fc" id="L13">                estoqueEntity.getCodigo(),</span>
+<span class="fc" id="L14">                estoqueEntity.getNome(),</span>
+<span class="fc" id="L15">                estoqueEntity.getValor(),</span>
+<span class="fc" id="L16">                estoqueEntity.getQuantidade(),</span>
+<span class="fc" id="L17">                estoqueEntity.getReservados(),</span>
+<span class="fc" id="L18">                estoqueEntity.getDisponiveis()</span>
+        );
+    }
+
+    public static Estoque toEntity(EstoqueDTO estoqueDTO) {
+<span class="fc" id="L23">        return Estoque.builder()</span>
+<span class="fc" id="L24">                .id(estoqueDTO.id())</span>
+<span class="fc" id="L25">                .codigo(estoqueDTO.codigo())</span>
+<span class="fc" id="L26">                .nome(estoqueDTO.nome())</span>
+<span class="fc" id="L27">                .valor(estoqueDTO.valor())</span>
+<span class="fc" id="L28">                .quantidade(estoqueDTO.quantidade())</span>
+<span class="fc" id="L29">                .reservados(estoqueDTO.reservados())</span>
+<span class="fc" id="L30">                .build();</span>
+    }
+
+
+    public static void updateEntityFromDto(EstoqueDTO dto, Estoque estoqueEntity) {
+<span class="pc bpc" id="L35" title="2 of 4 branches missed.">        if (dto == null || estoqueEntity == null) {</span>
+<span class="nc" id="L36">            return;</span>
+        }
+
+<span class="fc" id="L39">        estoqueEntity.setNome(dto.nome());</span>
+<span class="fc" id="L40">        estoqueEntity.setValor(dto.valor());</span>
+<span class="fc" id="L41">        estoqueEntity.setQuantidade(dto.quantidade());</span>
+<span class="fc" id="L42">        estoqueEntity.setReservados(dto.reservados());</span>
+<span class="fc" id="L43">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

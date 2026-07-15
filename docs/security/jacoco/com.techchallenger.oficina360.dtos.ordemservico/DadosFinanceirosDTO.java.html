@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DadosFinanceirosDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dtos.ordemservico</a> &gt; <span class="el_source">DadosFinanceirosDTO.java</span></div><h1>DadosFinanceirosDTO.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dtos.ordemservico;
+
+import com.techchallenger.oficina360.dtos.ordemservico.detalhes.PecasInsumosAdicionadosDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.detalhes.ServicosAdicionadosDTO;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Schema(
+        name = &quot;DadosFinanceirosDTO&quot;,
+        description = &quot;DTO utilizado para apresentar os dados financeiros da ordem de serviço, incluindo serviços, peças/insumos e valor total.&quot;
+)
+<span class="fc" id="L14">public record DadosFinanceirosDTO(</span>
+
+        @Schema(
+                description = &quot;Lista de serviços adicionados à ordem de serviço durante o diagnóstico.&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        List&lt;ServicosAdicionadosDTO&gt; servicos,
+
+        @Schema(
+                description = &quot;Lista de peças ou insumos adicionados à ordem de serviço durante o diagnóstico.&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        List&lt;PecasInsumosAdicionadosDTO&gt; pecasInsumos,
+        @Schema(
+                description = &quot;Valor total dos serviços da ordem de serviço.&quot;,
+                example = &quot;300.00&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        BigDecimal valorServicos,
+        @Schema(
+                description = &quot;Valor total dos peças e insumos da ordem de serviço.&quot;,
+                example = &quot;190.00&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        BigDecimal valorPecasInsumos,
+        @Schema(
+                description = &quot;Valor total da ordem de serviço, considerando serviços, peças e insumos.&quot;,
+                example = &quot;490.00&quot;,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        BigDecimal valorTotal
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

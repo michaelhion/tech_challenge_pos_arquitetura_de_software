@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServicosController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.controllers</a> &gt; <span class="el_source">ServicosController.java</span></div><h1>ServicosController.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.controllers;
+
+import com.techchallenger.oficina360.docs.api.ServicosApi;
+import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
+import com.techchallenger.oficina360.services.ServicoService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/servicos&quot;)
+@RequiredArgsConstructor
+public class ServicosController implements ServicosApi {
+
+    private final ServicoService servicoService;
+
+    @Override
+    @GetMapping(&quot;/listar/{codigo}&quot;)
+    public ResponseEntity&lt;ServicoDTO&gt; buscarPorId(
+            @PathVariable String codigo
+    ) {
+<span class="fc" id="L32">        return servicoService.findByCodigo(codigo)</span>
+<span class="fc" id="L33">                .map(ResponseEntity::ok)</span>
+<span class="fc" id="L34">                .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @Override
+    @PostMapping(&quot;/salvar&quot;)
+    public ResponseEntity&lt;ServicoDTO&gt; salvar(
+            @Valid @RequestBody ServicoDTO servico
+    ) {
+<span class="fc" id="L42">        ServicoDTO servicoSalvo = servicoService.save(servico);</span>
+<span class="fc" id="L43">        return ResponseEntity.status(201).body(servicoSalvo);</span>
+    }
+
+    @Override
+    @PutMapping(&quot;/editar/{codigo}&quot;)
+    public ResponseEntity&lt;ServicoDTO&gt; editar(
+            @PathVariable String codigo,
+            @Valid @RequestBody ServicoDTO servico
+    ) {
+<span class="fc" id="L52">        ServicoDTO servicoAtualizado = servicoService.edit(codigo, servico);</span>
+<span class="fc" id="L53">        return ResponseEntity.ok(servicoAtualizado);</span>
+    }
+
+    @Override
+    @DeleteMapping(&quot;/deletar/{codigo}&quot;)
+    public ResponseEntity&lt;Void&gt; deletar(
+            @PathVariable String codigo
+    ) {
+<span class="fc" id="L61">        servicoService.delete(codigo);</span>
+<span class="fc" id="L62">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @Override
+    @GetMapping(&quot;/listar&quot;)
+    public ResponseEntity&lt;List&lt;ServicoDTO&gt;&gt; listarServicos() {
+<span class="fc" id="L68">        List&lt;ServicoDTO&gt; servicos = servicoService.findAll();</span>
+<span class="fc" id="L69">        return ResponseEntity.ok(servicos);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

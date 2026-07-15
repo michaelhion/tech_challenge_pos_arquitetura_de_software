@@ -36,6 +36,9 @@
             target/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <tomcat.version>11.0.23</tomcat.version>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/docs/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.dependencyCheck.jsonReportPath>target/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
+        <sonar.dependencyCheck.htmlReportPath>target/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
     </properties>
     <dependencies>
         <dependency>
@@ -193,6 +196,9 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/docs/security/jacoco</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -201,6 +207,9 @@
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>12.2.2</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/docs/security/owasp</outputDirectory>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

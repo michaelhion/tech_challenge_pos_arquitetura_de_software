@@ -1,0 +1,74 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: oficina360-api
+  namespace: oficina360
+
+spec:
+
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: oficina360-api
+
+  template:
+
+    metadata:
+      labels:
+        app: oficina360-api
+
+    spec:
+
+      containers:
+        - name: oficina360-api
+          image: oficina360:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+
+          env:
+
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: oficina360-config
+                  key: SPRING_PROFILES_ACTIVE
+
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: oficina360-config
+                  key: DB_HOST
+
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: oficina360-config
+                  key: DB_PORT
+
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: oficina360-config
+                  key: DB_NAME
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: oficina360-secret
+                  key: DB_USERNAME
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: oficina360-secret
+                  key: DB_PASSWORD
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oficina360-secret
+                  key: JWT_SECRET

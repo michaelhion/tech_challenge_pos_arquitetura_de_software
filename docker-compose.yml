@@ -37,9 +37,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
 
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/oficina360
-      SPRING_DATASOURCE_USERNAME: oficina360
-      SPRING_DATASOURCE_PASSWORD: oficina360
+      DB_HOST: jdbc:postgresql://postgres:5432/oficina360
+      DB_USERNAME: oficina360
+      DB_PASSWORD: oficina360
 
     depends_on:
       postgres:

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServicoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.services</a> &gt; <span class="el_source">ServicoService.java</span></div><h1>ServicoService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.services;
+
+import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
+import com.techchallenger.oficina360.entities.Servico;
+import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.mappers.ServicoMapper;
+import com.techchallenger.oficina360.repositories.ServicoRepository;
+import com.techchallenger.oficina360.repositories.TempoExecucaoServicoRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.SERVICO_NAO_ENCONTRADO;
+import static com.techchallenger.oficina360.mappers.ServicoMapper.toDTO;
+import static com.techchallenger.oficina360.mappers.ServicoMapper.toEntity;
+
+@Service
+@RequiredArgsConstructor
+public class ServicoService {
+
+
+    private final ServicoRepository servicoRepository;
+    private final TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
+
+
+    public List&lt;ServicoDTO&gt; findAll() {
+
+<span class="fc" id="L30">        return servicoRepository.findAll()</span>
+<span class="fc" id="L31">                .stream()</span>
+<span class="fc" id="L32">                .map(this::toDTOComTempoMedio)</span>
+<span class="fc" id="L33">                .toList();</span>
+    }
+
+
+    public void delete(String codigo) {
+<span class="fc" id="L38">       servicoRepository.findByCodigo(codigo)</span>
+<span class="fc" id="L39">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));</span>
+
+<span class="fc" id="L41">        servicoRepository.deleteByCodigo(codigo);</span>
+<span class="fc" id="L42">    }</span>
+
+    public Optional&lt;ServicoDTO&gt; findByCodigo(String codigo) {
+<span class="fc" id="L45">        return servicoRepository.findByCodigo(codigo)</span>
+<span class="fc" id="L46">                .map(ServicoMapper::toDTO);</span>
+    }
+
+    public ServicoDTO save(ServicoDTO servicoDTO) {
+<span class="fc" id="L50">        Servico servico = toEntity(servicoDTO);</span>
+<span class="fc" id="L51">        servico.setTempoMedioExecucaoMinutos(0);</span>
+<span class="fc" id="L52">        Servico servicoSalvo = servicoRepository.save(servico);</span>
+
+<span class="fc" id="L54">        return toDTO(servicoSalvo);</span>
+    }
+
+    public ServicoDTO edit(String codigo, ServicoDTO servicoDTO) {
+<span class="fc" id="L58">        Servico servico = servicoRepository.findByCodigo(codigo)</span>
+<span class="fc" id="L59">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));</span>
+
+<span class="fc" id="L61">        ServicoMapper.updateEntityFromDto(servicoDTO, servico);</span>
+
+<span class="fc" id="L63">        Servico servicoAtualizado = servicoRepository.save(servico);</span>
+
+<span class="fc" id="L65">        return toDTO(servicoAtualizado);</span>
+    }
+
+
+    private ServicoDTO toDTOComTempoMedio(Servico servico) {
+
+<span class="fc" id="L71">        Double media = tempoExecucaoServicoRepository</span>
+<span class="fc" id="L72">                .calcularTempoMedio(servico.getId());</span>
+
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        Integer tempoMedio = media != null</span>
+<span class="fc" id="L75">                ? (int) Math.round(media)</span>
+<span class="fc" id="L76">                : 0;</span>
+
+<span class="fc" id="L78">        return new ServicoDTO(</span>
+<span class="fc" id="L79">                servico.getCodigo(),</span>
+<span class="fc" id="L80">                servico.getDescricao(),</span>
+<span class="fc" id="L81">                servico.getValor(),</span>
+                tempoMedio
+        );
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Estoque.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.entities</a> &gt; <span class="el_source">Estoque.java</span></div><h1>Estoque.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.entities;
+
+
+import com.techchallenger.oficina360.exceptions.ConflitoException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;ESTOQUE&quot;)
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Estoque {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = &quot;ID&quot;, nullable = false, updatable = false)
+    private UUID id;
+
+    @Column(name = &quot;NOME&quot;, nullable = false, length = 255)
+    private String nome;
+
+    @Column(name = &quot;VALOR&quot;, precision = 10, scale = 2, nullable = false)
+    private BigDecimal valor;
+
+    @Column(name = &quot;QUANTIDADE&quot;, nullable = false)
+    private Integer quantidade = 0;
+
+    @Column(name = &quot;RESERVADOS&quot;, nullable = false)
+    private Integer reservados = 0;
+
+    @Column(name = &quot;CODIGO&quot;, nullable = false, unique = true, length = 100)
+    private String codigo;
+
+
+    @Transient
+    public Integer getDisponiveis() {
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        int qtd = quantidade != null ? quantidade : 0;</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        int res = reservados != null ? reservados : 0;</span>
+
+<span class="fc" id="L56">        return qtd - res;</span>
+    }
+
+    public void reservar(Integer quantidadeReservar) {
+<span class="pc bpc" id="L60" title="1 of 4 branches missed.">        if (quantidadeReservar == null || quantidadeReservar &lt;= 0) {</span>
+<span class="fc" id="L61">            throw new ConflitoException(&quot;Quantidade a reservar deve ser maior que zero&quot;);</span>
+        }
+
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (quantidadeReservar &gt; getDisponiveis()) {</span>
+<span class="fc" id="L65">            throw new ConflitoException(&quot;Quantidade indisponível em estoque&quot;);</span>
+        }
+
+<span class="fc" id="L68">        this.reservados += quantidadeReservar;</span>
+<span class="fc" id="L69">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

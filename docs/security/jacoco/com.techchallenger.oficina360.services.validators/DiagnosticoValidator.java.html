@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiagnosticoValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.services.validators</a> &gt; <span class="el_source">DiagnosticoValidator.java</span></div><h1>DiagnosticoValidator.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.services.validators;
+
+import com.techchallenger.oficina360.entities.Estoque;
+import com.techchallenger.oficina360.entities.Servico;
+import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+@Component
+<span class="fc" id="L14">public class DiagnosticoValidator {</span>
+
+    public void validar(
+            List&lt;String&gt; codigosServicos,
+            Map&lt;String, Integer&gt; quantidadeEstoquePorCodigo,
+            Map&lt;String, Servico&gt; servicosPorCodigo,
+            Map&lt;String, Estoque&gt; estoquesPorCodigo
+    ) {
+<span class="fc" id="L22">        List&lt;String&gt; erros = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L24">        validarServicosEncontrados(codigosServicos, servicosPorCodigo, erros);</span>
+<span class="fc" id="L25">        validarItensEstoqueEncontrados(quantidadeEstoquePorCodigo, estoquesPorCodigo, erros);</span>
+<span class="fc" id="L26">        validarDisponibilidadeEstoque(quantidadeEstoquePorCodigo, estoquesPorCodigo, erros);</span>
+
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (!erros.isEmpty()) {</span>
+<span class="fc" id="L29">            throw new RegraDeNegocioException(&quot;Diagnóstico inválido&quot;, erros);</span>
+        }
+<span class="fc" id="L31">    }</span>
+
+    private void validarServicosEncontrados(
+            List&lt;String&gt; codigosServicos,
+            Map&lt;String, Servico&gt; servicosPorCodigo,
+            List&lt;String&gt; erros
+    ) {
+<span class="pc bpc" id="L38" title="1 of 4 branches missed.">        if (codigosServicos == null || codigosServicos.isEmpty()) {</span>
+<span class="fc" id="L39">            erros.add(&quot;Informe ao menos um serviço para o diagnóstico&quot;);</span>
+<span class="fc" id="L40">            return;</span>
+        }
+
+<span class="fc" id="L43">        List&lt;String&gt; codigosNaoEncontrados = codigosServicos.stream()</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                .filter(codigo -&gt; !servicosPorCodigo.containsKey(codigo))</span>
+<span class="fc" id="L45">                .toList();</span>
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (!codigosNaoEncontrados.isEmpty()) {</span>
+<span class="fc" id="L48">            erros.add(&quot;Serviços não encontrados: &quot; + String.join(&quot;, &quot;, codigosNaoEncontrados));</span>
+        }
+<span class="fc" id="L50">    }</span>
+
+    private void validarItensEstoqueEncontrados(
+            Map&lt;String, Integer&gt; quantidadeEstoquePorCodigo,
+            Map&lt;String, Estoque&gt; estoquesPorCodigo,
+            List&lt;String&gt; erros
+    ) {
+<span class="pc bpc" id="L57" title="1 of 4 branches missed.">        if (quantidadeEstoquePorCodigo == null || quantidadeEstoquePorCodigo.isEmpty()) {</span>
+<span class="fc" id="L58">            return;</span>
+        }
+
+<span class="fc" id="L61">        Set&lt;String&gt; codigosEncontrados = estoquesPorCodigo.keySet();</span>
+
+<span class="fc" id="L63">        List&lt;String&gt; codigosNaoEncontrados = quantidadeEstoquePorCodigo.keySet()</span>
+<span class="fc" id="L64">                .stream()</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">                .filter(codigo -&gt; !codigosEncontrados.contains(codigo))</span>
+<span class="fc" id="L66">                .toList();</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (!codigosNaoEncontrados.isEmpty()) {</span>
+<span class="fc" id="L69">            erros.add(&quot;Itens de estoque não encontrados: &quot; + String.join(&quot;, &quot;, codigosNaoEncontrados));</span>
+        }
+<span class="fc" id="L71">    }</span>
+
+    private void validarDisponibilidadeEstoque(
+            Map&lt;String, Integer&gt; quantidadeEstoquePorCodigo,
+            Map&lt;String, Estoque&gt; estoquesPorCodigo,
+            List&lt;String&gt; erros) {
+<span class="pc bpc" id="L77" title="1 of 4 branches missed.">        if (quantidadeEstoquePorCodigo == null || quantidadeEstoquePorCodigo.isEmpty()) {</span>
+<span class="fc" id="L78">            return;</span>
+        }
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        for (Map.Entry&lt;String, Integer&gt; entry : quantidadeEstoquePorCodigo.entrySet()) {</span>
+
+<span class="fc" id="L83">            String codigo = entry.getKey();</span>
+<span class="fc" id="L84">            Integer quantidadeSolicitada = entry.getValue();</span>
+
+<span class="fc" id="L86">            Estoque estoque = estoquesPorCodigo.get(codigo);</span>
+
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            if (estoque != null) {</span>
+
+<span class="fc bfc" id="L90" title="All 4 branches covered.">                if (quantidadeSolicitada == null || quantidadeSolicitada &lt;= 0) {</span>
+
+<span class="fc" id="L92">                    erros.add(&quot;Quantidade inválida para o item de estoque &quot;+ codigo);</span>
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">                } else if (quantidadeSolicitada&gt; estoque.getDisponiveis()) {</span>
+<span class="fc" id="L95">                    erros.add(String.format(&quot;Estoque insuficiente para %s. Solicitado: %d, disponível: %d&quot;,</span>
+<span class="fc" id="L96">                                    codigo,quantidadeSolicitada,estoque.getDisponiveis()));</span>
+                }
+            }
+<span class="fc" id="L99">        }</span>
+<span class="fc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

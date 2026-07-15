@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VeiculoDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dtos.veiculos</a> &gt; <span class="el_source">VeiculoDTO.java</span></div><h1>VeiculoDTO.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dtos.veiculos;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
+@Schema(
+        name = &quot;VeiculoDTO&quot;,
+        description = &quot;DTO utilizado para cadastro e atualização de veículos vinculados a clientes da oficina.&quot;
+)
+<span class="fc" id="L14">public record VeiculoDTO(</span>
+
+        @Schema(
+                description = &quot;Placa do veículo sem hífen. Aceita padrão antigo ABC1234 ou Mercosul ABC1D23.&quot;,
+                example = &quot;ABC1D23&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotBlank(message = &quot;A placa é obrigatória&quot;)
+        @Pattern(
+                regexp = &quot;^[A-Z]{3}\\d[A-Z0-9]\\d{2}$&quot;,
+                message = &quot;A placa deve estar no padrão ABC1234 ou ABC1D23, sem hífen&quot;
+        )
+        String placa,
+
+        @Schema(
+                description = &quot;Marca/fabricante do veículo.&quot;,
+                example = &quot;Volkswagen&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotBlank(message = &quot;A marca é obrigatória&quot;)
+        String marca,
+
+        @Schema(
+                description = &quot;Modelo do veículo.&quot;,
+                example = &quot;Gol&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotBlank(message = &quot;O modelo é obrigatório&quot;)
+        String modelo,
+
+        @Schema(
+                description = &quot;Ano de fabricação ou modelo do veículo.&quot;,
+                example = &quot;2020&quot;,
+                minimum = &quot;1900&quot;,
+                maximum = &quot;2100&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotNull(message = &quot;O ano é obrigatório&quot;)
+        @Min(value = 1900, message = &quot;O ano deve ser maior ou igual a 1900&quot;)
+        @Max(value = 2100, message = &quot;O ano deve ser menor ou igual a 2100&quot;)
+        Integer ano,
+
+        @Schema(
+                description = &quot;CPF ou CNPJ do cliente responsável pelo veículo, somente números.&quot;,
+                example = &quot;12345678901&quot;,
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @NotBlank(message = &quot;O documento do cliente é obrigatório&quot;)
+        @Pattern(
+                regexp = &quot;\\d{11}|\\d{14}&quot;,
+                message = &quot;O documento deve conter 11 dígitos para CPF ou 14 dígitos para CNPJ&quot;
+        )
+        String clienteDocumento
+) {
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

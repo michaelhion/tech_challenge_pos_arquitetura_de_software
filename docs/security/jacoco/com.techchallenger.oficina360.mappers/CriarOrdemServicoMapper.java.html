@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CriarOrdemServicoMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.mappers</a> &gt; <span class="el_source">CriarOrdemServicoMapper.java</span></div><h1>CriarOrdemServicoMapper.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.mappers;
+
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.entities.OrdemServico;
+
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
+
+public class CriarOrdemServicoMapper {
+
+    private CriarOrdemServicoMapper() {
+    }
+
+    public static CriarOrdemServicoDTO toDTO(OrdemServico ordemServicoEntity) {
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if (ordemServicoEntity == null) {</span>
+<span class="nc" id="L15">            return null;</span>
+        }
+
+<span class="fc" id="L18">        return new CriarOrdemServicoDTO(</span>
+<span class="fc" id="L19">                ordemServicoEntity.getId(),</span>
+<span class="fc" id="L20">                ordemServicoEntity.getDocumentoCliente(),</span>
+<span class="fc" id="L21">                mascararPlaca(ordemServicoEntity.getPlacaVeiculo()),</span>
+<span class="fc" id="L22">                ordemServicoEntity.getDescricaoProblema(),</span>
+<span class="fc" id="L23">                ordemServicoEntity.getOrdemDeServicoStatus()</span>
+        );
+    }
+
+    public static OrdemServico toEntity(CriarOrdemServicoDTO criarOrdemServicoDTO) {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (criarOrdemServicoDTO == null) {</span>
+<span class="nc" id="L29">            return null;</span>
+        }
+
+<span class="nc" id="L32">        return OrdemServico.builder()</span>
+<span class="nc" id="L33">                .id(criarOrdemServicoDTO.id())</span>
+<span class="nc" id="L34">                .documentoCliente(criarOrdemServicoDTO.documentoCliente())</span>
+<span class="nc" id="L35">                .placaVeiculo(criarOrdemServicoDTO.placaVeiculo())</span>
+<span class="nc" id="L36">                .descricaoProblema(criarOrdemServicoDTO.descricaoProblema())</span>
+<span class="nc" id="L37">                .ordemDeServicoStatus(criarOrdemServicoDTO.ordemDeServicoStatus())</span>
+<span class="nc" id="L38">                .build();</span>
+    }
+
+    public static void updateEntityFromDto(
+            CriarOrdemServicoDTO criarOrdemServicoDTO,
+            OrdemServico ordemServicoEntity
+    ) {
+<span class="nc bnc" id="L45" title="All 4 branches missed.">        if (criarOrdemServicoDTO == null || ordemServicoEntity == null) {</span>
+<span class="nc" id="L46">            return;</span>
+        }
+
+<span class="nc" id="L49">        ordemServicoEntity.setDocumentoCliente(criarOrdemServicoDTO.documentoCliente());</span>
+<span class="nc" id="L50">        ordemServicoEntity.setPlacaVeiculo(criarOrdemServicoDTO.placaVeiculo());</span>
+<span class="nc" id="L51">        ordemServicoEntity.setDescricaoProblema(criarOrdemServicoDTO.descricaoProblema());</span>
+<span class="nc" id="L52">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

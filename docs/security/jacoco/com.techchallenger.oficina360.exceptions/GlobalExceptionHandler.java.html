@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.exceptions</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.exceptions;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+<span class="fc" id="L21">@Slf4j</span>
+@RestControllerAdvice
+<span class="fc" id="L23">public class GlobalExceptionHandler {</span>
+
+    private static final String AMERICA_SAO_PAULO = &quot;America/Sao_Paulo&quot;;
+
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleRecursoNaoEncontrado(
+            RecursoNaoEncontradoException ex
+    ) {
+<span class="fc" id="L31">        return erro(</span>
+                HttpStatus.NOT_FOUND,
+                &quot;Recurso não encontrado&quot;,
+<span class="fc" id="L34">                ex.getMessage()</span>
+        );
+    }
+
+    @ExceptionHandler(ConflitoException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleConflito(
+            ConflitoException ex
+    ) {
+<span class="fc" id="L42">        return erro(</span>
+                HttpStatus.CONFLICT,
+                &quot;Conflito&quot;,
+<span class="fc" id="L45">                ex.getMessage()</span>
+        );
+    }
+
+    @ExceptionHandler(RegraDeNegocioException.class)
+    public ResponseEntity&lt;ErroRegraDeNegocioResponse&gt; handleRegraDeNegocio(
+            RegraDeNegocioException ex
+    ) {
+<span class="fc" id="L53">        ErroRegraDeNegocioResponse erro = new ErroRegraDeNegocioResponse(</span>
+<span class="fc" id="L54">                HttpStatus.UNPROCESSABLE_ENTITY.value(),</span>
+                &quot;Regra de negócio violada&quot;,
+<span class="fc" id="L56">                ex.getMessage(),</span>
+<span class="fc" id="L57">                ex.getMensagens(),</span>
+<span class="fc" id="L58">                LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))</span>
+        );
+
+<span class="fc" id="L61">        return ResponseEntity</span>
+<span class="fc" id="L62">                .status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="fc" id="L63">                .body(erro);</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex
+    ) {
+
+<span class="fc" id="L71">        String mensagem = ex.getBindingResult()</span>
+<span class="fc" id="L72">                .getFieldErrors()</span>
+<span class="fc" id="L73">                .stream()</span>
+<span class="fc" id="L74">                .map(error -&gt; error.getField() + &quot;: &quot; + error.getDefaultMessage())</span>
+<span class="fc" id="L75">                .findFirst()</span>
+<span class="fc" id="L76">                .orElse(&quot;Dados inválidos&quot;);</span>
+
+<span class="fc" id="L78">        return erro(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Dados inválidos&quot;,
+                mensagem
+        );
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleHandlerMethodValidation(
+            HandlerMethodValidationException ex
+    ) {
+<span class="fc" id="L89">        return erro(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Parâmetros inválidos&quot;,
+<span class="fc" id="L92">                ex.getMessage()</span>
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleConstraintViolation(
+            ConstraintViolationException ex
+    ) {
+
+<span class="fc" id="L101">        String mensagem = ex.getConstraintViolations()</span>
+<span class="fc" id="L102">                .stream()</span>
+<span class="fc" id="L103">                .map(ConstraintViolation::getMessage)</span>
+<span class="fc" id="L104">                .findFirst()</span>
+<span class="fc" id="L105">                .orElse(&quot;Validação inválida&quot;);</span>
+
+<span class="fc" id="L107">        return erro(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Validação inválida&quot;,
+                mensagem
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleMessageNotReadable(
+            HttpMessageNotReadableException ex
+    ) {
+<span class="fc" id="L118">        return erro(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Payload inválido&quot;,
+                &quot;O corpo da requisição possui formato inválido&quot;
+        );
+    }
+
+    @ExceptionHandler({
+            AuthorizationDeniedException.class,
+            AccessDeniedException.class
+    })
+    public ResponseEntity&lt;ErroResponse&gt; handleAccessDenied(
+            Exception ex
+    ) {
+<span class="fc" id="L132">        return erro(</span>
+                HttpStatus.FORBIDDEN,
+                &quot;Acesso negado&quot;,
+                &quot;Você não tem permissão para executar esta operação&quot;
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleDataIntegrityViolation(
+            DataIntegrityViolationException ex
+    ) {
+
+<span class="nc" id="L144">        log.warn(&quot;Violação de integridade de dados&quot;, ex);</span>
+
+<span class="nc" id="L146">        return erro(</span>
+                HttpStatus.CONFLICT,
+                &quot;Violação de integridade&quot;,
+                &quot;Operação não permitida devido à integridade dos dados&quot;
+        );
+    }
+
+    @ExceptionHandler(JpaSystemException.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleJpaSystemException(
+            JpaSystemException ex
+    ) {
+
+<span class="fc" id="L158">        log.error(&quot;Erro de persistência&quot;, ex);</span>
+
+<span class="fc" id="L160">        return erro(</span>
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                &quot;Erro de persistência&quot;,
+                &quot;Falha ao processar os dados da aplicação&quot;
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErroResponse&gt; handleException(
+            Exception ex
+    ) {
+
+<span class="fc" id="L172">        log.error(&quot;Erro inesperado&quot;, ex);</span>
+
+<span class="fc" id="L174">        return erro(</span>
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                &quot;Erro interno&quot;,
+                &quot;Ocorreu um erro inesperado&quot;
+        );
+    }
+
+    private ResponseEntity&lt;ErroResponse&gt; erro(
+            HttpStatus status,
+            String erro,
+            String mensagem
+    ) {
+
+<span class="fc" id="L187">        return ResponseEntity</span>
+<span class="fc" id="L188">                .status(status)</span>
+<span class="fc" id="L189">                .body(</span>
+                        new ErroResponse(
+<span class="fc" id="L191">                                status.value(),</span>
+                                erro,
+                                mensagem,
+<span class="fc" id="L194">                                LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))</span>
+                        )
+                );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

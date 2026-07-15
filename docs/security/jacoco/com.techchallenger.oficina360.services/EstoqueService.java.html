@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EstoqueService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.services</a> &gt; <span class="el_source">EstoqueService.java</span></div><h1>EstoqueService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.services;
+
+import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
+import com.techchallenger.oficina360.entities.Estoque;
+import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
+import com.techchallenger.oficina360.mappers.EstoqueMapper;
+import com.techchallenger.oficina360.repositories.EstoqueRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
+import static com.techchallenger.oficina360.mappers.EstoqueMapper.toDTO;
+import static com.techchallenger.oficina360.mappers.EstoqueMapper.toEntity;
+
+@Service
+@RequiredArgsConstructor
+public class EstoqueService {
+
+    private final EstoqueRepository estoqueRepository;
+
+    public List&lt;EstoqueDTO&gt; findAll() {
+<span class="fc" id="L27">        return estoqueRepository.findAll().stream().map(EstoqueMapper::toDTO).toList();</span>
+    }
+
+    public void delete(String codigo) {
+<span class="fc" id="L31">        estoqueRepository.findByCodigo(codigo)</span>
+<span class="fc" id="L32">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(ESTOQUE_ITEM_DE_ESTOQUE_NAO_DISPONIVEL));</span>
+<span class="fc" id="L33">        estoqueRepository.deleteByCodigo(codigo);</span>
+<span class="fc" id="L34">    }</span>
+
+    public Optional&lt;EstoqueDTO&gt; findByCodigo(String codigo) {
+<span class="fc" id="L37">        return estoqueRepository.findByCodigo(codigo).map(EstoqueMapper::toDTO);</span>
+    }
+
+    public EstoqueDTO save(EstoqueDTO estoqueDTO) {
+<span class="fc" id="L41">        estoqueRepository.findByCodigo(estoqueDTO.codigo())</span>
+<span class="fc" id="L42">                .ifPresent(existing -&gt; {</span>
+<span class="nc" id="L43">                    throw new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA);</span>
+                });
+<span class="fc" id="L45">        return toDTO(estoqueRepository.save(toEntity(estoqueDTO)));</span>
+    }
+
+
+    public EstoqueDTO edit(String codigo, EstoqueDTO estoqueDTO) {
+<span class="fc" id="L50">        Estoque estoque = estoqueRepository.findByCodigo(codigo)</span>
+<span class="fc" id="L51">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(ESTOQUE_ITEM_DE_ESTOQUE_NAO_DISPONIVEL));</span>
+
+<span class="fc" id="L53">        EstoqueMapper.updateEntityFromDto(estoqueDTO, estoque);</span>
+
+<span class="fc" id="L55">        Estoque estoqueAtualizado = estoqueRepository.save(estoque);</span>
+
+<span class="fc" id="L57">        return toDTO(estoqueAtualizado);</span>
+    }
+
+
+    public EstoqueDTO reservar(String codigo, ReservaEstoqueDTO reservaDTO) {
+<span class="fc" id="L62">        Estoque estoque = estoqueRepository.findByCodigo(codigo)</span>
+<span class="fc" id="L63">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(ESTOQUE_ITEM_NAO_ENCONTRADO));</span>
+
+<span class="fc" id="L65">        estoque.reservar(reservaDTO.quantidade());</span>
+
+<span class="fc" id="L67">        Estoque estoqueAtualizado = estoqueRepository.save(estoque);</span>
+
+<span class="fc" id="L69">        return EstoqueMapper.toDTO(estoqueAtualizado);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

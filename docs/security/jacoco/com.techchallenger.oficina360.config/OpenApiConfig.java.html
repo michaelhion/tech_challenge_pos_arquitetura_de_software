@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OpenApiConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.config</a> &gt; <span class="el_source">OpenApiConfig.java</span></div><h1>OpenApiConfig.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.config;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+<span class="fc" id="L15">public class OpenApiConfig {</span>
+
+    private static final String SECURITY_SCHEME_NAME = &quot;bearerAuth&quot;;
+
+    @Bean
+    public OpenAPI oficina360OpenAPI() {
+<span class="fc" id="L21">        return new OpenAPI()</span>
+<span class="fc" id="L22">                .info(apiInfo())</span>
+<span class="fc" id="L23">                .externalDocs(externalDocumentation())</span>
+<span class="fc" id="L24">                .components(new Components()</span>
+<span class="fc" id="L25">                        .addSecuritySchemes(SECURITY_SCHEME_NAME, securityScheme()))</span>
+<span class="fc" id="L26">                .addSecurityItem(new SecurityRequirement()</span>
+<span class="fc" id="L27">                        .addList(SECURITY_SCHEME_NAME));</span>
+    }
+
+    private Info apiInfo() {
+<span class="fc" id="L31">        return new Info()</span>
+<span class="fc" id="L32">                .title(&quot;Oficina360 API&quot;)</span>
+<span class="fc" id="L33">                .description(</span>
+                        &quot;API REST do sistema Oficina360, desenvolvido para o Tech Challenge. &quot; +
+                                &quot;O sistema apoia a gestão de uma oficina mecânica, incluindo clientes, &quot; +
+                                &quot;veículos, serviços, estoque de peças e insumos, reservas de estoque &quot; +
+                                &quot;e ordens de serviço.&quot;
+                )
+<span class="fc" id="L39">                .version(&quot;1.0.0&quot;)</span>
+<span class="fc" id="L40">                .contact(new Contact()</span>
+<span class="fc" id="L41">                        .name(&quot;Equipe Oficina360&quot;)</span>
+<span class="fc" id="L42">                        .email(&quot;contato@oficina360.com&quot;))</span>
+<span class="fc" id="L43">                .license(new License()</span>
+<span class="fc" id="L44">                        .name(&quot;Uso acadêmico - Tech Challenge&quot;));</span>
+    }
+
+    private ExternalDocumentation externalDocumentation() {
+<span class="fc" id="L48">        return new ExternalDocumentation()</span>
+<span class="fc" id="L49">                .description(&quot;Documentação do projeto Oficina360&quot;)</span>
+<span class="fc" id="L50">                .url(&quot;https://github.com/seu-usuario/seu-repositorio&quot;);</span>
+    }
+
+    private SecurityScheme securityScheme() {
+<span class="fc" id="L54">        return new SecurityScheme()</span>
+<span class="fc" id="L55">                .name(SECURITY_SCHEME_NAME)</span>
+<span class="fc" id="L56">                .description(&quot;Autenticação via JWT usando o header Authorization: Bearer {token}.&quot;)</span>
+<span class="fc" id="L57">                .type(SecurityScheme.Type.HTTP)</span>
+<span class="fc" id="L58">                .scheme(&quot;bearer&quot;)</span>
+<span class="fc" id="L59">                .bearerFormat(&quot;JWT&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

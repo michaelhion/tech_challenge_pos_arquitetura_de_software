@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoClienteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.services</a> &gt; <span class="el_source">OrdemServicoClienteService.java</span></div><h1>OrdemServicoClienteService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.services;
+
+import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.entities.OrdemServico;
+import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.mappers.OrdemServicoMapper;
+import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.OS_ORDEM_DE_SERVICO_NAO_ENCONTRADA;
+import static com.techchallenger.oficina360.mappers.OrdemServicoMapper.toDTO;
+
+@Service
+@RequiredArgsConstructor
+public class OrdemServicoClienteService {
+
+    private final OrdemServicosRepository ordemServicosRepository;
+
+    public Optional&lt;OrdemServicoDTO&gt; findById(UUID id) {
+<span class="fc" id="L25">        return ordemServicosRepository.findById(id)</span>
+<span class="fc" id="L26">                .map(OrdemServicoMapper::toDTO);</span>
+    }
+
+    public OrdemServicoDTO aprovar(UUID id, AprovacaoOrdemServicoDTO aprovacaoDTO) {
+<span class="fc" id="L30">        OrdemServico ordemServico =ordemServicosRepository.findById(id)</span>
+<span class="fc" id="L31">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(OS_ORDEM_DE_SERVICO_NAO_ENCONTRADA));</span>
+
+<span class="fc" id="L33">        ordemServico.registrarAprovacao(aprovacaoDTO.aprovado());</span>
+<span class="fc bfc" id="L34" title="All 4 branches covered.">        if (aprovacaoDTO.observacao() != null &amp;&amp; !aprovacaoDTO.observacao().isBlank()) {</span>
+<span class="fc" id="L35">            ordemServico.setObservacaoCliente(aprovacaoDTO.observacao());</span>
+        }
+<span class="fc" id="L37">        OrdemServico ordemServicoAtualizada = ordemServicosRepository.save(ordemServico);</span>
+
+<span class="fc" id="L39">        return toDTO(ordemServicoAtualizada);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

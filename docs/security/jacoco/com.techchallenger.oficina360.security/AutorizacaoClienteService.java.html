@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutorizacaoClienteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.security</a> &gt; <span class="el_source">AutorizacaoClienteService.java</span></div><h1>AutorizacaoClienteService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.security;
+
+import com.techchallenger.oficina360.entities.Usuario;
+import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
+import com.techchallenger.oficina360.repositories.VeiculoRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
+
+@Component(&quot;autorizacaoCliente&quot;)
+@RequiredArgsConstructor
+public class AutorizacaoClienteService {
+
+
+    private final VeiculoRepository veiculoRepository;
+    private final OrdemServicosRepository ordemServicosRepository;
+
+    public boolean podeAcessarClientePorDocumento(String documento, Authentication authentication) {
+<span class="fc" id="L24">        Usuario usuario = obterUsuario(authentication);</span>
+
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (!usuarioClienteValido(usuario)) {</span>
+<span class="fc" id="L27">            return false;</span>
+        }
+
+<span class="fc" id="L30">        return usuario.getDocumento().equals(normalizarDocumento(documento));</span>
+    }
+
+
+    public boolean podeAcessarVeiculo(String placa, Authentication authentication) {
+<span class="fc" id="L35">        Usuario usuario = obterUsuario(authentication);</span>
+
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (!usuarioClienteValido(usuario)) {</span>
+<span class="nc" id="L38">            return false;</span>
+        }
+
+<span class="fc" id="L41">        String placaNormalizada = normalizarPlaca(placa);</span>
+
+<span class="fc" id="L43">        return veiculoRepository.findByPlaca(placaNormalizada)</span>
+<span class="fc" id="L44">                .map(veiculo -&gt; usuario.getDocumento()</span>
+<span class="fc" id="L45">                        .equals(veiculo.getClienteDocumento()))</span>
+<span class="fc" id="L46">                .orElse(false);</span>
+    }
+
+    public boolean podeAcessarOrdemServico(UUID ordemServicoId, Authentication authentication) {
+<span class="fc" id="L50">        Usuario usuario = obterUsuario(authentication);</span>
+
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (!usuarioClienteValido(usuario)) {</span>
+<span class="nc" id="L53">            return false;</span>
+        }
+
+<span class="fc" id="L56">        return ordemServicosRepository.findById(ordemServicoId).map(os -&gt; usuario.getDocumento().equals(os.getDocumentoCliente())).orElse(false);</span>
+    }
+
+    private Usuario obterUsuario(Authentication authentication) {
+<span class="fc bfc" id="L60" title="All 4 branches covered.">        if (authentication == null || !(authentication.getPrincipal() instanceof Usuario usuario)) {</span>
+<span class="fc" id="L61">            return null;</span>
+        }
+
+<span class="fc" id="L64">        return usuario;</span>
+    }
+
+    private boolean usuarioClienteValido(Usuario usuario) {
+<span class="pc bpc" id="L68" title="2 of 6 branches missed.">        return usuario != null &amp;&amp; usuario.getDocumento() != null &amp;&amp; !usuario.getDocumento().isBlank();</span>
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

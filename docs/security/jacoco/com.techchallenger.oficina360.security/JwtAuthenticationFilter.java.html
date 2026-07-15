@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.security</a> &gt; <span class="el_source">JwtAuthenticationFilter.java</span></div><h1>JwtAuthenticationFilter.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.security;
+
+import com.techchallenger.oficina360.repositories.UsuarioRepository;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+@RequiredArgsConstructor
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
+<span class="fc" id="L30">        String token = recuperarToken(request);</span>
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (token != null) {</span>
+<span class="fc" id="L33">            String email = jwtService.validarTokenEObterSubject(token);</span>
+
+<span class="fc" id="L35">            usuarioRepository.findByEmail(email).ifPresent(usuario -&gt; {</span>
+<span class="fc" id="L36">                UsernamePasswordAuthenticationToken authentication =</span>
+                        new UsernamePasswordAuthenticationToken(
+                                usuario,
+                                null,
+<span class="fc" id="L40">                                usuario.getAuthorities()</span>
+                        );
+
+<span class="fc" id="L43">                SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="fc" id="L44">            });</span>
+        }
+
+<span class="fc" id="L47">        filterChain.doFilter(request, response);</span>
+<span class="fc" id="L48">    }</span>
+
+    private String recuperarToken(HttpServletRequest request) {
+<span class="fc" id="L51">        String authorizationHeader = request.getHeader(&quot;Authorization&quot;);</span>
+
+<span class="pc bpc" id="L53" title="1 of 4 branches missed.">        if (authorizationHeader == null || authorizationHeader.isBlank()) {</span>
+<span class="fc" id="L54">            return null;</span>
+        }
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (!authorizationHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L58">            return null;</span>
+        }
+
+<span class="fc" id="L61">        return authorizationHeader.replace(&quot;Bearer &quot;, &quot;&quot;).trim();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.mappers</a> &gt; <span class="el_source">UsuarioMapper.java</span></div><h1>UsuarioMapper.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.mappers;
+
+import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
+import com.techchallenger.oficina360.entities.Usuario;
+
+public class UsuarioMapper {
+
+    private UsuarioMapper(){}
+
+    public static CriarUsuarioRequestDTO toDTO(Usuario usuario) {
+<span class="nc" id="L11">        return new CriarUsuarioRequestDTO(</span>
+<span class="nc" id="L12">                usuario.getEmail(),</span>
+<span class="nc" id="L13">                usuario.getSenha(),</span>
+<span class="nc" id="L14">                usuario.getDocumento(),</span>
+<span class="nc" id="L15">                usuario.getRole()</span>
+        );
+    }
+
+    public static Usuario toEntity(CriarUsuarioRequestDTO usuarioRequestDTO) {
+<span class="fc" id="L20">        return Usuario.builder()</span>
+<span class="fc" id="L21">                .documento(usuarioRequestDTO.documento())</span>
+<span class="fc" id="L22">                .senha(usuarioRequestDTO.senha())</span>
+<span class="fc" id="L23">                .email(usuarioRequestDTO.email())</span>
+<span class="fc" id="L24">                .role(usuarioRequestDTO.role())</span>
+<span class="fc" id="L25">                .build();</span>
+    }
+
+
+    public static void updateEntityFromDto(CriarUsuarioRequestDTO dto, Usuario entity) {
+<span class="nc bnc" id="L30" title="All 4 branches missed.">        if (dto == null || entity == null) {</span>
+<span class="nc" id="L31">            return;</span>
+        }
+
+<span class="nc" id="L34">        entity.setDocumento(dto.documento());</span>
+<span class="nc" id="L35">        entity.setSenha(dto.senha());</span>
+<span class="nc" id="L36">        entity.setEmail(dto.email());</span>
+<span class="nc" id="L37">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
