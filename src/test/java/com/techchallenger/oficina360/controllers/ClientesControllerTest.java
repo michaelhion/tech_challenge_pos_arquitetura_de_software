@@ -2,10 +2,15 @@ package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.ClientesController;
-import com.techchallenger.oficina360.services.ClienteService;
+import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
+import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;
+import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
+import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
+import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -23,16 +28,27 @@ class ClientesControllerTest {
 
     public static final String DOCUMENTO = "12345678901";
     @Mock
-    private ClienteService clienteService;
+    private BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase;
 
+    @Mock
+    private CadastrarClienteUseCase cadastrarClienteUseCase;
+
+    @Mock
+    private ExcluirClienteUseCase excluirClienteUseCase;
+
+    @Mock
+    private ListarClientesUseCase listarClientesUseCase;
+
+    @Mock
+    private AtualizarClienteUseCase atualizarClienteUseCase;
+
+    @InjectMocks
     private ClientesController clientesController;
 
     private ClienteDTO clienteDTO;
 
     @BeforeEach
     void setUp() {
-        clientesController = new ClientesController(clienteService);
-
         clienteDTO = new ClienteDTO(
                 DOCUMENTO,
                 "João da Silva",
@@ -45,7 +61,7 @@ class ClientesControllerTest {
     void deveBuscarClientePorDocumentoComSucesso() {
         String documento = DOCUMENTO;
 
-        when(clienteService.findByDocumento(documento))
+        when(buscarClientePorDocumentoUseCase.findByDocumento(documento))
                 .thenReturn(Optional.of(clienteDTO));
 
         ResponseEntity<ClienteDTO> response = clientesController.buscarPorDocumento(documento);
@@ -57,14 +73,14 @@ class ClientesControllerTest {
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
 
-        verify(clienteService, times(1)).findByDocumento(documento);
+        verify(buscarClientePorDocumentoUseCase, times(1)).findByDocumento(documento);
     }
 
     @Test
     void deveRetornarNotFoundQuandoBuscarClientePorDocumentoInexistente() {
         String documento = "00000000000";
 
-        when(clienteService.findByDocumento(documento))
+        when(buscarClientePorDocumentoUseCase.findByDocumento(documento))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<ClienteDTO> response = clientesController.buscarPorDocumento(documento);
@@ -72,12 +88,12 @@ class ClientesControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(clienteService, times(1)).findByDocumento(documento);
+        verify(buscarClientePorDocumentoUseCase, times(1)).findByDocumento(documento);
     }
 
     @Test
     void deveSalvarClienteComSucesso() {
-        when(clienteService.save(clienteDTO))
+        when(cadastrarClienteUseCase.save(clienteDTO))
                 .thenReturn(clienteDTO);
 
         ResponseEntity<ClienteDTO> response = clientesController.salvar(clienteDTO);
@@ -89,7 +105,7 @@ class ClientesControllerTest {
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
 
-        verify(clienteService, times(1)).save(clienteDTO);
+        verify(cadastrarClienteUseCase, times(1)).save(clienteDTO);
     }
 
     @Test
@@ -102,7 +118,7 @@ class ClientesControllerTest {
                 "11888888888"
         );
 
-        when(clienteService.edit(DOCUMENTO, clienteAtualizado))
+        when(atualizarClienteUseCase.edit(DOCUMENTO, clienteAtualizado))
                 .thenReturn(clienteAtualizado);
 
         ResponseEntity<ClienteDTO> response = clientesController.editar(DOCUMENTO, clienteAtualizado);
@@ -114,21 +130,21 @@ class ClientesControllerTest {
         assertEquals("joao.atualizado@email.com", response.getBody().email());
         assertEquals("11888888888", response.getBody().telefone());
 
-        verify(clienteService, times(1)).edit(DOCUMENTO, clienteAtualizado);
+        verify(atualizarClienteUseCase, times(1)).edit(DOCUMENTO, clienteAtualizado);
     }
 
     @Test
     void deveDeletarClientePorDocumentoComSucesso() {
         String documento = DOCUMENTO;
 
-        doNothing().when(clienteService).delete(documento);
+        doNothing().when(excluirClienteUseCase).delete(documento);
 
         ResponseEntity<Void> response = clientesController.deletar(documento);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(clienteService, times(1)).delete(documento);
+        verify(excluirClienteUseCase, times(1)).delete(documento);
     }
 
     @Test
@@ -140,7 +156,7 @@ class ClientesControllerTest {
                 "11988887777"
         );
 
-        when(clienteService.findAll())
+        when(listarClientesUseCase.findAll())
                 .thenReturn(List.of(clienteDTO, segundoCliente));
 
         ResponseEntity<List<ClienteDTO>> response = clientesController.listarClientes();
@@ -159,12 +175,12 @@ class ClientesControllerTest {
         assertEquals("maria.oliveira@email.com", response.getBody().get(1).email());
         assertEquals("11988887777", response.getBody().get(1).telefone());
 
-        verify(clienteService, times(1)).findAll();
+        verify(listarClientesUseCase, times(1)).findAll();
     }
 
     @Test
     void deveRetornarListaVaziaQuandoNaoExistiremClientes() {
-        when(clienteService.findAll())
+        when(listarClientesUseCase.findAll())
                 .thenReturn(List.of());
 
         ResponseEntity<List<ClienteDTO>> response = clientesController.listarClientes();
@@ -173,7 +189,7 @@ class ClientesControllerTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
 
-        verify(clienteService, times(1)).findAll();
+        verify(listarClientesUseCase, times(1)).findAll();
     }
 }
 

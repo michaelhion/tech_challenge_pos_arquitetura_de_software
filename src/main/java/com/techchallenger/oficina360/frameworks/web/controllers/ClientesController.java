@@ -2,7 +2,11 @@ package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.ClientesApi;
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
-import com.techchallenger.oficina360.services.ClienteService;
+import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
+import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;
+import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
+import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
+import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +26,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientesController implements ClientesApi {
 
-    private final ClienteService clienteService;
+    private final BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase;
+    private final CadastrarClienteUseCase cadastrarClienteUseCase;
+    private final ExcluirClienteUseCase excluirClienteUseCase;
+    private final ListarClientesUseCase listarClientesUseCase;
+    private final AtualizarClienteUseCase atualizarClienteUseCase;
 
     @Override
     @GetMapping("/listar/{documento}")
     public ResponseEntity<ClienteDTO> buscarPorDocumento(
             @PathVariable String documento
     ) {
-        return clienteService.findByDocumento(documento)
+        return buscarClientePorDocumentoUseCase.findByDocumento(documento)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -39,7 +47,7 @@ public class ClientesController implements ClientesApi {
     public ResponseEntity<ClienteDTO> salvar(
             @Valid @RequestBody ClienteDTO cliente
     ) {
-        ClienteDTO clienteSalvo = clienteService.save(cliente);
+        ClienteDTO clienteSalvo = cadastrarClienteUseCase.save(cliente);
         return ResponseEntity.status(201).body(clienteSalvo);
     }
 
@@ -49,7 +57,7 @@ public class ClientesController implements ClientesApi {
             @PathVariable String documento,
             @Valid @RequestBody ClienteDTO cliente
     ) {
-        ClienteDTO clienteAtualizado = clienteService.edit(documento, cliente);
+        ClienteDTO clienteAtualizado = atualizarClienteUseCase.edit(documento, cliente);
         return ResponseEntity.ok(clienteAtualizado);
     }
 
@@ -58,13 +66,13 @@ public class ClientesController implements ClientesApi {
     public ResponseEntity<Void> deletar(
             @PathVariable String documento
     ) {
-        clienteService.delete(documento);
+        excluirClienteUseCase.delete(documento);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     @GetMapping("/listar")
     public ResponseEntity<List<ClienteDTO>> listarClientes() {
-        return ResponseEntity.ok(clienteService.findAll());
+        return ResponseEntity.ok(listarClientesUseCase.findAll());
     }
 }

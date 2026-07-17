@@ -1,5 +1,7 @@
 package com.techchallenger.oficina360.dominio;
 
+import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -23,6 +25,13 @@ public class Servico {
         this.tempoMedioExecucaoMinutos = tempoMedioExecucaoMinutos;
     }
 
+    public Servico(UUID id, String descricao, BigDecimal valor, String codigo) {
+        this.id = id;
+        this.descricao = descricao;
+        this.valor = valor;
+        this.codigo = codigo;
+    }
+
     public Servico() {
     }
 
@@ -44,5 +53,12 @@ public class Servico {
 
     public Integer getTempoMedioExecucaoMinutos() {
         return tempoMedioExecucaoMinutos;
+    }
+
+    public void inicializaTempoDeExecucao(int tempoInicial) {
+        if(this.tempoMedioExecucaoMinutos == null || this.tempoMedioExecucaoMinutos == 0){
+            this.tempoMedioExecucaoMinutos = tempoInicial;
+        }
+        throw new RegraDeNegocioException("N\u00E3o pode alterar tempo j\u00E1 computado!");
     }
 }

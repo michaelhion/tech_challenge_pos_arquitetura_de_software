@@ -13,7 +13,7 @@ public interface ClienteGateway {
 
     Cliente save(Cliente cliente);
 
-    List<Cliente> findAll(Cliente cliente);
+    List<Cliente> findAll();
 
     Optional<Cliente> findById(UUID id);
     void deleteById(UUID id);

@@ -1,5 +1,6 @@
 package com.techchallenger.oficina360.mappers;
 
+import com.techchallenger.oficina360.dominio.Cliente;
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
 
@@ -19,6 +20,15 @@ public class ClienteMapper {
         );
     }
 
+    public static ClienteDTO domainToDTO(Cliente cliente) {
+        return new ClienteDTO(
+                mascararDocumento(cliente.getDocumento()),
+                cliente.getNome(),
+                cliente.getEmail(),
+                cliente.getTelefone()
+        );
+    }
+
     public static ClienteEntity toEntity(ClienteDTO clienteDTO) {
         return ClienteEntity.builder()
                 .documento(clienteDTO.documento())
@@ -26,6 +36,17 @@ public class ClienteMapper {
                 .email(clienteDTO.email())
                 .telefone(clienteDTO.telefone())
                 .build();
+    }
+
+    public static Cliente toDomain(ClienteDTO clienteDTO) {
+        return new Cliente(
+                null,
+                clienteDTO.documento(),
+                clienteDTO.nome(),
+                clienteDTO.email(),
+                clienteDTO.telefone()
+        );
+
     }
 
 
@@ -38,6 +59,21 @@ public class ClienteMapper {
         entity.setNome(dto.nome());
         entity.setEmail(dto.email());
         entity.setTelefone(dto.telefone());
+    }
+
+    public static void updateDomainFromDto(ClienteDTO dto, Cliente domain) {
+        if (dto == null || domain == null) {
+            return;
+        }
+        Cliente newCliente = new Cliente(
+                domain.getId(),
+                domain.getDocumento(),
+                domain.getNome(),
+                domain.getEmail(),
+                domain.getTelefone()
+        );
+        domain = newCliente;
+
     }
 
 }

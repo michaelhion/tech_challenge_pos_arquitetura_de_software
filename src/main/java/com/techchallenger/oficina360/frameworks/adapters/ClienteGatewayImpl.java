@@ -44,7 +44,7 @@ public class ClienteGatewayImpl implements ClienteGateway {
     }
 
     @Override
-    public List<Cliente> findAll(Cliente cliente){
+    public List<Cliente> findAll(){
         return repository.findAll()
                 .stream()
                 .map(mapper::toDomain)

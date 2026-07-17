@@ -2,10 +2,15 @@ package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.ServicosController;
-import com.techchallenger.oficina360.services.ServicoService;
+import com.techchallenger.oficina360.usecases.servicos.AtualizarServicoUseCase;
+import com.techchallenger.oficina360.usecases.servicos.BuscarServicoPorCodigoUseCase;
+import com.techchallenger.oficina360.usecases.servicos.CadastrarServicoUseCase;
+import com.techchallenger.oficina360.usecases.servicos.ExcluirServicoUseCase;
+import com.techchallenger.oficina360.usecases.servicos.ListarServicosUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -23,17 +28,27 @@ class ServicosControllerTest {
 
     private static final String ALINHAMENTO_E_BALANCEAMENTO = "ALINHAMENTO-E-BALANCEAMENTO";
     @Mock
-    private ServicoService servicoService;
+    private CadastrarServicoUseCase cadastrarServicoUseCase;
 
+    @Mock
+    private BuscarServicoPorCodigoUseCase buscarServicoPorCodigoUseCase;
+
+    @Mock
+    private ListarServicosUseCase listarServicosUseCase;
+
+    @Mock
+    private AtualizarServicoUseCase atualizarServicoUseCase;
+
+    @Mock
+    private ExcluirServicoUseCase excluirServicoUseCase;
+
+    @InjectMocks
     private ServicosController servicosController;
 
     private ServicoDTO servicoDTO;
 
     @BeforeEach
     void setUp() {
-        servicosController = new ServicosController(servicoService);
-
-
         servicoDTO = new ServicoDTO(
                 "TROCA-DE-OLEO",
                 "Troca de óleo",
@@ -44,7 +59,7 @@ class ServicosControllerTest {
 
     @Test
     void deveBuscarServicoPorIdComSucesso() {
-        when(servicoService.findByCodigo(servicoDTO.codigo()))
+        when(buscarServicoPorCodigoUseCase.findByCodigo(servicoDTO.codigo()))
                 .thenReturn(Optional.of(servicoDTO));
 
         ResponseEntity<ServicoDTO> response = servicosController.buscarPorId(servicoDTO.codigo());
@@ -54,12 +69,12 @@ class ServicosControllerTest {
         assertEquals("Troca de óleo", response.getBody().descricao());
         assertEquals(BigDecimal.valueOf(150.00), response.getBody().valor());
 
-        verify(servicoService, times(1)).findByCodigo(servicoDTO.codigo());
+        verify(buscarServicoPorCodigoUseCase, times(1)).findByCodigo(servicoDTO.codigo());
     }
 
     @Test
     void deveRetornarNotFoundQuandoBuscarServicoPorIdInexistente() {
-        when(servicoService.findByCodigo(servicoDTO.codigo()))
+        when(buscarServicoPorCodigoUseCase.findByCodigo(servicoDTO.codigo()))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<ServicoDTO> response = servicosController.buscarPorId(servicoDTO.codigo());
@@ -67,12 +82,12 @@ class ServicosControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(servicoService, times(1)).findByCodigo(servicoDTO.codigo());
+        verify(buscarServicoPorCodigoUseCase, times(1)).findByCodigo(servicoDTO.codigo());
     }
 
     @Test
     void deveSalvarServicoComSucesso() {
-        when(servicoService.save(servicoDTO))
+        when(cadastrarServicoUseCase.save(servicoDTO))
                 .thenReturn(servicoDTO);
 
         ResponseEntity<ServicoDTO> response = servicosController.salvar(servicoDTO);
@@ -82,7 +97,7 @@ class ServicosControllerTest {
         assertEquals("Troca de óleo", response.getBody().descricao());
         assertEquals(BigDecimal.valueOf(150.00), response.getBody().valor());
 
-        verify(servicoService, times(1)).save(servicoDTO);
+        verify(cadastrarServicoUseCase, times(1)).save(servicoDTO);
     }
 
     @Test
@@ -94,7 +109,7 @@ class ServicosControllerTest {
                 1
         );
 
-        when(servicoService.edit(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado))
+        when(atualizarServicoUseCase.edit(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado))
                 .thenReturn(servicoAtualizado);
 
         ResponseEntity<ServicoDTO> response = servicosController.editar(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado);
@@ -104,12 +119,12 @@ class ServicosControllerTest {
         assertEquals("Alinhamento e balanceamento", response.getBody().descricao());
         assertEquals(BigDecimal.valueOf(220.00), response.getBody().valor());
 
-        verify(servicoService, times(1)).edit(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado);
+        verify(atualizarServicoUseCase, times(1)).edit(ALINHAMENTO_E_BALANCEAMENTO, servicoAtualizado);
     }
 
     @Test
     void deveDeletarServicoComSucesso() {
-        doNothing().when(servicoService)
+        doNothing().when(excluirServicoUseCase)
                 .delete(ALINHAMENTO_E_BALANCEAMENTO);
 
         ResponseEntity<Void> response = servicosController.deletar(ALINHAMENTO_E_BALANCEAMENTO);
@@ -117,7 +132,7 @@ class ServicosControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(servicoService, times(1)).delete(ALINHAMENTO_E_BALANCEAMENTO);
+        verify(excluirServicoUseCase, times(1)).delete(ALINHAMENTO_E_BALANCEAMENTO);
     }
 
     @Test
@@ -129,7 +144,7 @@ class ServicosControllerTest {
                 3
         );
 
-        when(servicoService.findAll())
+        when(listarServicosUseCase.findAll())
                 .thenReturn(List.of(servicoDTO, segundoServico));
 
         ResponseEntity<List<ServicoDTO>> response = servicosController.listarServicos();
@@ -144,12 +159,12 @@ class ServicosControllerTest {
         assertEquals("Troca de pastilha de freio", response.getBody().get(1).descricao());
         assertEquals(BigDecimal.valueOf(300.00), response.getBody().get(1).valor());
 
-        verify(servicoService, times(1)).findAll();
+        verify(listarServicosUseCase, times(1)).findAll();
     }
 
     @Test
     void deveRetornarListaVaziaQuandoNaoExistiremServicos() {
-        when(servicoService.findAll())
+        when(listarServicosUseCase.findAll())
                 .thenReturn(List.of());
 
         ResponseEntity<List<ServicoDTO>> response = servicosController.listarServicos();
@@ -158,6 +173,6 @@ class ServicosControllerTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
 
-        verify(servicoService, times(1)).findAll();
+        verify(listarServicosUseCase, times(1)).findAll();
     }
 }
