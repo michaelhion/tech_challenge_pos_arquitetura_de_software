@@ -1,12 +1,13 @@
 package com.techchallenger.oficina360.mappers;
 
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;
+import com.techchallenger.oficina360.dominio.OrdemServicoServico;
 import com.techchallenger.oficina360.dtos.ordemservico.DadosFinanceirosDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.detalhes.PecasInsumosAdicionadosDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.detalhes.ServicosAdicionadosDTO;
-import com.techchallenger.oficina360.entities.OrdemServico;
-import com.techchallenger.oficina360.entities.OrdemServicoItemEstoque;
-import com.techchallenger.oficina360.entities.OrdemServicoServico;
+import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
 
 import java.util.List;
 
@@ -33,12 +34,12 @@ public class OrdemServicoMapper {
         );
     }
 
-    public static OrdemServico toEntity(OrdemServicoDTO ordemServicoDTO) {
+    public static OrdemServicoEntity toEntity(OrdemServicoDTO ordemServicoDTO) {
         if (ordemServicoDTO == null) {
             return null;
         }
 
-        return OrdemServico.builder()
+        return OrdemServicoEntity.builder()
                 .id(ordemServicoDTO.id())
                 .documentoCliente(ordemServicoDTO.documentoCliente())
                 .placaVeiculo(ordemServicoDTO.placaVeiculo())
@@ -49,7 +50,7 @@ public class OrdemServicoMapper {
 
     public static void updateEntityFromDto(
             OrdemServicoDTO ordemServicoDTO,
-            OrdemServico ordemServicoEntity
+            OrdemServicoEntity ordemServicoEntity
     ) {
         if (ordemServicoDTO == null || ordemServicoEntity == null) {
             return;

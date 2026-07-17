@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
-import com.techchallenger.oficina360.entities.Servico;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ServicoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ServicoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.TempoExecucaoServicoRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.mappers.ServicoMapper;
-import com.techchallenger.oficina360.repositories.ServicoRepository;
-import com.techchallenger.oficina360.repositories.TempoExecucaoServicoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -47,38 +47,38 @@ public class ServicoService {
     }
 
     public ServicoDTO save(ServicoDTO servicoDTO) {
-        Servico servico = toEntity(servicoDTO);
-        servico.setTempoMedioExecucaoMinutos(0);
-        Servico servicoSalvo = servicoRepository.save(servico);
+        ServicoEntity servicoEntity = toEntity(servicoDTO);
+        servicoEntity.setTempoMedioExecucaoMinutos(0);
+        ServicoEntity servicoEntitySalvo = servicoRepository.save(servicoEntity);
 
-        return toDTO(servicoSalvo);
+        return toDTO(servicoEntitySalvo);
     }
 
     public ServicoDTO edit(String codigo, ServicoDTO servicoDTO) {
-        Servico servico = servicoRepository.findByCodigo(codigo)
+        ServicoEntity servicoEntity = servicoRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));
 
-        ServicoMapper.updateEntityFromDto(servicoDTO, servico);
+        ServicoMapper.updateEntityFromDto(servicoDTO, servicoEntity);
 
-        Servico servicoAtualizado = servicoRepository.save(servico);
+        ServicoEntity servicoEntityAtualizado = servicoRepository.save(servicoEntity);
 
-        return toDTO(servicoAtualizado);
+        return toDTO(servicoEntityAtualizado);
     }
 
 
-    private ServicoDTO toDTOComTempoMedio(Servico servico) {
+    private ServicoDTO toDTOComTempoMedio(ServicoEntity servicoEntity) {
 
         Double media = tempoExecucaoServicoRepository
-                .calcularTempoMedio(servico.getId());
+                .calcularTempoMedio(servicoEntity.getId());
 
         Integer tempoMedio = media != null
                 ? (int) Math.round(media)
                 : 0;
 
         return new ServicoDTO(
-                servico.getCodigo(),
-                servico.getDescricao(),
-                servico.getValor(),
+                servicoEntity.getCodigo(),
+                servicoEntity.getDescricao(),
+                servicoEntity.getValor(),
                 tempoMedio
         );
     }

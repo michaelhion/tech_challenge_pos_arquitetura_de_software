@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.mappers;
 
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
-import com.techchallenger.oficina360.entities.Veiculo;
+import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
 
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocumento;
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
@@ -10,7 +10,7 @@ public class VeiculoMapper {
 
     private VeiculoMapper(){}
 
-    public static VeiculoDTO toDTO(Veiculo veiculoEntity) {
+    public static VeiculoDTO toDTO(VeiculoEntity veiculoEntity) {
         return new VeiculoDTO(
                 mascararPlaca(veiculoEntity.getPlaca()),
                 veiculoEntity.getMarca(),
@@ -20,8 +20,8 @@ public class VeiculoMapper {
         );
     }
 
-    public static Veiculo toEntity(VeiculoDTO veiculoDTO) {
-        return Veiculo.builder()
+    public static VeiculoEntity toEntity(VeiculoDTO veiculoDTO) {
+        return VeiculoEntity.builder()
                 .placa(veiculoDTO.placa())
                 .modelo(veiculoDTO.modelo())
                 .marca(veiculoDTO.marca())
@@ -31,7 +31,7 @@ public class VeiculoMapper {
     }
 
 
-    public static void updateEntityFromDto(VeiculoDTO dto, Veiculo entity) {
+    public static void updateEntityFromDto(VeiculoDTO dto, VeiculoEntity entity) {
         if (dto == null || entity == null) {
             return;
         }

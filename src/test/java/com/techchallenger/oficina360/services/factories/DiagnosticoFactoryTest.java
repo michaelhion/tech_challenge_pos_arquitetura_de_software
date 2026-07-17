@@ -1,9 +1,10 @@
 package com.techchallenger.oficina360.services.factories;
 
-import com.techchallenger.oficina360.entities.Estoque;
-import com.techchallenger.oficina360.entities.OrdemServicoItemEstoque;
-import com.techchallenger.oficina360.entities.OrdemServicoServico;
-import com.techchallenger.oficina360.entities.Servico;
+import com.techchallenger.oficina360.dominio.Estoque;
+import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;
+import com.techchallenger.oficina360.dominio.OrdemServicoServico;
+import com.techchallenger.oficina360.dominio.Servico;
+import com.techchallenger.oficina360.usecases.factories.DiagnosticoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,12 +25,12 @@ class DiagnosticoFactoryTest {
 
     @Test
     void deveCriarServicoDaOrdemServicoAPartirDeServicoCadastrado() {
-        Servico servico = Servico.builder()
-                .id(UUID.randomUUID())
-                .codigo("SRV-TROCA-OLEO")
-                .descricao("Troca de óleo")
-                .valor(BigDecimal.valueOf(150.00))
-                .build();
+        Servico servico = new Servico(
+                UUID.randomUUID(),
+                "Troca de óleo",
+                BigDecimal.valueOf(150.00),
+                "SRV-TROCA-OLEO",
+                90);
 
         OrdemServicoServico resultado = diagnosticoFactory.criarServicoDaOs(servico);
 
@@ -41,20 +42,20 @@ class DiagnosticoFactoryTest {
 
     @Test
     void deveCriarItemEstoqueDaOrdemServicoAPartirDeEstoqueEQuantidade() {
-        Estoque estoque = Estoque.builder()
-                .id(UUID.randomUUID())
-                .codigo("EST-FILTRO-OLEO")
-                .nome("Filtro de óleo")
-                .valor(BigDecimal.valueOf(45.90))
-                .quantidade(20)
-                .reservados(5)
-                .build();
+        Estoque estoqueEntity = new Estoque(
+                UUID.randomUUID(),
+                "Filtro de óleo",
+                BigDecimal.valueOf(45.90),
+                20,
+                5,
+                "EST-FILTRO-OLEO"
+                );
 
         OrdemServicoItemEstoque resultado =
-                diagnosticoFactory.criarItemEstoqueDaOs(estoque, 2);
+                diagnosticoFactory.criarItemEstoqueDaOs(estoqueEntity, 2);
 
         assertNotNull(resultado);
-        assertEquals(estoque.getId(), resultado.getEstoqueId());
+        assertEquals(estoqueEntity.getId(), resultado.getEstoqueId());
         assertEquals("Filtro de óleo", resultado.getNome());
         assertEquals(BigDecimal.valueOf(45.90), resultado.getValorUnitario());
         assertEquals(2, resultado.getQuantidade());

@@ -1,7 +1,8 @@
 package com.techchallenger.oficina360.mappers;
 
+import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
-import com.techchallenger.oficina360.entities.OrdemServico;
+import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
 
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
 
@@ -10,26 +11,26 @@ public class CriarOrdemServicoMapper {
     private CriarOrdemServicoMapper() {
     }
 
-    public static CriarOrdemServicoDTO toDTO(OrdemServico ordemServicoEntity) {
-        if (ordemServicoEntity == null) {
+    public static CriarOrdemServicoDTO toDTO(OrdemServico ordemServico) {
+        if (ordemServico == null) {
             return null;
         }
 
         return new CriarOrdemServicoDTO(
-                ordemServicoEntity.getId(),
-                ordemServicoEntity.getDocumentoCliente(),
-                mascararPlaca(ordemServicoEntity.getPlacaVeiculo()),
-                ordemServicoEntity.getDescricaoProblema(),
-                ordemServicoEntity.getOrdemDeServicoStatus()
+                ordemServico.getId(),
+                ordemServico.getDocumentoCliente(),
+                mascararPlaca(ordemServico.getPlacaVeiculo()),
+                ordemServico.getDescricaoProblema(),
+                ordemServico.getOrdemDeServicoStatus()
         );
     }
 
-    public static OrdemServico toEntity(CriarOrdemServicoDTO criarOrdemServicoDTO) {
+    public static OrdemServicoEntity toEntity(CriarOrdemServicoDTO criarOrdemServicoDTO) {
         if (criarOrdemServicoDTO == null) {
             return null;
         }
 
-        return OrdemServico.builder()
+        return OrdemServicoEntity.builder()
                 .id(criarOrdemServicoDTO.id())
                 .documentoCliente(criarOrdemServicoDTO.documentoCliente())
                 .placaVeiculo(criarOrdemServicoDTO.placaVeiculo())
@@ -40,7 +41,7 @@ public class CriarOrdemServicoMapper {
 
     public static void updateEntityFromDto(
             CriarOrdemServicoDTO criarOrdemServicoDTO,
-            OrdemServico ordemServicoEntity
+            OrdemServicoEntity ordemServicoEntity
     ) {
         if (criarOrdemServicoDTO == null || ordemServicoEntity == null) {
             return;

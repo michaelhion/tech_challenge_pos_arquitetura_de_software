@@ -1,12 +1,13 @@
 package com.techchallenger.oficina360.services;
 
+import com.techchallenger.oficina360.constants.MensagensDeErroConstant;
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
-import com.techchallenger.oficina360.entities.Veiculo;
-import com.techchallenger.oficina360.exceptions.ConflitoException;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.mappers.VeiculoMapper;
-import com.techchallenger.oficina360.repositories.ClienteRepository;
-import com.techchallenger.oficina360.repositories.VeiculoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.VEICULO_SERV_CLIENTE_NAO_ENCONTRADO;
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.VEICULO_SERV_VEICULO_CADASTRADO;
 import static com.techchallenger.oficina360.mappers.VeiculoMapper.toDTO;
 import static com.techchallenger.oficina360.mappers.VeiculoMapper.toEntity;
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
@@ -49,13 +51,13 @@ public class VeiculoService {
         validarClienteExiste(documentoClienteNormalizado);
         validarPlacaDisponivelParaCadastro(placaNormalizada);
 
-        Veiculo veiculo = toEntity(veiculoDTO);
-        veiculo.setPlaca(placaNormalizada);
-        veiculo.setClienteDocumento(documentoClienteNormalizado);
+        VeiculoEntity veiculoEntity = toEntity(veiculoDTO);
+        veiculoEntity.setPlaca(placaNormalizada);
+        veiculoEntity.setClienteDocumento(documentoClienteNormalizado);
 
-        Veiculo veiculoSalvo = veiculoRepository.save(veiculo);
+        VeiculoEntity veiculoEntitySalvo = veiculoRepository.save(veiculoEntity);
 
-        return toDTO(veiculoSalvo);
+        return toDTO(veiculoEntitySalvo);
     }
 
     @Transactional
@@ -64,19 +66,19 @@ public class VeiculoService {
         String novaPlacaNormalizada = normalizarPlaca(veiculoDTO.placa());
         String documentoClienteNormalizado = normalizarDocumento(veiculoDTO.clienteDocumento());
 
-        Veiculo veiculo = buscarVeiculoPorPlaca(placaAtualNormalizada);
+        VeiculoEntity veiculoEntity = buscarVeiculoPorPlaca(placaAtualNormalizada);
 
         validarClienteExiste(documentoClienteNormalizado);
-        validarPlacaDisponivelParaEdicao(novaPlacaNormalizada, veiculo);
+        validarPlacaDisponivelParaEdicao(novaPlacaNormalizada, veiculoEntity);
 
-        VeiculoMapper.updateEntityFromDto(veiculoDTO, veiculo);
+        VeiculoMapper.updateEntityFromDto(veiculoDTO, veiculoEntity);
 
-        veiculo.setPlaca(novaPlacaNormalizada);
-        veiculo.setClienteDocumento(documentoClienteNormalizado);
+        veiculoEntity.setPlaca(novaPlacaNormalizada);
+        veiculoEntity.setClienteDocumento(documentoClienteNormalizado);
 
-        Veiculo veiculoAtualizado = veiculoRepository.save(veiculo);
+        VeiculoEntity veiculoEntityAtualizado = veiculoRepository.save(veiculoEntity);
 
-        return toDTO(veiculoAtualizado);
+        return toDTO(veiculoEntityAtualizado);
     }
 
     @Transactional
@@ -88,9 +90,9 @@ public class VeiculoService {
         veiculoRepository.deleteByPlaca(placaNormalizada);
     }
 
-    private Veiculo buscarVeiculoPorPlaca(String placa) {
+    private VeiculoEntity buscarVeiculoPorPlaca(String placa) {
         return veiculoRepository.findByPlaca(placa)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(VEICULO_SERV_VEICULO_NAO_ENCONTRADO));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(MensagensDeErroConstant.VEICULO_NAO_ENCONTRADO));
     }
 
     private void validarClienteExiste(String documentoCliente) {
@@ -101,7 +103,7 @@ public class VeiculoService {
 
     private void validarVeiculoExistePorPlaca(String placa) {
         if (!veiculoRepository.existsByPlaca(placa)) {
-            throw new RecursoNaoEncontradoException(VEICULO_SERV_VEICULO_NAO_ENCONTRADO);
+            throw new RecursoNaoEncontradoException(MensagensDeErroConstant.VEICULO_NAO_ENCONTRADO);
         }
     }
 
@@ -113,9 +115,9 @@ public class VeiculoService {
 
     private void validarPlacaDisponivelParaEdicao(
             String novaPlaca,
-            Veiculo veiculoAtual
+            VeiculoEntity veiculoEntityAtual
     ) {
-        if (veiculoRepository.existsByPlacaAndIdNot(novaPlaca, veiculoAtual.getId())) {
+        if (veiculoRepository.existsByPlacaAndIdNot(novaPlaca, veiculoEntityAtual.getId())) {
             throw new ConflitoException(VEICULO_SERV_VEICULO_CADASTRADO);
         }
     }

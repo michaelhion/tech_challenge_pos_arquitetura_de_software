@@ -5,7 +5,15 @@ import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
-import com.techchallenger.oficina360.services.OrdemServicoOficinaService;
+import com.techchallenger.oficina360.frameworks.web.controllers.OrdemServicoOficinaController;
+import com.techchallenger.oficina360.usecases.ordemservico.AbrirOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.DeletarOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.DiagnosticarOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.EditarOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.FinalizarExecucaoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.IniciarExecucaoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.ListarOrdensServicoUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +35,30 @@ class OrdemServicoOficinaControllerTest {
     private static final String CPF = "12345678901";
     private static final String PLACA = "ABC1D23";
     private static final String RECLAMACAO_CLIENTE = "Veículo apresenta ruído ao frear e vibração no volante.";
+
     @Mock
-    private OrdemServicoOficinaService ordemServicoOficinaService;
+    private AbrirOrdemServicoUseCase abrirOrdemServicoUseCase;
+
+    @Mock
+    private DiagnosticarOrdemServicoUseCase diagnosticarOrdemServicoUseCase;
+
+    @Mock
+    private IniciarExecucaoUseCase iniciarExecucaoUseCase;
+
+    @Mock
+    private FinalizarExecucaoUseCase finalizarExecucaoUseCase;
+
+    @Mock
+    private ListarOrdensServicoUseCase listarOrdensServicoUseCase;
+
+    @Mock
+    private BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
+
+    @Mock
+    private EditarOrdemServicoUseCase editarOrdemServicoUseCase;
+
+    @Mock
+    private DeletarOrdemServicoUseCase deletarOrdemServicoUseCase;
 
     private OrdemServicoOficinaController ordemServicoOficinaController;
 
@@ -39,7 +69,18 @@ class OrdemServicoOficinaControllerTest {
 
     @BeforeEach
     void setUp() {
-        ordemServicoOficinaController = new OrdemServicoOficinaController(ordemServicoOficinaService);
+
+        ordemServicoOficinaController =
+                new OrdemServicoOficinaController(
+                        abrirOrdemServicoUseCase,
+                        diagnosticarOrdemServicoUseCase,
+                        iniciarExecucaoUseCase,
+                        finalizarExecucaoUseCase,
+                        listarOrdensServicoUseCase,
+                        buscarOrdemServicoPorIdUseCase,
+                        editarOrdemServicoUseCase,
+                        deletarOrdemServicoUseCase
+                );
 
         ordemServicoId = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
 
@@ -71,7 +112,7 @@ class OrdemServicoOficinaControllerTest {
                 null
         );
 
-        when(ordemServicoOficinaService.findAll())
+        when(listarOrdensServicoUseCase.findAll())
                 .thenReturn(List.of(ordemServicoDTO, segundaOrdem));
 
         ResponseEntity<List<OrdemServicoDTO>> response =
@@ -92,12 +133,12 @@ class OrdemServicoOficinaControllerTest {
         assertEquals("Veículo apresenta falha na partida.", response.getBody().get(1).descricaoProblema());
         assertEquals(OrdemDeServicoStatus.EM_DIAGNOSTICO, response.getBody().get(1).ordemDeServicoStatus());
 
-        verify(ordemServicoOficinaService, times(1)).findAll();
+        verify(listarOrdensServicoUseCase, times(1)).findAll();
     }
 
     @Test
     void deveRetornarListaVaziaQuandoNaoExistiremOrdensServico() {
-        when(ordemServicoOficinaService.findAll())
+        when(listarOrdensServicoUseCase.findAll())
                 .thenReturn(List.of());
 
         ResponseEntity<List<OrdemServicoDTO>> response =
@@ -107,12 +148,12 @@ class OrdemServicoOficinaControllerTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
 
-        verify(ordemServicoOficinaService, times(1)).findAll();
+        verify(listarOrdensServicoUseCase, times(1)).findAll();
     }
 
     @Test
     void deveBuscarOrdemServicoPorIdComSucesso() {
-        when(ordemServicoOficinaService.findById(ordemServicoId))
+        when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId))
                 .thenReturn(Optional.of(ordemServicoDTO));
 
         ResponseEntity<OrdemServicoDTO> response =
@@ -126,12 +167,12 @@ class OrdemServicoOficinaControllerTest {
         assertEquals(RECLAMACAO_CLIENTE, response.getBody().descricaoProblema());
         assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus());
 
-        verify(ordemServicoOficinaService, times(1)).findById(ordemServicoId);
+        verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
     }
 
     @Test
     void deveRetornarNotFoundQuandoOrdemServicoNaoForEncontradaPorId() {
-        when(ordemServicoOficinaService.findById(ordemServicoId))
+        when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<OrdemServicoDTO> response =
@@ -140,7 +181,7 @@ class OrdemServicoOficinaControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(ordemServicoOficinaService, times(1)).findById(ordemServicoId);
+        verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
     }
 
     @Test
@@ -153,7 +194,7 @@ class OrdemServicoOficinaControllerTest {
                 null
         );
 
-        when(ordemServicoOficinaService.save(request))
+        when(abrirOrdemServicoUseCase.abrirOrdemServico(request))
                 .thenReturn(criarOrdemServicoDTO);
 
         ResponseEntity<CriarOrdemServicoDTO> response =
@@ -167,7 +208,7 @@ class OrdemServicoOficinaControllerTest {
         assertEquals(RECLAMACAO_CLIENTE, response.getBody().descricaoProblema());
         assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus());
 
-        verify(ordemServicoOficinaService, times(1)).save(request);
+        verify(abrirOrdemServicoUseCase, times(1)).abrirOrdemServico(request);
     }
 
     @Test
@@ -181,7 +222,7 @@ class OrdemServicoOficinaControllerTest {
                 null
         );
 
-        when(ordemServicoOficinaService.edit(ordemServicoId, ordemServicoAtualizada))
+        when(editarOrdemServicoUseCase.edit(ordemServicoId, ordemServicoAtualizada))
                 .thenReturn(ordemServicoAtualizada);
 
         ResponseEntity<OrdemServicoDTO> response =
@@ -195,14 +236,14 @@ class OrdemServicoOficinaControllerTest {
         assertEquals("Veículo apresenta ruído ao frear após troca recente de pastilhas.", response.getBody().descricaoProblema());
         assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus());
 
-        verify(ordemServicoOficinaService, times(1))
+        verify(editarOrdemServicoUseCase, times(1))
                 .edit(ordemServicoId, ordemServicoAtualizada);
     }
 
     @Test
     void deveDeletarOrdemServicoComSucesso() {
-        doNothing().when(ordemServicoOficinaService)
-                .delete(ordemServicoId);
+        doNothing().when(deletarOrdemServicoUseCase)
+                .deleteById(ordemServicoId);
 
         ResponseEntity<Void> response =
                 ordemServicoOficinaController.deletar(ordemServicoId);
@@ -210,7 +251,7 @@ class OrdemServicoOficinaControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(ordemServicoOficinaService, times(1)).delete(ordemServicoId);
+        verify(deletarOrdemServicoUseCase, times(1)).deleteById(ordemServicoId);
     }
 
     @Test
@@ -232,7 +273,7 @@ class OrdemServicoOficinaControllerTest {
                 null
         );
 
-        when(ordemServicoOficinaService.diagnosticar(ordemServicoId, diagnosticoDTO))
+        when(diagnosticarOrdemServicoUseCase.diagnosticar(ordemServicoId, diagnosticoDTO))
                 .thenReturn(ordemServicoDiagnosticada);
 
         ResponseEntity<OrdemServicoDTO> response =
@@ -246,7 +287,7 @@ class OrdemServicoOficinaControllerTest {
         assertEquals(RECLAMACAO_CLIENTE, response.getBody().descricaoProblema());
         assertEquals(OrdemDeServicoStatus.AGUARDANDO_APROVACAO, response.getBody().ordemDeServicoStatus());
 
-        verify(ordemServicoOficinaService, times(1))
+        verify(diagnosticarOrdemServicoUseCase, times(1))
                 .diagnosticar(ordemServicoId, diagnosticoDTO);
     }
 
@@ -254,7 +295,7 @@ class OrdemServicoOficinaControllerTest {
     void deveIniciarExecucaoComSucesso() {
 
 
-        when(ordemServicoOficinaService.iniciarExecucao(ordemServicoId))
+        when(iniciarExecucaoUseCase.iniciarExecucao(ordemServicoId))
                 .thenReturn(ordemServicoDTO);
 
         ResponseEntity<OrdemServicoDTO> response = ordemServicoOficinaController
@@ -268,9 +309,9 @@ class OrdemServicoOficinaControllerTest {
 
         assertNull(response.getBody());
 
-        verify(ordemServicoOficinaService, times(1)).iniciarExecucao(ordemServicoId);
+        verify(iniciarExecucaoUseCase, times(1)).iniciarExecucao(ordemServicoId);
 
-        verifyNoMoreInteractions(ordemServicoOficinaService);
+        verifyNoMoreInteractions(iniciarExecucaoUseCase);
     }
 
     @Test
@@ -289,8 +330,8 @@ class OrdemServicoOficinaControllerTest {
 
         assertNull(response.getBody());
 
-        verify(ordemServicoOficinaService, times(1)).finalizarExecucao(ordemServicoId);
+        verify(finalizarExecucaoUseCase, times(1)).finalizarExecucao(ordemServicoId);
 
-        verifyNoMoreInteractions(ordemServicoOficinaService);
+        verifyNoMoreInteractions(finalizarExecucaoUseCase);
     }
 }

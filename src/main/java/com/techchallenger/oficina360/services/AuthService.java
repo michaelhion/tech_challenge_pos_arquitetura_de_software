@@ -2,12 +2,12 @@ package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.exceptions.ConflitoException;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
-import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
-import com.techchallenger.oficina360.repositories.ClienteRepository;
-import com.techchallenger.oficina360.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
 import com.techchallenger.oficina360.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,13 +19,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.CLIENTE_NAO_ENCONTRADO;
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
 import static com.techchallenger.oficina360.constants.Roles.*;
 import static com.techchallenger.oficina360.mappers.UsuarioMapper.toEntity;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UsuarioRepository usuarioRepository;
@@ -33,7 +34,7 @@ public class AuthService {
 
     public String autenticar(LoginRequestDTO loginRequestDTO) {
         if(!usuarioRepository.existsByEmail(loginRequestDTO.email())){
-            throw new AccessDeniedException("Dados de login inválidos");
+            throw new AccessDeniedException(AUTH_SERV_DADOS_DE_LOGIN_INVALIDOS);
         }
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
@@ -44,25 +45,25 @@ public class AuthService {
         Authentication authentication =
                 authenticationManager.authenticate(authenticationToken);
 
-        Usuario usuario = (Usuario) authentication.getPrincipal();
+        UsuarioEntity usuarioEntity = (UsuarioEntity) authentication.getPrincipal();
 
-        return jwtService.gerarToken(usuario);
+        return jwtService.gerarToken(usuarioEntity);
     }
     public void criarUsuario(CriarUsuarioRequestDTO criarUsuarioRequestDTO) {
         if(usuarioRepository.existsByEmail(criarUsuarioRequestDTO.email())) {
-            throw new ConflitoException("E-mail já cadastrado");
+            throw new ConflitoException(AUTH_SERV_E_MAIL_JA_CADASTRADO);
         }
         String role = criarUsuarioRequestDTO.role();
         String roleToUpper = role.toUpperCase();
         validaRole(roleToUpper);
         validaSeClienteExiste(criarUsuarioRequestDTO, roleToUpper);
 
-        Usuario usuario = toEntity(criarUsuarioRequestDTO);
-        usuario.setRole(roleToUpper);
+        UsuarioEntity usuarioEntity = toEntity(criarUsuarioRequestDTO);
+        usuarioEntity.setRole(roleToUpper);
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        usuario.setSenha(encoder.encode(criarUsuarioRequestDTO.senha()));
+        usuarioEntity.setSenha(encoder.encode(criarUsuarioRequestDTO.senha()));
 
-        usuarioRepository.save(usuario);
+        usuarioRepository.save(usuarioEntity);
     }
 
     private void validaSeClienteExiste(CriarUsuarioRequestDTO criarUsuarioRequestDTO, String roleToUpper) {

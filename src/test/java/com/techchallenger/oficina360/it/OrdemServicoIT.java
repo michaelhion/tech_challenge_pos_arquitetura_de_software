@@ -1,9 +1,9 @@
 package com.techchallenger.oficina360.it;
 
 import com.jayway.jsonpath.JsonPath;
-import com.techchallenger.oficina360.entities.OrdemServico;
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.OrdemServicosRepository;
 import com.techchallenger.oficina360.security.JwtService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,10 +60,6 @@ class OrdemServicoIT {
     private static final String ORDEM_SERVICO_CLIENTE_BASE_PATH = "/ordem-servico/clientes";
 
 
-    public String gerarToken(Usuario usuario){
-        return jwtService.gerarToken(usuario);
-    }
-
     @BeforeEach
     void setup() {
         tokenAdmin = jwtService.gerarToken(gerarUsuarioAdmin());
@@ -111,7 +107,7 @@ class OrdemServicoIT {
                 .andExpect( jsonPath("$.ordemDeServicoStatus").value("AGUARDANDO_APROVACAO"))
                 .andDo(print());
 
-        String tokenCliente = gerarToken(gerarUsuarioCliente2());
+        String tokenCliente = jwtService.gerarToken(gerarUsuarioCliente2());
 
         mockMvc.perform(patch((ORDEM_SERVICO_CLIENTE_BASE_PATH + "/aprovacao/%s").formatted(id))
                         .header("Authorization", "Bearer " + tokenCliente)
@@ -125,7 +121,7 @@ class OrdemServicoIT {
                 .andExpect(status().isAccepted())
                 .andDo(print());
 
-        OrdemServico os = ordemServicosRepository.findById(UUID.fromString(id)).orElseThrow();
+        OrdemServicoEntity os = ordemServicosRepository.findById(UUID.fromString(id)).orElseThrow();
         assertEquals(EM_EXECUCAO, os.getOrdemDeServicoStatus());
 
         mockMvc.perform(patch(ORDEM_SERVICO_BASE_PATH + "/execucao/finalizar/%s".formatted(id))
@@ -198,7 +194,7 @@ class OrdemServicoIT {
 
     @Test
     void clienteNaodeveFinalizarExecucao() throws Exception {
-        Usuario usuarioCliente = gerarUsuarioCliente1();
+        UsuarioEntity usuarioCliente = gerarUsuarioCliente1();
         String token = jwtService.gerarToken(usuarioCliente);
 
         mockMvc.perform(patch(ORDEM_SERVICO_BASE_PATH + "/execucao/finalizar/%s".formatted(OS_COM_STATUS_EM_EXECUCAO))
@@ -221,7 +217,7 @@ class OrdemServicoIT {
     @Test
     void naoDeveAprovarOrcamentoDeOutroCliente() throws Exception {
 
-        Usuario usuarioCliente = gerarUsuarioCliente1();
+        UsuarioEntity usuarioCliente = gerarUsuarioCliente1();
         String token = jwtService.gerarToken(usuarioCliente);
 
 
@@ -242,12 +238,17 @@ class OrdemServicoIT {
 
     @Test
     void clienteNaoDeveIniciarExecucao() throws Exception {
-        Usuario usuarioCliente = gerarUsuarioCliente1();
+        UsuarioEntity usuarioCliente = gerarUsuarioCliente1();
         String token = jwtService.gerarToken(usuarioCliente);
         mockMvc.perform(patch(ORDEM_SERVICO_BASE_PATH + "/execucao/iniciar/%s".formatted(OS_COM_STATUS_APROVADA))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden())
                 .andDo(print());
     }
+
+    //todo validar comportamento de adição de serviços na os, validando valores e se todos serviços requeridos foram adicionados
+    //todo validar o que acontece quando tenta inserir um serviço que não existe ou um que existe e outro que não existe, deve retornar um bad request e interromper o fluxo
+    //todo validar o comportamento da adição de estoque na os com os mesmos testes do serviço
+    //todo validar edição de ordem de serviço, incluindo validar se realmente editou ou se criou novo registro no banco com id diferente
 
 }

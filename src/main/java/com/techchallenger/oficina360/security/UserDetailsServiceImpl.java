@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

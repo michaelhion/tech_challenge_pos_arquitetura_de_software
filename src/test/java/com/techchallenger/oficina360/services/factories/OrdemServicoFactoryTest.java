@@ -1,10 +1,11 @@
 package com.techchallenger.oficina360.services.factories;
 
+import com.techchallenger.oficina360.dominio.Cliente;
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.dominio.Veiculo;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
-import com.techchallenger.oficina360.entities.Cliente;
-import com.techchallenger.oficina360.entities.OrdemServico;
-import com.techchallenger.oficina360.entities.Veiculo;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.usecases.factories.OrdemServicoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ class OrdemServicoFactoryTest {
         Cliente cliente = criarCliente();
         Veiculo veiculo = criarVeiculo();
 
-        OrdemServico resultado = ordemServicoFactory.criar(dto, cliente, veiculo);
+        OrdemServico resultado = ordemServicoFactory.criar(dto, cliente.getDocumento(), veiculo.getPlaca());
 
         assertNotNull(resultado);
         assertEquals("12345678901", resultado.getDocumentoCliente());
@@ -54,23 +55,21 @@ class OrdemServicoFactoryTest {
     }
 
     private Cliente criarCliente() {
-        return Cliente.builder()
-                .id(UUID.randomUUID())
-                .documento("12345678901")
-                .nome("João da Silva")
-                .email("joao.silva@email.com")
-                .telefone("11999999999")
-                .build();
+        return new Cliente(
+                UUID.randomUUID(),
+                "12345678901",
+                "João da Silva",
+                "joao.silva@email.com",
+                "11999999999");
     }
 
     private Veiculo criarVeiculo() {
-        return Veiculo.builder()
-                .id(UUID.randomUUID())
-                .placa("ABC1D23")
-                .marca("Volkswagen")
-                .modelo("Gol")
-                .ano("2020")
-                .clienteDocumento("12345678901")
-                .build();
+        return new Veiculo(
+                UUID.randomUUID(),
+                "ABC1D23",
+                "Volkswagen",
+                "Gol",
+                "2020",
+                "12345678901");
     }
 }

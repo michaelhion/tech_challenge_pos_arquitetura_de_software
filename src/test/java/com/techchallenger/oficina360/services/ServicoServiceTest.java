@@ -1,10 +1,10 @@
 package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
-import com.techchallenger.oficina360.entities.Servico;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
-import com.techchallenger.oficina360.repositories.ServicoRepository;
-import com.techchallenger.oficina360.repositories.TempoExecucaoServicoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ServicoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ServicoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.TempoExecucaoServicoRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +37,7 @@ class ServicoServiceTest {
     private ServicoService servicoService;
 
     private UUID servicoId;
-    private Servico servico;
+    private ServicoEntity servicoEntity;
     private ServicoDTO servicoDTO;
 
     @BeforeEach
@@ -51,7 +51,7 @@ class ServicoServiceTest {
                 1
         );
 
-        servico = Servico.builder()
+        servicoEntity = ServicoEntity.builder()
                 .id(servicoId)
                 .descricao("Troca de óleo")
                 .valor(BigDecimal.valueOf(150.00))
@@ -62,7 +62,7 @@ class ServicoServiceTest {
     @Test
     void deveListarTodosOsServicos() {
         when(servicoRepository.findAll())
-                .thenReturn(List.of(servico));
+                .thenReturn(List.of(servicoEntity));
 
         List<ServicoDTO> resultado = servicoService.findAll();
 
@@ -90,7 +90,7 @@ class ServicoServiceTest {
     @Test
     void deveBuscarServicoPorIdQuandoExistir() {
         when(servicoRepository.findByCodigo(servicoDTO.codigo()))
-                .thenReturn(Optional.of(servico));
+                .thenReturn(Optional.of(servicoEntity));
 
         Optional<ServicoDTO> resultado = servicoService.findByCodigo(servicoDTO.codigo());
 
@@ -115,8 +115,8 @@ class ServicoServiceTest {
 
     @Test
     void deveSalvarServicoComSucesso() {
-        when(servicoRepository.save(any(Servico.class)))
-                .thenReturn(servico);
+        when(servicoRepository.save(any(ServicoEntity.class)))
+                .thenReturn(servicoEntity);
 
         ServicoDTO resultado = servicoService.save(servicoDTO);
 
@@ -124,7 +124,7 @@ class ServicoServiceTest {
         assertEquals("Troca de óleo", resultado.descricao());
         assertEquals(BigDecimal.valueOf(150.00), resultado.valor());
 
-        verify(servicoRepository, times(1)).save(any(Servico.class));
+        verify(servicoRepository, times(1)).save(any(ServicoEntity.class));
     }
 
     @Test
@@ -136,17 +136,17 @@ class ServicoServiceTest {
                 1
         );
 
-        Servico servicoAtualizado = Servico.builder()
+        ServicoEntity servicoEntityAtualizado = ServicoEntity.builder()
                 .id(servicoId)
                 .descricao("Alinhamento e balanceamento")
                 .valor(BigDecimal.valueOf(220.00))
                 .build();
 
         when(servicoRepository.findByCodigo(ALINHAMENTO_E_BALANCEAMENTO))
-                .thenReturn(Optional.of(servico));
+                .thenReturn(Optional.of(servicoEntity));
 
-        when(servicoRepository.save(any(Servico.class)))
-                .thenReturn(servicoAtualizado);
+        when(servicoRepository.save(any(ServicoEntity.class)))
+                .thenReturn(servicoEntityAtualizado);
 
         ServicoDTO resultado = servicoService.edit(ALINHAMENTO_E_BALANCEAMENTO, dtoAtualizado);
 
@@ -155,7 +155,7 @@ class ServicoServiceTest {
         assertEquals(BigDecimal.valueOf(220.00), resultado.valor());
 
         verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
-        verify(servicoRepository, times(1)).save(any(Servico.class));
+        verify(servicoRepository, times(1)).save(any(ServicoEntity.class));
     }
 
     @Test
@@ -171,13 +171,13 @@ class ServicoServiceTest {
         assertEquals("Serviço não encontrado", exception.getMessage());
 
         verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
-        verify(servicoRepository, never()).save(any(Servico.class));
+        verify(servicoRepository, never()).save(any(ServicoEntity.class));
     }
 
     @Test
     void deveDeletarServicoComSucesso() {
         when(servicoRepository.findByCodigo(ALINHAMENTO_E_BALANCEAMENTO))
-                .thenReturn(Optional.of(servico));
+                .thenReturn(Optional.of(servicoEntity));
 
         doNothing().when(servicoRepository)
                 .deleteByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
@@ -201,14 +201,14 @@ class ServicoServiceTest {
         assertEquals("Serviço não encontrado", exception.getMessage());
 
         verify(servicoRepository, times(1)).findByCodigo(ALINHAMENTO_E_BALANCEAMENTO);
-        verify(servicoRepository, never()).delete(any(Servico.class));
+        verify(servicoRepository, never()).delete(any(ServicoEntity.class));
     }
 
     @Test
     void deveRetornarTempoMedioCalculadoAoListarServicos() {
 
         when(servicoRepository.findAll())
-                .thenReturn(List.of(servico));
+                .thenReturn(List.of(servicoEntity));
 
         when(tempoExecucaoServicoRepository
                 .calcularTempoMedio(servicoId))
@@ -233,7 +233,7 @@ class ServicoServiceTest {
     void deveRetornarTempoMedioZeroQuandoNaoExistiremExecucoes() {
 
         when(servicoRepository.findAll())
-                .thenReturn(List.of(servico));
+                .thenReturn(List.of(servicoEntity));
 
         when(tempoExecucaoServicoRepository
                 .calcularTempoMedio(servicoId))
@@ -257,11 +257,11 @@ class ServicoServiceTest {
     @Test
     void deveInicializarTempoMedioComZeroAoSalvar() {
 
-        ArgumentCaptor<Servico> captor =
-                ArgumentCaptor.forClass(Servico.class);
+        ArgumentCaptor<ServicoEntity> captor =
+                ArgumentCaptor.forClass(ServicoEntity.class);
 
         when(servicoRepository.save(any()))
-                .thenReturn(servico);
+                .thenReturn(servicoEntity);
 
         servicoService.save(servicoDTO);
 

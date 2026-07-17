@@ -2,7 +2,13 @@ package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
-import com.techchallenger.oficina360.services.EstoqueService;
+import com.techchallenger.oficina360.frameworks.web.controllers.EstoqueController;
+import com.techchallenger.oficina360.usecases.estoque.BuscarItemEstoqueUseCase;
+import com.techchallenger.oficina360.usecases.estoque.CriarItemEstoqueUseCase;
+import com.techchallenger.oficina360.usecases.estoque.EditarItemEstoqueUseCase;
+import com.techchallenger.oficina360.usecases.estoque.ExcluirItemEstoqueUseCase;
+import com.techchallenger.oficina360.usecases.estoque.ListarItensEstoqueUseCase;
+import com.techchallenger.oficina360.usecases.estoque.ReservarEstoqueUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,200 +28,212 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EstoqueControllerTest {
 
-    private static final String FILTRO_DE_OLEO = "FILTRO-DE-OLEO";
-    private static final String FILTRO_DE_OLEO_PREMIUM = "FILTRO-DE-OLEO-PREMIUM";
-    @Mock
-    private EstoqueService estoqueService;
+	private static final String FILTRO_DE_OLEO = "FILTRO-DE-OLEO";
+	private static final String FILTRO_DE_OLEO_PREMIUM = "FILTRO-DE-OLEO-PREMIUM";
 
-    private EstoqueController estoqueController;
+	@Mock
+	private CriarItemEstoqueUseCase criarItemEstoqueUseCase;
+	@Mock
+	private EditarItemEstoqueUseCase editarItemEstoqueUseCase;
+	@Mock
+	private BuscarItemEstoqueUseCase buscarItemEstoqueUseCase;
+	@Mock
+	private ListarItensEstoqueUseCase listarItensEstoqueUseCase;
+	@Mock
+	private ExcluirItemEstoqueUseCase excluirItemEstoqueUseCase;
+	@Mock
+	private ReservarEstoqueUseCase reservarEstoqueUseCase;
 
-    private UUID estoqueId;
+	private EstoqueController estoqueController;
 
-    private EstoqueDTO estoqueDTO;
+	private UUID estoqueId;
 
-    @BeforeEach
-    void setUp() {
-        estoqueController = new EstoqueController(estoqueService);
+	private EstoqueDTO estoqueDTO;
 
-        estoqueId = UUID.fromString("2b3ded6d-2e43-4f2f-8ea3-26714b1398f8");
+	@BeforeEach
+	void setUp() {
+		estoqueController = new EstoqueController(criarItemEstoqueUseCase, editarItemEstoqueUseCase,
+				buscarItemEstoqueUseCase, listarItensEstoqueUseCase, excluirItemEstoqueUseCase,reservarEstoqueUseCase);
 
-        estoqueDTO = new EstoqueDTO(
-                estoqueId,
-                FILTRO_DE_OLEO,
-                "Filtro de óleo",
-                BigDecimal.valueOf(45.90),
-                20,
-                5,
-                15
-        );
-    }
+		estoqueId = UUID.fromString("2b3ded6d-2e43-4f2f-8ea3-26714b1398f8");
 
-    @Test
-    void deveBuscarPorIdComSucesso() {
-        when(estoqueService.findByCodigo(estoqueDTO.codigo()))
-                .thenReturn(Optional.of(estoqueDTO));
+		estoqueDTO = new EstoqueDTO(
+				estoqueId,
+				FILTRO_DE_OLEO,
+				"Filtro de óleo",
+				BigDecimal.valueOf(45.90),
+				20,
+				5,
+				15
+		);
+	}
 
-        ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(estoqueDTO.codigo());
+	@Test
+	void deveBuscarPorIdComSucesso() {
+		when(buscarItemEstoqueUseCase.findByCodigo(estoqueDTO.codigo()))
+				.thenReturn(Optional.of(estoqueDTO));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Filtro de óleo", response.getBody().nome());
-        assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
-        assertEquals(20, response.getBody().quantidade());
-        assertEquals(5, response.getBody().reservados());
-        assertEquals(15, response.getBody().disponiveis());
+		ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(estoqueDTO.codigo());
 
-        verify(estoqueService, times(1)).findByCodigo(estoqueDTO.codigo());
-    }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals("Filtro de óleo", response.getBody().nome());
+		assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
+		assertEquals(20, response.getBody().quantidade());
+		assertEquals(5, response.getBody().reservados());
+		assertEquals(15, response.getBody().disponiveis());
 
-    @Test
-    void deveRetornarNotFoundQuandoNaoEncontrarPorId() {
-        when(estoqueService.findByCodigo(estoqueDTO.codigo()))
-                .thenReturn(Optional.empty());
+		verify(buscarItemEstoqueUseCase, times(1)).findByCodigo(estoqueDTO.codigo());
+	}
 
-        ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(estoqueDTO.codigo());
+	@Test
+	void deveRetornarNotFoundQuandoNaoEncontrarPorId() {
+		when(buscarItemEstoqueUseCase.findByCodigo(estoqueDTO.codigo()))
+				.thenReturn(Optional.empty());
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+		ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(estoqueDTO.codigo());
 
-        verify(estoqueService, times(1)).findByCodigo(estoqueDTO.codigo());
-    }
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertNull(response.getBody());
 
-    @Test
-    void deveSalvarComSucesso() {
-        when(estoqueService.save(estoqueDTO))
-                .thenReturn(estoqueDTO);
+		verify(buscarItemEstoqueUseCase, times(1)).findByCodigo(estoqueDTO.codigo());
+	}
 
-        ResponseEntity<EstoqueDTO> response = estoqueController.salvar(estoqueDTO);
+	@Test
+	void deveSalvarComSucesso() {
+		when(criarItemEstoqueUseCase.save(estoqueDTO))
+				.thenReturn(estoqueDTO);
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Filtro de óleo", response.getBody().nome());
-        assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
-        assertEquals(20, response.getBody().quantidade());
-        assertEquals(5, response.getBody().reservados());
-        assertEquals(15, response.getBody().disponiveis());
+		ResponseEntity<EstoqueDTO> response = estoqueController.salvar(estoqueDTO);
 
-        verify(estoqueService, times(1)).save(estoqueDTO);
-    }
+		assertEquals(HttpStatus.CREATED, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals("Filtro de óleo", response.getBody().nome());
+		assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
+		assertEquals(20, response.getBody().quantidade());
+		assertEquals(5, response.getBody().reservados());
+		assertEquals(15, response.getBody().disponiveis());
 
-    @Test
-    void deveEditarComSucesso() {
-        EstoqueDTO estoqueAtualizado = new EstoqueDTO(
-                estoqueId,
-                FILTRO_DE_OLEO_PREMIUM,
-                "Filtro de óleo premium",
-                BigDecimal.valueOf(60.00),
-                30,
-                10,
-                20
-        );
+		verify(criarItemEstoqueUseCase, times(1)).save(estoqueDTO);
+	}
 
-        when(estoqueService.edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado))
-                .thenReturn(estoqueAtualizado);
+	@Test
+	void deveEditarComSucesso() {
+		EstoqueDTO estoqueAtualizado = new EstoqueDTO(
+				estoqueId,
+				FILTRO_DE_OLEO_PREMIUM,
+				"Filtro de óleo premium",
+				BigDecimal.valueOf(60.00),
+				30,
+				10,
+				20
+		);
 
-        ResponseEntity<EstoqueDTO> response = estoqueController.editar(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
+		when(editarItemEstoqueUseCase.edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado))
+				.thenReturn(estoqueAtualizado);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Filtro de óleo premium", response.getBody().nome());
-        assertEquals(BigDecimal.valueOf(60.00), response.getBody().valor());
-        assertEquals(30, response.getBody().quantidade());
-        assertEquals(10, response.getBody().reservados());
-        assertEquals(20, response.getBody().disponiveis());
+		ResponseEntity<EstoqueDTO> response = estoqueController.editar(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
 
-        verify(estoqueService, times(1)).edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
-    }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals("Filtro de óleo premium", response.getBody().nome());
+		assertEquals(BigDecimal.valueOf(60.00), response.getBody().valor());
+		assertEquals(30, response.getBody().quantidade());
+		assertEquals(10, response.getBody().reservados());
+		assertEquals(20, response.getBody().disponiveis());
 
-    @Test
-    void deveDeletarComSucesso() {
-        doNothing().when(estoqueService).delete(FILTRO_DE_OLEO);
+		verify(editarItemEstoqueUseCase, times(1)).edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
+	}
 
-        ResponseEntity<Void> response = estoqueController.deletar(FILTRO_DE_OLEO);
+	@Test
+	void deveDeletarComSucesso() {
+		doNothing().when(excluirItemEstoqueUseCase).delete(FILTRO_DE_OLEO);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
+		ResponseEntity<Void> response = estoqueController.deletar(FILTRO_DE_OLEO);
 
-        verify(estoqueService, times(1)).delete(FILTRO_DE_OLEO);
-    }
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+		assertNull(response.getBody());
 
-    @Test
-    void deveListarEstoquesComSucesso() {
-        EstoqueDTO segundoItem = new EstoqueDTO(
-                estoqueId,
-                "PASTILHA-DE-FREIO",
-                "Pastilha de freio",
-                BigDecimal.valueOf(120.00),
-                10,
-                2,
-                8
-        );
+		verify(excluirItemEstoqueUseCase, times(1)).delete(FILTRO_DE_OLEO);
+	}
 
-        when(estoqueService.findAll())
-                .thenReturn(List.of(estoqueDTO, segundoItem));
+	@Test
+	void deveListarEstoquesComSucesso() {
+		EstoqueDTO segundoItem = new EstoqueDTO(
+				estoqueId,
+				"PASTILHA-DE-FREIO",
+				"Pastilha de freio",
+				BigDecimal.valueOf(120.00),
+				10,
+				2,
+				8
+		);
 
-        ResponseEntity<List<EstoqueDTO>> response = estoqueController.listarEstoques();
+		when(listarItensEstoqueUseCase.findAll())
+				.thenReturn(List.of(estoqueDTO, segundoItem));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
+		ResponseEntity<List<EstoqueDTO>> response = estoqueController.listarEstoques();
 
-        assertEquals("Filtro de óleo", response.getBody().get(0).nome());
-        assertEquals(BigDecimal.valueOf(45.90), response.getBody().get(0).valor());
-        assertEquals(20, response.getBody().get(0).quantidade());
-        assertEquals(5, response.getBody().get(0).reservados());
-        assertEquals(15, response.getBody().get(0).disponiveis());
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals(2, response.getBody().size());
 
-        assertEquals("Pastilha de freio", response.getBody().get(1).nome());
-        assertEquals(BigDecimal.valueOf(120.00), response.getBody().get(1).valor());
-        assertEquals(10, response.getBody().get(1).quantidade());
-        assertEquals(2, response.getBody().get(1).reservados());
-        assertEquals(8, response.getBody().get(1).disponiveis());
+		assertEquals("Filtro de óleo", response.getBody().get(0).nome());
+		assertEquals(BigDecimal.valueOf(45.90), response.getBody().get(0).valor());
+		assertEquals(20, response.getBody().get(0).quantidade());
+		assertEquals(5, response.getBody().get(0).reservados());
+		assertEquals(15, response.getBody().get(0).disponiveis());
 
-        verify(estoqueService, times(1)).findAll();
-    }
+		assertEquals("Pastilha de freio", response.getBody().get(1).nome());
+		assertEquals(BigDecimal.valueOf(120.00), response.getBody().get(1).valor());
+		assertEquals(10, response.getBody().get(1).quantidade());
+		assertEquals(2, response.getBody().get(1).reservados());
+		assertEquals(8, response.getBody().get(1).disponiveis());
 
-    @Test
-    void deveRetornarListaVaziaQuandoNaoExistiremEstoques() {
-        when(estoqueService.findAll())
-                .thenReturn(List.of());
+		verify(listarItensEstoqueUseCase, times(1)).findAll();
+	}
 
-        ResponseEntity<List<EstoqueDTO>> response = estoqueController.listarEstoques();
+	@Test
+	void deveRetornarListaVaziaQuandoNaoExistiremEstoques() {
+		when(listarItensEstoqueUseCase.findAll())
+				.thenReturn(List.of());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isEmpty());
+		ResponseEntity<List<EstoqueDTO>> response = estoqueController.listarEstoques();
 
-        verify(estoqueService, times(1)).findAll();
-    }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertTrue(response.getBody().isEmpty());
 
-    @Test
-    void deveReservarComSucesso() {
-        ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(3);
+		verify(listarItensEstoqueUseCase, times(1)).findAll();
+	}
 
-        EstoqueDTO estoqueReservado = new EstoqueDTO(
-                estoqueId,
-                FILTRO_DE_OLEO,
-                "Filtro de óleo",
-                BigDecimal.valueOf(45.90),
-                20,
-                8,
-                12
-        );
+	@Test
+	void deveReservarComSucesso() {
+		ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(3);
 
-        when(estoqueService.reservar(FILTRO_DE_OLEO, reservaDTO))
-                .thenReturn(estoqueReservado);
+		EstoqueDTO estoqueReservado = new EstoqueDTO(
+				estoqueId,
+				FILTRO_DE_OLEO,
+				"Filtro de óleo",
+				BigDecimal.valueOf(45.90),
+				20,
+				8,
+				12
+		);
 
-    ResponseEntity<EstoqueDTO> response = estoqueController.reservar(FILTRO_DE_OLEO, reservaDTO);
+		when(reservarEstoqueUseCase.reservar(FILTRO_DE_OLEO, reservaDTO))
+				.thenReturn(estoqueReservado);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Filtro de óleo", response.getBody().nome());
-        assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
-        assertEquals(20, response.getBody().quantidade());
-        assertEquals(8, response.getBody().reservados());
-        assertEquals(12, response.getBody().disponiveis());
+		ResponseEntity<EstoqueDTO> response = estoqueController.reservar(FILTRO_DE_OLEO, reservaDTO);
 
-        verify(estoqueService, times(1)).reservar(FILTRO_DE_OLEO, reservaDTO);
-    }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals("Filtro de óleo", response.getBody().nome());
+		assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
+		assertEquals(20, response.getBody().quantidade());
+		assertEquals(8, response.getBody().reservados());
+		assertEquals(12, response.getBody().disponiveis());
+
+		verify(reservarEstoqueUseCase, times(1)).reservar(FILTRO_DE_OLEO, reservaDTO);
+	}
 }

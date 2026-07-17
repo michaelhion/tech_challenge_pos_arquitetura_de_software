@@ -4,7 +4,7 @@ import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
-import com.techchallenger.oficina360.entities.Usuario;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 
 import java.util.List;
 
@@ -34,20 +34,20 @@ public final class OrdemServicoFixture {
         return new AprovacaoOrdemServicoDTO(true,null);
     }
 
-    public static Usuario gerarUsuarioAdmin() {
-        return Usuario.builder().email("admin@oficina360.com").senha("123456").role(ADMIN).build();
+    public static UsuarioEntity gerarUsuarioAdmin() {
+        return UsuarioEntity.builder().email("admin@oficina360.com").senha("123456").role(ADMIN).build();
     }
 
-    public static Usuario gerarUsuarioCliente() {
-        return Usuario.builder().email("cliente@oficina360.com").senha("123456").role(CLIENTE).build();
+    public static UsuarioEntity gerarUsuarioCliente() {
+        return UsuarioEntity.builder().email("cliente@oficina360.com").senha("123456").role(CLIENTE).build();
     }
 
-    public static Usuario gerarUsuarioCliente1() {
-        return Usuario.builder().email("cliente1@oficina360.com").senha("123456").role(CLIENTE).build();
+    public static UsuarioEntity gerarUsuarioCliente1() {
+        return UsuarioEntity.builder().email("cliente1@oficina360.com").senha("123456").role(CLIENTE).build();
     }
 
-    public static Usuario gerarUsuarioCliente2() {
-        return Usuario.builder().email("cliente2@oficina360.com").senha("123456").role(CLIENTE).build();
+    public static UsuarioEntity gerarUsuarioCliente2() {
+        return UsuarioEntity.builder().email("cliente2@oficina360.com").senha("123456").role(CLIENTE).build();
     }
 
 }

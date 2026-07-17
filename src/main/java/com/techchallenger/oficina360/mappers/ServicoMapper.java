@@ -1,13 +1,13 @@
 package com.techchallenger.oficina360.mappers;
 
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
-import com.techchallenger.oficina360.entities.Servico;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ServicoEntity;
 
 public class ServicoMapper {
 
     private ServicoMapper(){}
 
-    public static ServicoDTO toDTO(Servico servicoEntity) {
+    public static ServicoDTO toDTO(ServicoEntity servicoEntity) {
         return new ServicoDTO(
                 servicoEntity.getCodigo(),
                 servicoEntity.getDescricao(),
@@ -16,8 +16,8 @@ public class ServicoMapper {
         );
     }
 
-    public static Servico toEntity(ServicoDTO servicoDTO) {
-        return Servico.builder()
+    public static ServicoEntity toEntity(ServicoDTO servicoDTO) {
+        return ServicoEntity.builder()
                 .codigo(servicoDTO.codigo())
                 .descricao(servicoDTO.descricao())
                 .valor(servicoDTO.valor())
@@ -26,7 +26,7 @@ public class ServicoMapper {
     }
 
 
-    public static void updateEntityFromDto(ServicoDTO dto, Servico entity) {
+    public static void updateEntityFromDto(ServicoDTO dto, ServicoEntity entity) {
         if (dto == null || entity == null) {
             return;
         }

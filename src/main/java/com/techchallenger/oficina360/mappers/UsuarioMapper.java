@@ -1,23 +1,23 @@
 package com.techchallenger.oficina360.mappers;
 
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
-import com.techchallenger.oficina360.entities.Usuario;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 
 public class UsuarioMapper {
 
     private UsuarioMapper(){}
 
-    public static CriarUsuarioRequestDTO toDTO(Usuario usuario) {
+    public static CriarUsuarioRequestDTO toDTO(UsuarioEntity usuarioEntity) {
         return new CriarUsuarioRequestDTO(
-                usuario.getEmail(),
-                usuario.getSenha(),
-                usuario.getDocumento(),
-                usuario.getRole()
+                usuarioEntity.getEmail(),
+                usuarioEntity.getSenha(),
+                usuarioEntity.getDocumento(),
+                usuarioEntity.getRole()
         );
     }
 
-    public static Usuario toEntity(CriarUsuarioRequestDTO usuarioRequestDTO) {
-        return Usuario.builder()
+    public static UsuarioEntity toEntity(CriarUsuarioRequestDTO usuarioRequestDTO) {
+        return UsuarioEntity.builder()
                 .documento(usuarioRequestDTO.documento())
                 .senha(usuarioRequestDTO.senha())
                 .email(usuarioRequestDTO.email())
@@ -26,7 +26,7 @@ public class UsuarioMapper {
     }
 
 
-    public static void updateEntityFromDto(CriarUsuarioRequestDTO dto, Usuario entity) {
+    public static void updateEntityFromDto(CriarUsuarioRequestDTO dto, UsuarioEntity entity) {
         if (dto == null || entity == null) {
             return;
         }

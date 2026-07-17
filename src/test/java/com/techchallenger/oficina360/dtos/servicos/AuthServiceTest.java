@@ -2,13 +2,13 @@ package com.techchallenger.oficina360.dtos.servicos;
 
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
-import com.techchallenger.oficina360.entities.Cliente;
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.exceptions.ConflitoException;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
-import com.techchallenger.oficina360.exceptions.RegraDeNegocioException;
-import com.techchallenger.oficina360.repositories.ClienteRepository;
-import com.techchallenger.oficina360.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
 import com.techchallenger.oficina360.security.JwtService;
 import com.techchallenger.oficina360.services.AuthService;
 import org.junit.jupiter.api.Test;
@@ -54,8 +54,8 @@ class AuthServiceTest {
                         "123456"
                 );
 
-        Usuario usuario =
-                Usuario.builder()
+        UsuarioEntity usuarioEntity =
+                UsuarioEntity.builder()
                         .email("admin@oficina360.com")
                         .role("ADMIN")
                         .build();
@@ -71,9 +71,9 @@ class AuthServiceTest {
                 .thenReturn(authentication);
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
-        when(jwtService.gerarToken(usuario))
+        when(jwtService.gerarToken(usuarioEntity))
                 .thenReturn("jwt-token");
 
         String token =
@@ -85,7 +85,7 @@ class AuthServiceTest {
         );
 
         verify(jwtService)
-                .gerarToken(usuario);
+                .gerarToken(usuarioEntity);
     }
 
     @Test
@@ -133,12 +133,12 @@ class AuthServiceTest {
 
         when(clienteRepository.findByDocumento(
                 request.documento()))
-                .thenReturn(Optional.of(mock(Cliente.class)));
+                .thenReturn(Optional.of(mock(ClienteEntity.class)));
 
         authService.criarUsuario(request);
 
         verify(usuarioRepository)
-                .save(any(Usuario.class));
+                .save(any(UsuarioEntity.class));
     }
 
     @Test

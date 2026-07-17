@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.mappers;
 
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
-import com.techchallenger.oficina360.entities.Cliente;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
 
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocumento;
 
@@ -10,7 +10,7 @@ public class ClienteMapper {
     private ClienteMapper() {
     }
 
-    public static ClienteDTO toDTO(Cliente clienteEntity) {
+    public static ClienteDTO toDTO(ClienteEntity clienteEntity) {
         return new ClienteDTO(
                 mascararDocumento(clienteEntity.getDocumento()),
                 clienteEntity.getNome(),
@@ -19,8 +19,8 @@ public class ClienteMapper {
         );
     }
 
-    public static Cliente toEntity(ClienteDTO clienteDTO) {
-        return Cliente.builder()
+    public static ClienteEntity toEntity(ClienteDTO clienteDTO) {
+        return ClienteEntity.builder()
                 .documento(clienteDTO.documento())
                 .nome(clienteDTO.nome())
                 .email(clienteDTO.email())
@@ -29,7 +29,7 @@ public class ClienteMapper {
     }
 
 
-    public static void updateEntityFromDto(ClienteDTO dto, Cliente entity) {
+    public static void updateEntityFromDto(ClienteDTO dto, ClienteEntity entity) {
         if (dto == null || entity == null) {
             return;
         }

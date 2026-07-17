@@ -23,9 +23,12 @@ public enum OrdemDeServicoStatus {
         return ativa;
     }
 
+    private static final List<OrdemDeServicoStatus> ATIVOS =
+            Arrays.stream(values())
+                    .filter(OrdemDeServicoStatus::isAtiva)
+                    .toList();
+
     public static List<OrdemDeServicoStatus> ativos() {
-        return Arrays.stream(values())
-                .filter(OrdemDeServicoStatus::isAtiva)
-                .toList();
+        return ATIVOS;
     }
 }

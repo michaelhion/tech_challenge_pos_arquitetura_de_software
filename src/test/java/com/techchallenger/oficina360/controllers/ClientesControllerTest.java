@@ -1,6 +1,7 @@
 package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.web.controllers.ClientesController;
 import com.techchallenger.oficina360.services.ClienteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

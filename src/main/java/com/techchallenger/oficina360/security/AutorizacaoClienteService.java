@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
-import com.techchallenger.oficina360.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.OrdemServicosRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.VeiculoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -21,51 +21,51 @@ public class AutorizacaoClienteService {
     private final OrdemServicosRepository ordemServicosRepository;
 
     public boolean podeAcessarClientePorDocumento(String documento, Authentication authentication) {
-        Usuario usuario = obterUsuario(authentication);
+        UsuarioEntity usuarioEntity = obterUsuario(authentication);
 
-        if (!usuarioClienteValido(usuario)) {
+        if (!usuarioClienteValido(usuarioEntity)) {
             return false;
         }
 
-        return usuario.getDocumento().equals(normalizarDocumento(documento));
+        return usuarioEntity.getDocumento().equals(normalizarDocumento(documento));
     }
 
 
     public boolean podeAcessarVeiculo(String placa, Authentication authentication) {
-        Usuario usuario = obterUsuario(authentication);
+        UsuarioEntity usuarioEntity = obterUsuario(authentication);
 
-        if (!usuarioClienteValido(usuario)) {
+        if (!usuarioClienteValido(usuarioEntity)) {
             return false;
         }
 
         String placaNormalizada = normalizarPlaca(placa);
 
         return veiculoRepository.findByPlaca(placaNormalizada)
-                .map(veiculo -> usuario.getDocumento()
+                .map(veiculo -> usuarioEntity.getDocumento()
                         .equals(veiculo.getClienteDocumento()))
                 .orElse(false);
     }
 
     public boolean podeAcessarOrdemServico(UUID ordemServicoId, Authentication authentication) {
-        Usuario usuario = obterUsuario(authentication);
+        UsuarioEntity usuarioEntity = obterUsuario(authentication);
 
-        if (!usuarioClienteValido(usuario)) {
+        if (!usuarioClienteValido(usuarioEntity)) {
             return false;
         }
 
-        return ordemServicosRepository.findById(ordemServicoId).map(os -> usuario.getDocumento().equals(os.getDocumentoCliente())).orElse(false);
+        return ordemServicosRepository.findById(ordemServicoId).map(os -> usuarioEntity.getDocumento().equals(os.getDocumentoCliente())).orElse(false);
     }
 
-    private Usuario obterUsuario(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof Usuario usuario)) {
+    private UsuarioEntity obterUsuario(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UsuarioEntity usuarioEntity)) {
             return null;
         }
 
-        return usuario;
+        return usuarioEntity;
     }
 
-    private boolean usuarioClienteValido(Usuario usuario) {
-        return usuario != null && usuario.getDocumento() != null && !usuario.getDocumento().isBlank();
+    private boolean usuarioClienteValido(UsuarioEntity usuarioEntity) {
+        return usuarioEntity != null && usuarioEntity.getDocumento() != null && !usuarioEntity.getDocumento().isBlank();
     }
 }
 

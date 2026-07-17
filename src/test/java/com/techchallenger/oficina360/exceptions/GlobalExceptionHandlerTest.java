@@ -1,5 +1,11 @@
 package com.techchallenger.oficina360.exceptions;
 
+import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ErroRegraDeNegocioResponse;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ErroResponse;
+import com.techchallenger.oficina360.frameworks.web.exceptions.GlobalExceptionHandler;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.entities.Usuario;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -13,7 +13,7 @@ class JwtServiceTest {
 
     private JwtService jwtService;
 
-    private Usuario usuario;
+    private UsuarioEntity usuarioEntity;
 
     @BeforeEach
     void setUp() {
@@ -23,7 +23,7 @@ class JwtServiceTest {
         ReflectionTestUtils.setField(jwtService, "issuer", "oficina360-api-test");
         ReflectionTestUtils.setField(jwtService, "expirationHours", 2L);
 
-        usuario = Usuario.builder()
+        usuarioEntity = UsuarioEntity.builder()
                 .id(UUID.randomUUID())
                 .email("admin@oficina360.com")
                 .senha("senha-criptografada")
@@ -33,7 +33,7 @@ class JwtServiceTest {
 
     @Test
     void deveGerarTokenJwtComSucesso() {
-        String token = jwtService.gerarToken(usuario);
+        String token = jwtService.gerarToken(usuarioEntity);
 
         assertNotNull(token);
         assertFalse(token.isBlank());
@@ -41,7 +41,7 @@ class JwtServiceTest {
 
     @Test
     void deveValidarTokenEObterSubject() {
-        String token = jwtService.gerarToken(usuario);
+        String token = jwtService.gerarToken(usuarioEntity);
 
         String subject = jwtService.validarTokenEObterSubject(token);
 

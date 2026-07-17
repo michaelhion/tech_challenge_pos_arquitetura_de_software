@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +39,7 @@ class JwtAuthenticationFilterTest {
 
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    private Usuario usuario;
+    private UsuarioEntity usuarioEntity;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +47,7 @@ class JwtAuthenticationFilterTest {
 
         jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, usuarioRepository);
 
-        usuario = Usuario.builder()
+        usuarioEntity = UsuarioEntity.builder()
                 .id(UUID.randomUUID())
                 .email("admin@oficina360.com")
                 .senha("senha-criptografada")
@@ -100,7 +100,7 @@ class JwtAuthenticationFilterTest {
                 .thenReturn("admin@oficina360.com");
 
         when(usuarioRepository.findByEmail("admin@oficina360.com"))
-                .thenReturn(Optional.of(usuario));
+                .thenReturn(Optional.of(usuarioEntity));
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 

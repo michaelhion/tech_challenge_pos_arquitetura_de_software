@@ -1,13 +1,14 @@
 package com.techchallenger.oficina360.mappers;
 
+import com.techchallenger.oficina360.dominio.Estoque;
 import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
-import com.techchallenger.oficina360.entities.Estoque;
+import com.techchallenger.oficina360.frameworks.persistence.entities.EstoqueEntity;
 
 public class EstoqueMapper {
 
     private EstoqueMapper(){}
 
-    public static EstoqueDTO toDTO(Estoque estoqueEntity) {
+    public static EstoqueDTO toDTO(EstoqueEntity estoqueEntity) {
         return new EstoqueDTO(
                 estoqueEntity.getId(),
                 estoqueEntity.getCodigo(),
@@ -19,8 +20,20 @@ public class EstoqueMapper {
         );
     }
 
-    public static Estoque toEntity(EstoqueDTO estoqueDTO) {
-        return Estoque.builder()
+    public static EstoqueDTO domaintoDTO(Estoque estoque) {
+        return new EstoqueDTO(
+                estoque.getId(),
+                estoque.getCodigo(),
+                estoque.getNome(),
+                estoque.getValor(),
+                estoque.getQuantidade(),
+                estoque.getReservados(),
+                estoque.getDisponiveis()
+        );
+    }
+
+    public static EstoqueEntity toEntity(EstoqueDTO estoqueDTO) {
+        return EstoqueEntity.builder()
                 .id(estoqueDTO.id())
                 .codigo(estoqueDTO.codigo())
                 .nome(estoqueDTO.nome())
@@ -30,8 +43,18 @@ public class EstoqueMapper {
                 .build();
     }
 
+    public static Estoque toDomain(EstoqueDTO estoqueDTO) {
+        return new Estoque(
+                estoqueDTO.id(),
+                estoqueDTO.nome(),
+                estoqueDTO.valor(),
+                estoqueDTO.quantidade(),
+                estoqueDTO.reservados(),
+                estoqueDTO.codigo());
+    }
 
-    public static void updateEntityFromDto(EstoqueDTO dto, Estoque estoqueEntity) {
+
+    public static void updateEntityFromDto(EstoqueDTO dto, EstoqueEntity estoqueEntity) {
         if (dto == null || estoqueEntity == null) {
             return;
         }
@@ -40,6 +63,22 @@ public class EstoqueMapper {
         estoqueEntity.setValor(dto.valor());
         estoqueEntity.setQuantidade(dto.quantidade());
         estoqueEntity.setReservados(dto.reservados());
+    }
+
+    public static void updateDomainFromDto(EstoqueDTO dto, Estoque estoque) {
+        if (dto == null || estoque == null) {
+            return;
+        }
+        Estoque newEstoque = new Estoque(
+                estoque.getId(),
+                estoque.getNome(),
+                estoque.getValor(),
+                estoque.getQuantidade(),
+                estoque.getReservados(),
+                estoque.getCodigo()
+        );
+        estoque = newEstoque;
+
     }
 
 }

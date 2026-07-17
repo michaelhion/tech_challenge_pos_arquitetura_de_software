@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
-import com.techchallenger.oficina360.entities.Veiculo;
-import com.techchallenger.oficina360.exceptions.ConflitoException;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
-import com.techchallenger.oficina360.repositories.ClienteRepository;
-import com.techchallenger.oficina360.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +44,7 @@ class VeiculoServiceTest {
     private VeiculoService veiculoService;
 
     private VeiculoDTO veiculoDTO;
-    private Veiculo veiculo;
+    private VeiculoEntity veiculoEntity;
     private UUID veiculoId;
 
     @BeforeEach
@@ -58,7 +58,7 @@ class VeiculoServiceTest {
                 DOCUMENTO_JOAO
         );
 
-        veiculo = Veiculo.builder()
+        veiculoEntity = VeiculoEntity.builder()
                 .id(UUID.randomUUID())
                 .placa(PLACA_GOL)
                 .marca(VOLKSWAGEN)
@@ -70,7 +70,7 @@ class VeiculoServiceTest {
 
     @Test
     void deveListarTodosOsVeiculos() {
-        when(veiculoRepository.findAll()).thenReturn(List.of(veiculo));
+        when(veiculoRepository.findAll()).thenReturn(List.of(veiculoEntity));
 
         List<VeiculoDTO> resultado = veiculoService.findAll();
         assertAll(
@@ -89,7 +89,7 @@ class VeiculoServiceTest {
 
     @Test
     void deveBuscarVeiculoPorPlacaQuandoExistir() {
-        when(veiculoRepository.findByPlaca(PLACA_GOL)).thenReturn(Optional.of(veiculo));
+        when(veiculoRepository.findByPlaca(PLACA_GOL)).thenReturn(Optional.of(veiculoEntity));
 
         Optional<VeiculoDTO> resultado = veiculoService.findByPlaca(PLACA_GOL);
 
@@ -115,7 +115,7 @@ class VeiculoServiceTest {
     void deveSalvarVeiculoComSucesso() {
         when(clienteRepository.existsByDocumento(DOCUMENTO_JOAO)).thenReturn(Boolean.TRUE);
         when(veiculoRepository.existsByPlaca(PLACA_GOL)).thenReturn(Boolean.FALSE);
-        when(veiculoRepository.save(any(Veiculo.class))).thenReturn(veiculo);
+        when(veiculoRepository.save(any(VeiculoEntity.class))).thenReturn(veiculoEntity);
 
         VeiculoDTO resultado = veiculoService.save(veiculoDTO);
 
@@ -131,7 +131,7 @@ class VeiculoServiceTest {
 
         verify(clienteRepository, times(1)).existsByDocumento(DOCUMENTO_JOAO);
         verify(veiculoRepository, times(1)).existsByPlaca(PLACA_GOL);
-        verify(veiculoRepository, times(1)).save(any(Veiculo.class));
+        verify(veiculoRepository, times(1)).save(any(VeiculoEntity.class));
     }
 
     @Test
@@ -147,7 +147,7 @@ class VeiculoServiceTest {
 
         verify(clienteRepository, times(1)).existsByDocumento(DOCUMENTO_JOAO);
         verify(veiculoRepository, never()).findByPlaca(anyString());
-        verify(veiculoRepository, never()).save(any(Veiculo.class));
+        verify(veiculoRepository, never()).save(any(VeiculoEntity.class));
     }
 
     @Test
@@ -164,7 +164,7 @@ class VeiculoServiceTest {
 
         verify(clienteRepository, times(1)).existsByDocumento(DOCUMENTO_JOAO);
         verify(veiculoRepository, times(1)).existsByPlaca(PLACA_GOL);
-        verify(veiculoRepository, never()).save(any(Veiculo.class));
+        verify(veiculoRepository, never()).save(any(VeiculoEntity.class));
     }
 
     @Test
@@ -177,7 +177,7 @@ class VeiculoServiceTest {
                 "12345678901"
         );
 
-        Veiculo veiculoExistente = Veiculo.builder()
+        VeiculoEntity veiculoEntityExistente = VeiculoEntity.builder()
                 .id(veiculoId)
                 .placa(PLACA)
                 .marca("Volkswagen")
@@ -187,7 +187,7 @@ class VeiculoServiceTest {
                 .build();
 
         when(veiculoRepository.findByPlaca(PLACA))
-                .thenReturn(Optional.of(veiculoExistente));
+                .thenReturn(Optional.of(veiculoEntityExistente));
 
         when(clienteRepository.existsByDocumento("12345678901"))
                 .thenReturn(true);
@@ -195,7 +195,7 @@ class VeiculoServiceTest {
         when(veiculoRepository.existsByPlacaAndIdNot(PLACA, veiculoId))
                 .thenReturn(false);
 
-        when(veiculoRepository.save(any(Veiculo.class)))
+        when(veiculoRepository.save(any(VeiculoEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         VeiculoDTO resultado = veiculoService.edit(PLACA, dtoAtualizado );
@@ -208,7 +208,7 @@ class VeiculoServiceTest {
         verify(veiculoRepository, times(1)).findByPlaca(PLACA);
         verify(clienteRepository, times(1)).existsByDocumento("12345678901");
         verify(veiculoRepository, times(1)).existsByPlacaAndIdNot(PLACA, veiculoId);
-        verify(veiculoRepository, times(1)).save(any(Veiculo.class));
+        verify(veiculoRepository, times(1)).save(any(VeiculoEntity.class));
     }
 
     @Test
@@ -224,12 +224,12 @@ class VeiculoServiceTest {
 
         verify(veiculoRepository, times(1)).findByPlaca(PLACA_GOL);
         verify(clienteRepository, never()).findByDocumento(anyString());
-        verify(veiculoRepository, never()).save(any(Veiculo.class));
+        verify(veiculoRepository, never()).save(any(VeiculoEntity.class));
     }
 
     @Test
     void naoDeveEditarQuandoClienteNaoExistir() {
-        when(veiculoRepository.findByPlaca(PLACA_GOL)).thenReturn(Optional.of(veiculo));
+        when(veiculoRepository.findByPlaca(PLACA_GOL)).thenReturn(Optional.of(veiculoEntity));
         when(clienteRepository.existsByDocumento(DOCUMENTO_JOAO)).thenReturn(Boolean.FALSE);
 
         RecursoNaoEncontradoException exception = assertThrows(
@@ -241,7 +241,7 @@ class VeiculoServiceTest {
 
         verify(veiculoRepository, times(1)).findByPlaca(PLACA_GOL);
         verify(clienteRepository, times(1)).existsByDocumento(DOCUMENTO_JOAO);
-        verify(veiculoRepository, never()).save(any(Veiculo.class));
+        verify(veiculoRepository, never()).save(any(VeiculoEntity.class));
     }
 
     @Test
@@ -254,7 +254,7 @@ class VeiculoServiceTest {
                 DOCUMENTO_JOAO
         );
 
-        Veiculo veiculoAtual = Veiculo.builder()
+        VeiculoEntity veiculoEntityAtual = VeiculoEntity.builder()
                 .id(UUID.randomUUID())
                 .placa(PLACA_GOL)
                 .marca("Volkswagen")
@@ -264,12 +264,12 @@ class VeiculoServiceTest {
                 .build();
 
         when(veiculoRepository.findByPlaca(PLACA_GOL))
-                .thenReturn(Optional.of(veiculoAtual));
+                .thenReturn(Optional.of(veiculoEntityAtual));
 
         when(clienteRepository.existsByDocumento(DOCUMENTO_JOAO))
                 .thenReturn(true);
 
-        when(veiculoRepository.existsByPlacaAndIdNot("DEF2G34", veiculoAtual.getId()))
+        when(veiculoRepository.existsByPlacaAndIdNot("DEF2G34", veiculoEntityAtual.getId()))
                 .thenReturn(true);
 
         ConflitoException exception = assertThrows(
@@ -282,8 +282,8 @@ class VeiculoServiceTest {
         verify(veiculoRepository, times(1)).findByPlaca(PLACA_GOL);
         verify(clienteRepository, times(1)).existsByDocumento(DOCUMENTO_JOAO);
         verify(veiculoRepository, times(1))
-                .existsByPlacaAndIdNot("DEF2G34", veiculoAtual.getId());
-        verify(veiculoRepository, never()).save(any(Veiculo.class));
+                .existsByPlacaAndIdNot("DEF2G34", veiculoEntityAtual.getId());
+        verify(veiculoRepository, never()).save(any(VeiculoEntity.class));
     }
 
     @Test
@@ -306,8 +306,8 @@ class VeiculoServiceTest {
                 DOCUMENTO_JOAO
         );
 
-        Veiculo veiculoAtualizado = Veiculo.builder()
-                .id(veiculo.getId())
+        VeiculoEntity veiculoEntityAtualizado = VeiculoEntity.builder()
+                .id(veiculoEntity.getId())
                 .placa(PLACA_GOL)
                 .marca(VOLKSWAGEN)
                 .modelo("Gol")
@@ -316,14 +316,14 @@ class VeiculoServiceTest {
                 .build();
 
         when(veiculoRepository.findByPlaca(PLACA_GOL))
-                .thenReturn(Optional.of(veiculo))
-                .thenReturn(Optional.of(veiculo));
+                .thenReturn(Optional.of(veiculoEntity))
+                .thenReturn(Optional.of(veiculoEntity));
 
         when(clienteRepository.existsByDocumento(DOCUMENTO_JOAO))
                 .thenReturn(Boolean.TRUE);
 
-        when(veiculoRepository.save(any(Veiculo.class)))
-                .thenReturn(veiculoAtualizado);
+        when(veiculoRepository.save(any(VeiculoEntity.class)))
+                .thenReturn(veiculoEntityAtualizado);
 
         VeiculoDTO resultado = veiculoService.edit(PLACA_GOL, dtoAtualizado);
         assertAll(
@@ -338,7 +338,7 @@ class VeiculoServiceTest {
 
         verify(veiculoRepository, times(1)).findByPlaca(PLACA_GOL);
         verify(clienteRepository, times(1)).existsByDocumento(DOCUMENTO_JOAO);
-        verify(veiculoRepository, times(1)).save(any(Veiculo.class));
+        verify(veiculoRepository, times(1)).save(any(VeiculoEntity.class));
     }
 
 }

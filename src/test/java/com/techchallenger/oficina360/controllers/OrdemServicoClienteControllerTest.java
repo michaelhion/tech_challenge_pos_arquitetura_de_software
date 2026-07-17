@@ -3,7 +3,9 @@ package com.techchallenger.oficina360.controllers;
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
-import com.techchallenger.oficina360.services.OrdemServicoClienteService;
+import com.techchallenger.oficina360.frameworks.web.controllers.OrdemServicoClienteController;
+import com.techchallenger.oficina360.usecases.ordemservico.AprovarOrcamentoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +25,10 @@ import static org.mockito.Mockito.*;
 class OrdemServicoClienteControllerTest {
 
     @Mock
-    private OrdemServicoClienteService ordemServicoClienteService;
+    private AprovarOrcamentoUseCase aprovarOrcamentoUseCase;
+
+    @Mock
+    private BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
 
     @Mock
     private OrdemServicoClienteController ordemServicoClienteController;
@@ -33,7 +38,7 @@ class OrdemServicoClienteControllerTest {
 
     @BeforeEach
     void setUp() {
-        ordemServicoClienteController = new OrdemServicoClienteController(ordemServicoClienteService);
+        ordemServicoClienteController = new OrdemServicoClienteController(aprovarOrcamentoUseCase,buscarOrdemServicoPorIdUseCase);
 
         ordemServicoId = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
     }
@@ -52,7 +57,7 @@ class OrdemServicoClienteControllerTest {
                 null
         );
 
-        when(ordemServicoClienteService.aprovar(ordemServicoId, aprovacaoDTO))
+        when(aprovarOrcamentoUseCase.aprovar(ordemServicoId, aprovacaoDTO))
                 .thenReturn(ordemServicoAprovada);
 
         ResponseEntity<OrdemServicoDTO> response =
@@ -64,7 +69,7 @@ class OrdemServicoClienteControllerTest {
         assertEquals("ABC1D23", response.getBody().placaVeiculo());
         assertEquals(OrdemDeServicoStatus.ORCAMENTO_APROVADO, response.getBody().ordemDeServicoStatus());
 
-        verify(ordemServicoClienteService, times(1))
+        verify(aprovarOrcamentoUseCase, times(1))
                 .aprovar(ordemServicoId, aprovacaoDTO);
     }
 
@@ -81,7 +86,7 @@ class OrdemServicoClienteControllerTest {
                 null
         );
 
-        when(ordemServicoClienteService.aprovar(ordemServicoId, aprovacaoDTO))
+        when(aprovarOrcamentoUseCase.aprovar(ordemServicoId, aprovacaoDTO))
                 .thenReturn(ordemServicoReprovada);
 
         ResponseEntity<OrdemServicoDTO> response =
@@ -94,7 +99,7 @@ class OrdemServicoClienteControllerTest {
         assertEquals("ABC1D23", response.getBody().placaVeiculo());
         assertEquals(OrdemDeServicoStatus.ORCAMENTO_REPROVADO, response.getBody().ordemDeServicoStatus());
 
-        verify(ordemServicoClienteService, times(1))
+        verify(aprovarOrcamentoUseCase, times(1))
                 .aprovar(ordemServicoId, aprovacaoDTO);
     }
 
@@ -111,7 +116,7 @@ class OrdemServicoClienteControllerTest {
                         null
                 );
 
-        when(ordemServicoClienteService.findById(ordemServicoId))
+        when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId))
                 .thenReturn(Optional.of(ordemServicoDTO));
 
         ResponseEntity<OrdemServicoDTO> response = ordemServicoClienteController
@@ -123,14 +128,14 @@ class OrdemServicoClienteControllerTest {
 
         assertEquals(ordemServicoId,response.getBody().id());
 
-        verify(ordemServicoClienteService)
+        verify(buscarOrdemServicoPorIdUseCase)
                 .findById(ordemServicoId);
     }
 
     @Test
     void deveRetornar404QuandoOrdemServicoNaoExistir() {
 
-        when(ordemServicoClienteService.findById(ordemServicoId))
+        when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<OrdemServicoDTO> response = ordemServicoClienteController
@@ -138,6 +143,6 @@ class OrdemServicoClienteControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
 
-        verify(ordemServicoClienteService).findById(ordemServicoId);
+        verify(buscarOrdemServicoPorIdUseCase).findById(ordemServicoId);
     }
 }

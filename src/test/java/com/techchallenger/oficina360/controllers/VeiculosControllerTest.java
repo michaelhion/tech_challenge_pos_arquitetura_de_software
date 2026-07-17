@@ -1,6 +1,7 @@
 package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.frameworks.web.controllers.VeiculosController;
 import com.techchallenger.oficina360.services.VeiculoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

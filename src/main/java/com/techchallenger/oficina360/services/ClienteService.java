@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.services;
 
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
-import com.techchallenger.oficina360.entities.Cliente;
-import com.techchallenger.oficina360.exceptions.ConflitoException;
-import com.techchallenger.oficina360.exceptions.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
+import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.mappers.ClienteMapper;
-import com.techchallenger.oficina360.repositories.ClienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -47,14 +47,14 @@ public class ClienteService {
     }
 
     public ClienteDTO edit(String documento, ClienteDTO dto) {
-        Cliente cliente = clienteRepository.findByDocumento(documento)
+        ClienteEntity clienteEntity = clienteRepository.findByDocumento(documento)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));
 
-        ClienteMapper.updateEntityFromDto(dto, cliente);
+        ClienteMapper.updateEntityFromDto(dto, clienteEntity);
 
-        Cliente clienteAtualizado = clienteRepository.save(cliente);
+        ClienteEntity clienteEntityAtualizado = clienteRepository.save(clienteEntity);
 
-        return ClienteMapper.toDTO(clienteAtualizado);
+        return ClienteMapper.toDTO(clienteEntityAtualizado);
     }
 
 

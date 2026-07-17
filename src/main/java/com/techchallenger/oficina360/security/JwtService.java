@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.techchallenger.oficina360.entities.Usuario;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +24,13 @@ public class JwtService {
     @Value("${api.security.jwt.expiration-hours:2}")
     private Long expirationHours;
 
-    public String gerarToken(Usuario usuario) {
+    public String gerarToken(UsuarioEntity usuarioEntity) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         return JWT.create()
                 .withIssuer(issuer)
-                .withSubject(usuario.getEmail())
-                .withClaim("role", usuario.getRole())
+                .withSubject(usuarioEntity.getEmail())
+                .withClaim("role", usuarioEntity.getRole())
                 .withExpiresAt(dataExpiracao())
                 .sign(algorithm);
     }

@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.entities.OrdemServico;
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.entities.Veiculo;
-import com.techchallenger.oficina360.repositories.ClienteRepository;
-import com.techchallenger.oficina360.repositories.OrdemServicosRepository;
-import com.techchallenger.oficina360.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.OrdemServicosRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.VeiculoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,12 +49,12 @@ class AutorizacaoClienteServiceTest {
     @Test
     void devePermitirAcessoAoProprioDocumento() {
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         boolean resultado =
                 service.podeAcessarClientePorDocumento(
@@ -68,12 +68,12 @@ class AutorizacaoClienteServiceTest {
     @Test
     void naoDevePermitirAcessoADocumentoDeOutroCliente() {
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         boolean resultado =
                 service.podeAcessarClientePorDocumento(
@@ -114,20 +114,20 @@ class AutorizacaoClienteServiceTest {
     @Test
     void devePermitirAcessoAoVeiculoDoCliente() {
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
-        Veiculo veiculo = Veiculo.builder()
+        VeiculoEntity veiculoEntity = VeiculoEntity.builder()
                 .clienteDocumento("12345678901")
                 .placa("ABC1D23")
                 .build();
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         when(veiculoRepository.findByPlaca("ABC1D23"))
-                .thenReturn(Optional.of(veiculo));
+                .thenReturn(Optional.of(veiculoEntity));
 
         boolean resultado =
                 service.podeAcessarVeiculo(
@@ -141,20 +141,20 @@ class AutorizacaoClienteServiceTest {
     @Test
     void naoDevePermitirAcessoAoVeiculoDeOutroCliente() {
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
-        Veiculo veiculo = Veiculo.builder()
+        VeiculoEntity veiculoEntity = VeiculoEntity.builder()
                 .clienteDocumento("99999999999")
                 .placa("ABC1D23")
                 .build();
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         when(veiculoRepository.findByPlaca("ABC1D23"))
-                .thenReturn(Optional.of(veiculo));
+                .thenReturn(Optional.of(veiculoEntity));
 
         boolean resultado =
                 service.podeAcessarVeiculo(
@@ -168,12 +168,12 @@ class AutorizacaoClienteServiceTest {
     @Test
     void naoDevePermitirQuandoVeiculoNaoExistir() {
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         when(veiculoRepository.findByPlaca(anyString()))
                 .thenReturn(Optional.empty());
@@ -192,18 +192,18 @@ class AutorizacaoClienteServiceTest {
 
         UUID id = UUID.randomUUID();
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
-        OrdemServico ordemServico = new OrdemServico();
-        ordemServico.setDocumentoCliente("12345678901");
+        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
+        ordemServicoEntity.setDocumentoCliente("12345678901");
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         when(ordemServicosRepository.findById(id))
-                .thenReturn(Optional.of(ordemServico));
+                .thenReturn(Optional.of(ordemServicoEntity));
 
         boolean resultado =
                 service.podeAcessarOrdemServico(
@@ -219,18 +219,18 @@ class AutorizacaoClienteServiceTest {
 
         UUID id = UUID.randomUUID();
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
-        OrdemServico ordemServico = new OrdemServico();
-        ordemServico.setDocumentoCliente("99999999999");
+        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
+        ordemServicoEntity.setDocumentoCliente("99999999999");
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         when(ordemServicosRepository.findById(id))
-                .thenReturn(Optional.of(ordemServico));
+                .thenReturn(Optional.of(ordemServicoEntity));
 
         boolean resultado =
                 service.podeAcessarOrdemServico(
@@ -246,12 +246,12 @@ class AutorizacaoClienteServiceTest {
 
         UUID id = UUID.randomUUID();
 
-        Usuario usuario = Usuario.builder()
+        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
                 .documento("12345678901")
                 .build();
 
         when(authentication.getPrincipal())
-                .thenReturn(usuario);
+                .thenReturn(usuarioEntity);
 
         when(ordemServicosRepository.findById(id))
                 .thenReturn(Optional.empty());

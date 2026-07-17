@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.entities.Usuario;
-import com.techchallenger.oficina360.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,13 +24,13 @@ class UserDetailsServiceImplTest {
 
     private UserDetailsServiceImpl userDetailsService;
 
-    private Usuario usuario;
+    private UsuarioEntity usuarioEntity;
 
     @BeforeEach
     void setUp() {
         userDetailsService = new UserDetailsServiceImpl(usuarioRepository);
 
-        usuario = Usuario.builder()
+        usuarioEntity = UsuarioEntity.builder()
                 .id(UUID.randomUUID())
                 .email("admin@oficina360.com")
                 .senha("senha-criptografada")
@@ -41,7 +41,7 @@ class UserDetailsServiceImplTest {
     @Test
     void deveCarregarUsuarioPorEmailComSucesso() {
         when(usuarioRepository.findByEmail("admin@oficina360.com"))
-                .thenReturn(Optional.of(usuario));
+                .thenReturn(Optional.of(usuarioEntity));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername("admin@oficina360.com");
 
