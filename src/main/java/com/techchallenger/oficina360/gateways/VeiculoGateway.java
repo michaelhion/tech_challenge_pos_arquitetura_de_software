@@ -17,7 +17,7 @@ public interface VeiculoGateway {
 
     Veiculo save(Veiculo veiculo);
 
-    List<Veiculo> findAll(Veiculo veiculo);
+    List<Veiculo> findAll();
 
     Optional<Veiculo> findById(UUID id);
 }

@@ -15,7 +15,7 @@ public class ClienteFinder {
 		this.gateway = gateway;
 	}
 
-	public Cliente buscarPorDocumento(String documento) {
+	public Cliente buscarPorDocumentoOuFalhar(String documento) {
 		return gateway.findByDocumento(normalizarDocumento(documento))
 				.orElseThrow(() ->
 						new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));

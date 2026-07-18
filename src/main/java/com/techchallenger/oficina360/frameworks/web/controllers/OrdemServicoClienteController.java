@@ -27,8 +27,8 @@ public class OrdemServicoClienteController implements OrdemServicoClienteApi {
 
     private final AprovarOrcamentoUseCase aprovar;
     private final BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
-
-    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoCliente.podeAcessarOrdemServico(#id, authentication)")
+    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
+//    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoCliente.podeAcessarOrdemServico(#id, authentication)")
     @GetMapping("/listar/{id}")
     @Override
     public ResponseEntity<OrdemServicoDTO> buscarPorId(
@@ -39,7 +39,8 @@ public class OrdemServicoClienteController implements OrdemServicoClienteApi {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoCliente.podeAcessarOrdemServico(#id, authentication)")
+    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
+//    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoCliente.podeAcessarOrdemServico(#id, authentication)")
     @PatchMapping("/aprovacao/{id}")
     @Override
     public ResponseEntity<OrdemServicoDTO> aprovar(

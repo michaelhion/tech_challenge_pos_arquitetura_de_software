@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.security;
 
+import com.techchallenger.oficina360.dominio.Usuario;
 import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
-import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
-import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.OrdemServicosRepository;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.VeiculoRepository;
+import com.techchallenger.oficina360.frameworks.security.UsuarioSecurityDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,250 +18,227 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AutorizacaoClienteServiceTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private VeiculoRepository veiculoRepository;
 
-    @Mock
-    private VeiculoRepository veiculoRepository;
+	@Mock
+	private OrdemServicosRepository ordemServicosRepository;
+
+	@Mock
+	private Authentication authentication;
 
-    @Mock
-    private OrdemServicosRepository ordemServicosRepository;
+	private AutorizacaoClienteService service;
+
+	@BeforeEach
+	void setup() {
+		service = new AutorizacaoClienteService(
+				veiculoRepository,
+				ordemServicosRepository
+		);
+	}
+
+	private UsuarioSecurityDetails usuarioAutenticado(String documento) {
+		Usuario usuario = new Usuario(
+				UUID.randomUUID(),
+				"cliente@teste.com",
+				"senha",
+				"CLIENTE",
+				documento
+		);
 
-    @Mock
-    private Authentication authentication;
+		return new UsuarioSecurityDetails(usuario);
+	}
+
+	@Test
+	void devePermitirAcessoAoProprioDocumento() {
+
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-    private AutorizacaoClienteService service;
+		boolean resultado =
+				service.podeAcessarClientePorDocumento(
+						"12345678901",
+						authentication
+				);
 
-    @BeforeEach
-    void setup() {
-        service = new AutorizacaoClienteService(
-                veiculoRepository,
-                ordemServicosRepository
-        );
-    }
+		assertTrue(resultado);
+	}
 
-    @Test
-    void devePermitirAcessoAoProprioDocumento() {
+	@Test
+	void naoDevePermitirAcessoADocumentoDeOutroCliente() {
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
+		boolean resultado =
+				service.podeAcessarClientePorDocumento(
+						"99999999999",
+						authentication
+				);
 
-        boolean resultado =
-                service.podeAcessarClientePorDocumento(
-                        "12345678901",
-                        authentication
-                );
+		assertFalse(resultado);
+	}
 
-        assertTrue(resultado);
-    }
+	@Test
+	void naoDevePermitirQuandoAuthenticationForNull() {
 
-    @Test
-    void naoDevePermitirAcessoADocumentoDeOutroCliente() {
+		boolean resultado =
+				service.podeAcessarClientePorDocumento(
+						"12345678901",
+						null
+				);
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
+		assertFalse(resultado);
+	}
 
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
+	@Test
+	void naoDevePermitirQuandoPrincipalNaoForUsuarioSecurityDetails() {
 
-        boolean resultado =
-                service.podeAcessarClientePorDocumento(
-                        "99999999999",
-                        authentication
-                );
+		when(authentication.getPrincipal())
+				.thenReturn("qualquer-coisa");
 
-        assertFalse(resultado);
-    }
+		boolean resultado =
+				service.podeAcessarClientePorDocumento(
+						"12345678901",
+						authentication
+				);
 
-    @Test
-    void naoDevePermitirQuandoAuthenticationForNull() {
+		assertFalse(resultado);
+	}
 
-        boolean resultado =
-                service.podeAcessarClientePorDocumento(
-                        "12345678901",
-                        null
-                );
+	@Test
+	void devePermitirAcessoAoVeiculoDoCliente() {
 
-        assertFalse(resultado);
-    }
+		VeiculoEntity veiculo = VeiculoEntity.builder()
+				.placa("ABC1D23")
+				.clienteDocumento("12345678901")
+				.build();
 
-    @Test
-    void naoDevePermitirQuandoPrincipalNaoForUsuario() {
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-        when(authentication.getPrincipal())
-                .thenReturn("qualquer-coisa");
+		when(veiculoRepository.findByPlaca("ABC1D23"))
+				.thenReturn(Optional.of(veiculo));
 
-        boolean resultado =
-                service.podeAcessarClientePorDocumento(
-                        "12345678901",
-                        authentication
-                );
+		boolean resultado =
+				service.podeAcessarVeiculo(
+						"abc1d23",
+						authentication
+				);
 
-        assertFalse(resultado);
-    }
+		assertTrue(resultado);
+	}
 
-    @Test
-    void devePermitirAcessoAoVeiculoDoCliente() {
+	@Test
+	void naoDevePermitirAcessoAoVeiculoDeOutroCliente() {
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
+		VeiculoEntity veiculo = VeiculoEntity.builder()
+				.placa("ABC1D23")
+				.clienteDocumento("99999999999")
+				.build();
 
-        VeiculoEntity veiculoEntity = VeiculoEntity.builder()
-                .clienteDocumento("12345678901")
-                .placa("ABC1D23")
-                .build();
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
+		when(veiculoRepository.findByPlaca("ABC1D23"))
+				.thenReturn(Optional.of(veiculo));
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
-                .thenReturn(Optional.of(veiculoEntity));
+		boolean resultado =
+				service.podeAcessarVeiculo(
+						"ABC1D23",
+						authentication
+				);
 
-        boolean resultado =
-                service.podeAcessarVeiculo(
-                        "abc1d23",
-                        authentication
-                );
+		assertFalse(resultado);
+	}
 
-        assertTrue(resultado);
-    }
+	@Test
+	void naoDevePermitirQuandoVeiculoNaoExistir() {
 
-    @Test
-    void naoDevePermitirAcessoAoVeiculoDeOutroCliente() {
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
+		when(veiculoRepository.findByPlaca(anyString()))
+				.thenReturn(Optional.empty());
 
-        VeiculoEntity veiculoEntity = VeiculoEntity.builder()
-                .clienteDocumento("99999999999")
-                .placa("ABC1D23")
-                .build();
+		boolean resultado =
+				service.podeAcessarVeiculo(
+						"ABC1D23",
+						authentication
+				);
 
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
+		assertFalse(resultado);
+	}
 
-        when(veiculoRepository.findByPlaca("ABC1D23"))
-                .thenReturn(Optional.of(veiculoEntity));
+	@Test
+	void devePermitirAcessoAOrdemServicoDoCliente() {
 
-        boolean resultado =
-                service.podeAcessarVeiculo(
-                        "ABC1D23",
-                        authentication
-                );
+		UUID id = UUID.randomUUID();
 
-        assertFalse(resultado);
-    }
+		OrdemServicoEntity ordem = new OrdemServicoEntity();
+		ordem.setDocumentoCliente("12345678901");
 
-    @Test
-    void naoDevePermitirQuandoVeiculoNaoExistir() {
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
+		when(ordemServicosRepository.findById(id))
+				.thenReturn(Optional.of(ordem));
 
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
+		boolean resultado =
+				service.podeAcessarOrdemServico(
+						id,
+						authentication
+				);
 
-        when(veiculoRepository.findByPlaca(anyString()))
-                .thenReturn(Optional.empty());
+		assertTrue(resultado);
+	}
 
-        boolean resultado =
-                service.podeAcessarVeiculo(
-                        "ABC1D23",
-                        authentication
-                );
+	@Test
+	void naoDevePermitirAcessoAOrdemServicoDeOutroCliente() {
 
-        assertFalse(resultado);
-    }
+		UUID id = UUID.randomUUID();
 
-    @Test
-    void devePermitirAcessoAOrdemServicoDoCliente() {
+		OrdemServicoEntity ordem = new OrdemServicoEntity();
+		ordem.setDocumentoCliente("99999999999");
 
-        UUID id = UUID.randomUUID();
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
+		when(ordemServicosRepository.findById(id))
+				.thenReturn(Optional.of(ordem));
 
-        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
-        ordemServicoEntity.setDocumentoCliente("12345678901");
+		boolean resultado =
+				service.podeAcessarOrdemServico(
+						id,
+						authentication
+				);
 
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
+		assertFalse(resultado);
+	}
 
-        when(ordemServicosRepository.findById(id))
-                .thenReturn(Optional.of(ordemServicoEntity));
+	@Test
+	void naoDevePermitirQuandoOrdemServicoNaoExistir() {
 
-        boolean resultado =
-                service.podeAcessarOrdemServico(
-                        id,
-                        authentication
-                );
+		UUID id = UUID.randomUUID();
 
-        assertTrue(resultado);
-    }
+		when(authentication.getPrincipal())
+				.thenReturn(usuarioAutenticado("12345678901"));
 
-    @Test
-    void naoDevePermitirAcessoAOrdemServicoDeOutroCliente() {
+		when(ordemServicosRepository.findById(id))
+				.thenReturn(Optional.empty());
 
-        UUID id = UUID.randomUUID();
+		boolean resultado =
+				service.podeAcessarOrdemServico(
+						id,
+						authentication
+				);
 
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
-
-        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
-        ordemServicoEntity.setDocumentoCliente("99999999999");
-
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
-
-        when(ordemServicosRepository.findById(id))
-                .thenReturn(Optional.of(ordemServicoEntity));
-
-        boolean resultado =
-                service.podeAcessarOrdemServico(
-                        id,
-                        authentication
-                );
-
-        assertFalse(resultado);
-    }
-
-    @Test
-    void naoDevePermitirQuandoOrdemServicoNaoExistir() {
-
-        UUID id = UUID.randomUUID();
-
-        UsuarioEntity usuarioEntity = UsuarioEntity.builder()
-                .documento("12345678901")
-                .build();
-
-        when(authentication.getPrincipal())
-                .thenReturn(usuarioEntity);
-
-        when(ordemServicosRepository.findById(id))
-                .thenReturn(Optional.empty());
-
-        boolean resultado =
-                service.podeAcessarOrdemServico(
-                        id,
-                        authentication
-                );
-
-        assertFalse(resultado);
-    }
+		assertFalse(resultado);
+	}
 }

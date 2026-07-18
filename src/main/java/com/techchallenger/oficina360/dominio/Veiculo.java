@@ -51,4 +51,12 @@ public class Veiculo {
 
     public Veiculo() {
     }
+
+    public void atualizarVeiculo(Veiculo newVeiculo){
+        this.placa = newVeiculo.getPlaca();
+        this.marca= newVeiculo.getMarca();
+        this.modelo= newVeiculo.getModelo();
+        this.ano = newVeiculo.getAno();
+        this.clienteDocumento = newVeiculo.getClienteDocumento();
+    }
 }

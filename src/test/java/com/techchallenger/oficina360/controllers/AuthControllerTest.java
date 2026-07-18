@@ -4,10 +4,11 @@ import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.AuthController;
-import com.techchallenger.oficina360.services.AuthService;
-import org.junit.jupiter.api.BeforeEach;
+import com.techchallenger.oficina360.usecases.auth.AutenticarUsuarioUseCase;
+import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -22,14 +23,14 @@ import static org.mockito.Mockito.when;
 class AuthControllerTest {
 
     @Mock
-    private AuthService authService;
+    private AutenticarUsuarioUseCase autenticarUsuarioUseCase;
 
+    @Mock
+    private CriarUsuarioUseCase criarUsuarioUseCase;
+
+    @InjectMocks
     private AuthController authController;
 
-    @BeforeEach
-    void setUp() {
-        authController = new AuthController(authService);
-    }
 
     @Test
     void deveAutenticarUsuarioERetornarTokenJwt() {
@@ -40,7 +41,7 @@ class AuthControllerTest {
                         "123456"
                 );
 
-        when(authService.autenticar(request))
+        when(autenticarUsuarioUseCase.executar(request))
                 .thenReturn("token-jwt-gerado");
 
         ResponseEntity<LoginResponseDTO> response =
@@ -60,8 +61,8 @@ class AuthControllerTest {
                 response.getBody().tipo()
         );
 
-        verify(authService)
-                .autenticar(request);
+        verify(autenticarUsuarioUseCase)
+                .executar(request);
     }
 
 
@@ -89,8 +90,8 @@ class AuthControllerTest {
                 response.getBody()
         );
 
-        verify(authService)
-                .criarUsuario(request);
+        verify(criarUsuarioUseCase)
+                .executar(request);
     }
 
 }

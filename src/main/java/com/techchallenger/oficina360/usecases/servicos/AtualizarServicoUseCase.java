@@ -2,14 +2,12 @@ package com.techchallenger.oficina360.usecases.servicos;
 
 import com.techchallenger.oficina360.dominio.Servico;
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
-import com.techchallenger.oficina360.frameworks.persistence.entities.ServicoEntity;
 import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
 import com.techchallenger.oficina360.mappers.ServicoMapper;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.SERVICO_NAO_ENCONTRADO;
 import static com.techchallenger.oficina360.mappers.ServicoMapper.domainToDTO;
-import static com.techchallenger.oficina360.mappers.ServicoMapper.toDTO;
 
 public class AtualizarServicoUseCase {
 

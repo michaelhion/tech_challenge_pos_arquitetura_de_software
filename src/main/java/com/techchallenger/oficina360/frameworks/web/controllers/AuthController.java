@@ -4,7 +4,8 @@ import com.techchallenger.oficina360.docs.api.AuthApi;
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
-import com.techchallenger.oficina360.services.AuthService;
+import com.techchallenger.oficina360.usecases.auth.AutenticarUsuarioUseCase;
+import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +22,15 @@ import static com.techchallenger.oficina360.constants.Roles.ADMIN;
 @RequestMapping("/auth")
 public class AuthController implements AuthApi {
 
-    private final AuthService authService;
+    private final AutenticarUsuarioUseCase autenticarUsuarioUseCase;
+    private final CriarUsuarioUseCase criarUsuarioUseCase;
 
     @Override
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO loginRequestDTO
     ) {
-        String token = authService.autenticar(loginRequestDTO);
+        String token = autenticarUsuarioUseCase.executar(loginRequestDTO);
 
         return ResponseEntity.ok(new LoginResponseDTO(token, "Bearer"));
     }
@@ -38,7 +40,7 @@ public class AuthController implements AuthApi {
     @PostMapping("/criar-usuario")
     @PreAuthorize("hasRole('" + ADMIN + "')")
     public ResponseEntity<String> criarUsuario(@Valid @RequestBody CriarUsuarioRequestDTO criarUsuarioRequestDTO) {
-        authService.criarUsuario(criarUsuarioRequestDTO);
+        criarUsuarioUseCase.executar(criarUsuarioRequestDTO);
         return ResponseEntity.ok("Usuário criado com sucesso!");
     }
 }

@@ -35,8 +35,8 @@ public class AbrirOrdemServicoUseCase {
 
 		ordemServicoValidator.validarNaoExisteOrdemServicoAtiva(dto.placaVeiculo());
 
-		Cliente cliente = clienteFinder.buscarPorDocumento(dto.documentoCliente());
-		Veiculo veiculo = veiculoFinder.buscarPorPlaca(dto.placaVeiculo());
+		Cliente cliente = clienteFinder.buscarPorDocumentoOuFalhar(dto.documentoCliente());
+		Veiculo veiculo = veiculoFinder.buscarPorPlacaOuFalhar(dto.placaVeiculo());
 
 		ordemServicoValidator.validarVeiculoPertenceAoCliente(veiculo, cliente);
 

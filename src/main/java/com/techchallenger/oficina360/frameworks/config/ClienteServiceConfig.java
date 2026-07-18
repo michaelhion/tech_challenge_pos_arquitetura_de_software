@@ -1,19 +1,11 @@
 package com.techchallenger.oficina360.frameworks.config;
 
 import com.techchallenger.oficina360.gateways.ClienteGateway;
-import com.techchallenger.oficina360.gateways.EstoqueGateway;
 import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;
 import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
-import com.techchallenger.oficina360.usecases.estoque.BuscarItemEstoqueUseCase;
-import com.techchallenger.oficina360.usecases.estoque.CriarItemEstoqueUseCase;
-import com.techchallenger.oficina360.usecases.estoque.EditarItemEstoqueUseCase;
-import com.techchallenger.oficina360.usecases.estoque.ExcluirItemEstoqueUseCase;
-import com.techchallenger.oficina360.usecases.estoque.ListarItensEstoqueUseCase;
-import com.techchallenger.oficina360.usecases.estoque.ReservarEstoqueUseCase;
-import com.techchallenger.oficina360.usecases.finders.EstoqueFinder;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

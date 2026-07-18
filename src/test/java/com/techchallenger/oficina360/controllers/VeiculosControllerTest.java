@@ -2,10 +2,15 @@ package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.VeiculosController;
-import com.techchallenger.oficina360.services.VeiculoService;
+import com.techchallenger.oficina360.usecases.veiculo.AtualizarVeiculoUseCase;
+import com.techchallenger.oficina360.usecases.veiculo.BuscarVeiculoPorPlacaUseCase;
+import com.techchallenger.oficina360.usecases.veiculo.CadastrarVeiculoUseCase;
+import com.techchallenger.oficina360.usecases.veiculo.ExcluirVeiculoUseCase;
+import com.techchallenger.oficina360.usecases.veiculo.ListarVeiculosUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -21,15 +26,27 @@ import static org.mockito.Mockito.*;
 class VeiculosControllerTest {
 
     @Mock
-    private VeiculoService veiculoService;
+    private CadastrarVeiculoUseCase cadastrarVeiculoUseCase;
 
+    @Mock
+    private AtualizarVeiculoUseCase atualizarVeiculoUseCase;
+
+    @Mock
+    private BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
+
+    @Mock
+    private ListarVeiculosUseCase listarVeiculosUseCase;
+
+    @Mock
+    private ExcluirVeiculoUseCase excluirVeiculoUseCase;
+
+    @InjectMocks
     private VeiculosController veiculosController;
 
     private VeiculoDTO veiculoDTO;
 
     @BeforeEach
     void setUp() {
-        veiculosController = new VeiculosController(veiculoService);
 
         veiculoDTO = new VeiculoDTO(
                 "ABC1D23",
@@ -42,7 +59,7 @@ class VeiculosControllerTest {
 
     @Test
     void deveBuscarVeiculoPorPlacaComSucesso() {
-        when(veiculoService.findByPlaca("ABC1D23"))
+        when(buscarVeiculoPorPlacaUseCase.findByPlaca("ABC1D23"))
                 .thenReturn(Optional.of(veiculoDTO));
 
         ResponseEntity<VeiculoDTO> response =
@@ -56,12 +73,12 @@ class VeiculosControllerTest {
         assertEquals(2020, response.getBody().ano());
         assertEquals("12345678901", response.getBody().clienteDocumento());
 
-        verify(veiculoService, times(1)).findByPlaca("ABC1D23");
+        verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca("ABC1D23");
     }
 
     @Test
     void deveRetornarNotFoundQuandoBuscarVeiculoPorPlacaInexistente() {
-        when(veiculoService.findByPlaca("ZZZ9Z99"))
+        when(buscarVeiculoPorPlacaUseCase.findByPlaca("ZZZ9Z99"))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<VeiculoDTO> response =
@@ -70,12 +87,12 @@ class VeiculosControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(veiculoService, times(1)).findByPlaca("ZZZ9Z99");
+        verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca("ZZZ9Z99");
     }
 
     @Test
     void deveSalvarVeiculoComSucesso() {
-        when(veiculoService.save(veiculoDTO))
+        when(cadastrarVeiculoUseCase.save(veiculoDTO))
                 .thenReturn(veiculoDTO);
 
         ResponseEntity<VeiculoDTO> response =
@@ -89,7 +106,7 @@ class VeiculosControllerTest {
         assertEquals(2020, response.getBody().ano());
         assertEquals("12345678901", response.getBody().clienteDocumento());
 
-        verify(veiculoService, times(1)).save(veiculoDTO);
+        verify(cadastrarVeiculoUseCase, times(1)).save(veiculoDTO);
     }
 
     @Test
@@ -104,7 +121,7 @@ class VeiculosControllerTest {
                 "12345678901"
         );
 
-        when(veiculoService.edit(placaAtual, veiculoAtualizado))
+        when(atualizarVeiculoUseCase.edit(placaAtual, veiculoAtualizado))
                 .thenReturn(veiculoAtualizado);
 
         ResponseEntity<VeiculoDTO> response =
@@ -118,14 +135,14 @@ class VeiculosControllerTest {
         assertEquals(2022, response.getBody().ano());
         assertEquals("12345678901", response.getBody().clienteDocumento());
 
-        verify(veiculoService, times(1)).edit(placaAtual, veiculoAtualizado);
+        verify(atualizarVeiculoUseCase, times(1)).edit(placaAtual, veiculoAtualizado);
     }
 
     @Test
     void deveDeletarVeiculoPorPlacaComSucesso() {
         String placa = "ABC1D23";
 
-        doNothing().when(veiculoService).delete(placa);
+        doNothing().when(excluirVeiculoUseCase).delete(placa);
 
         ResponseEntity<Void> response =
                 veiculosController.deletar(placa);
@@ -133,7 +150,7 @@ class VeiculosControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(veiculoService, times(1)).delete(placa);
+        verify(excluirVeiculoUseCase, times(1)).delete(placa);
     }
 
     @Test
@@ -146,7 +163,7 @@ class VeiculosControllerTest {
                 "98765432100"
         );
 
-        when(veiculoService.findAll())
+        when(listarVeiculosUseCase.findAll())
                 .thenReturn(List.of(veiculoDTO, veiculoDTO2));
 
         ResponseEntity<List<VeiculoDTO>> response =
@@ -168,12 +185,12 @@ class VeiculosControllerTest {
         assertEquals(2022, response.getBody().get(1).ano());
         assertEquals("98765432100", response.getBody().get(1).clienteDocumento());
 
-        verify(veiculoService, times(1)).findAll();
+        verify(listarVeiculosUseCase, times(1)).findAll();
     }
 
     @Test
     void deveRetornarListaVaziaQuandoNaoExistiremVeiculos() {
-        when(veiculoService.findAll())
+        when(listarVeiculosUseCase.findAll())
                 .thenReturn(List.of());
 
         ResponseEntity<List<VeiculoDTO>> response =
@@ -183,7 +200,7 @@ class VeiculosControllerTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
 
-        verify(veiculoService, times(1)).findAll();
+        verify(listarVeiculosUseCase, times(1)).findAll();
     }
 }
 

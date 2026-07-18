@@ -1,6 +1,8 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.frameworks.security.UsuarioSecurityDetails;
+import com.techchallenger.oficina360.gateways.TokenGateway;
+import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +19,10 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final UsuarioRepository usuarioRepository;
+
+    private final TokenGateway tokenGateway;
+    private final UsuarioGateway usuarioGateway;
+
 
     @Override
     protected void doFilterInternal(
@@ -27,37 +31,61 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+
         String token = recuperarToken(request);
 
+
         if (token != null) {
-            String email = jwtService.validarTokenEObterSubject(token);
 
-            usuarioRepository.findByEmail(email).ifPresent(usuario -> {
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                usuario,
-                                null,
-                                usuario.getAuthorities()
-                        );
+            String email =
+                    tokenGateway.validarTokenEObterSubject(token);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            });
+
+            usuarioGateway.findByEmail(email)
+                    .ifPresent(usuario -> {
+
+						UsuarioSecurityDetails principal =
+                                new UsuarioSecurityDetails(usuario);
+
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(
+                                        principal,
+                                        null,
+                                        principal.getAuthorities()
+                                );
+
+
+                        SecurityContextHolder
+                                .getContext()
+                                .setAuthentication(authentication);
+
+                    });
         }
+
 
         filterChain.doFilter(request, response);
     }
 
-    private String recuperarToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+    private String recuperarToken(HttpServletRequest request) {
+
+        String authorizationHeader =
+                request.getHeader("Authorization");
+
+
+        if (authorizationHeader == null
+                || authorizationHeader.isBlank()) {
             return null;
         }
+
 
         if (!authorizationHeader.startsWith("Bearer ")) {
             return null;
         }
 
-        return authorizationHeader.replace("Bearer ", "").trim();
+
+        return authorizationHeader
+                .replace("Bearer ", "")
+                .trim();
     }
 }

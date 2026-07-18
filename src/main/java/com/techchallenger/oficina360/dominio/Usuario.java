@@ -1,11 +1,9 @@
 package com.techchallenger.oficina360.dominio;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
+
+import static com.techchallenger.oficina360.constants.Roles.ADMIN;
+import static com.techchallenger.oficina360.constants.Roles.CLIENTE;
 
 public class Usuario {
 
@@ -18,10 +16,6 @@ public class Usuario {
     private String role;
 
     private String documento;
-
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
-    }
 
     public String getPassword() {
         return senha;
@@ -77,5 +71,44 @@ public class Usuario {
     public String getDocumento() {
         return documento;
     }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public void setSenha(String criptografar) {
+        this.senha = criptografar;
+    }
+
+    public static Usuario criarCliente(
+            String email,
+            String senha,
+            String documento
+    ){
+
+        return new Usuario(
+                null,
+                email,
+                senha,
+                CLIENTE,
+                documento
+        );
+    }
+
+
+    public static Usuario criarAdmin(
+            String email,
+            String senha
+    ){
+
+        return new Usuario(
+                null,
+                email,
+                senha,
+                ADMIN,
+                null
+        );
+    }
+
 }
 

@@ -1,13 +1,15 @@
 package com.techchallenger.oficina360.security;
 
-import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
-import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
+import com.techchallenger.oficina360.dominio.Usuario;
+import com.techchallenger.oficina360.gateways.TokenGateway;
+import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,11 +22,15 @@ import static org.mockito.Mockito.*;
 
 class JwtAuthenticationFilterTest {
 
+    private static final String DOCUMENTO = "27631184020";
+    private static final String EMAIL = "admin@oficina360.com";
+    private static final String SENHA_CRIPTOGRAFADA = "senha-criptografada";
+    private static final String ROLE = "ADMIN";
     @Mock
-    private JwtService jwtService;
+    private TokenGateway tokenGateway;
 
     @Mock
-    private UsuarioRepository usuarioRepository;
+    private UsuarioGateway usuarioGateway;
 
     @Mock
     private HttpServletRequest request;
@@ -37,22 +43,22 @@ class JwtAuthenticationFilterTest {
 
     private AutoCloseable closeable;
 
+    @InjectMocks
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    private UsuarioEntity usuarioEntity;
+    private Usuario usuario;
 
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, usuarioRepository);
-
-        usuarioEntity = UsuarioEntity.builder()
-                .id(UUID.randomUUID())
-                .email("admin@oficina360.com")
-                .senha("senha-criptografada")
-                .role("ADMIN")
-                .build();
+        usuario = new Usuario(
+                UUID.randomUUID(),
+                EMAIL,
+                SENHA_CRIPTOGRAFADA,
+                ROLE,
+                DOCUMENTO
+                );
 
         SecurityContextHolder.clearContext();
     }
@@ -72,8 +78,8 @@ class JwtAuthenticationFilterTest {
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
 
-        verify(jwtService, never()).validarTokenEObterSubject(anyString());
-        verify(usuarioRepository, never()).findByEmail(anyString());
+        verify(tokenGateway, never()).validarTokenEObterSubject(anyString());
+        verify(usuarioGateway, never()).findByEmail(anyString());
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
@@ -86,8 +92,8 @@ class JwtAuthenticationFilterTest {
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
 
-        verify(jwtService, never()).validarTokenEObterSubject(anyString());
-        verify(usuarioRepository, never()).findByEmail(anyString());
+        verify(tokenGateway, never()).validarTokenEObterSubject(anyString());
+        verify(usuarioGateway, never()).findByEmail(anyString());
         verify(filterChain, times(1)).doFilter(request, response);
     }
 
@@ -96,25 +102,25 @@ class JwtAuthenticationFilterTest {
         when(request.getHeader("Authorization"))
                 .thenReturn("Bearer token-valido");
 
-        when(jwtService.validarTokenEObterSubject("token-valido"))
-                .thenReturn("admin@oficina360.com");
+        when(tokenGateway.validarTokenEObterSubject("token-valido"))
+                .thenReturn(EMAIL);
 
-        when(usuarioRepository.findByEmail("admin@oficina360.com"))
-                .thenReturn(Optional.of(usuarioEntity));
+        when(usuarioGateway.findByEmail(EMAIL))
+                .thenReturn(Optional.of(usuario));
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(
-                "admin@oficina360.com",
+                EMAIL,
                 SecurityContextHolder.getContext().getAuthentication().getName()
         );
 
-        verify(jwtService, times(1))
+        verify(tokenGateway, times(1))
                 .validarTokenEObterSubject("token-valido");
 
-        verify(usuarioRepository, times(1))
-                .findByEmail("admin@oficina360.com");
+        verify(usuarioGateway, times(1))
+                .findByEmail(EMAIL);
 
         verify(filterChain, times(1))
                 .doFilter(request, response);
@@ -125,21 +131,21 @@ class JwtAuthenticationFilterTest {
         when(request.getHeader("Authorization"))
                 .thenReturn("Bearer token-valido");
 
-        when(jwtService.validarTokenEObterSubject("token-valido"))
-                .thenReturn("admin@oficina360.com");
+        when(tokenGateway.validarTokenEObterSubject("token-valido"))
+                .thenReturn(EMAIL);
 
-        when(usuarioRepository.findByEmail("admin@oficina360.com"))
+        when(usuarioGateway.findByEmail(EMAIL))
                 .thenReturn(Optional.empty());
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
 
-        verify(jwtService, times(1))
+        verify(tokenGateway, times(1))
                 .validarTokenEObterSubject("token-valido");
 
-        verify(usuarioRepository, times(1))
-                .findByEmail("admin@oficina360.com");
+        verify(usuarioGateway, times(1))
+                .findByEmail(EMAIL);
 
         verify(filterChain, times(1))
                 .doFilter(request, response);

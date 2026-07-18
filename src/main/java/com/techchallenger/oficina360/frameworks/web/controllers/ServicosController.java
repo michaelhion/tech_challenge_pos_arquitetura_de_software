@@ -2,11 +2,6 @@ package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.ServicosApi;
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
-import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
-import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;
-import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
-import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
-import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
 import com.techchallenger.oficina360.usecases.servicos.AtualizarServicoUseCase;
 import com.techchallenger.oficina360.usecases.servicos.BuscarServicoPorCodigoUseCase;
 import com.techchallenger.oficina360.usecases.servicos.CadastrarServicoUseCase;

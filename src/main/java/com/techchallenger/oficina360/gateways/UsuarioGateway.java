@@ -17,4 +17,8 @@ public interface UsuarioGateway {
     List<Usuario> findAll();
 
     Optional<Usuario> findById(UUID id);
+
+    Usuario salvar(Usuario usuario);
+
+    void excluirTodos();
 }

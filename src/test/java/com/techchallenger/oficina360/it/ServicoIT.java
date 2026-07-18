@@ -1,9 +1,7 @@
 package com.techchallenger.oficina360.it;
 
-import com.jayway.jsonpath.JsonPath;
-import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
-import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.ServicoRepository;
+import com.techchallenger.oficina360.frameworks.persistence.repositories.TempoExecucaoServicoRepository;
 import com.techchallenger.oficina360.security.JwtService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,22 +14,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.UUID;
-
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.EM_EXECUCAO;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.FINALIZADA;
-import static com.techchallenger.oficina360.it.fixtures.ordemservico.OrdemServicoFixture.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static com.techchallenger.oficina360.it.fixtures.ordemservico.ServicoFixture.criarValido;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles(value = "test")
-class ServicoIT {
+class ServicoIT extends BaseIT{
 
     private static final String OS_COM_STATUS_RECEBIDA = "76dba7d9-2ded-426f-aae8-fd8f8506a7cc";
     private static final String OS_COM_STATUS_AGUARDANDO_APROVACAO = "cc702d41-3acf-464f-ad33-f9ec8c01f57d";
@@ -51,24 +44,21 @@ class ServicoIT {
 
     @Autowired
     private ServicoRepository servicoRepository;
-
-    private String tokenAdmin;
-    private String tokenCliente;
+    @Autowired
+    private TempoExecucaoServicoRepository tempoExecucaoServicoRepository;
 
     private static final String ORDEM_SERVICO_BASE_PATH = "/servicos";
 
-
     @BeforeEach
-    void setup() {
-        tokenAdmin = jwtService.gerarToken(gerarUsuarioAdmin());
-        tokenCliente = jwtService.gerarToken(gerarUsuarioCliente());
+    void setup(){
+        tempoExecucaoServicoRepository.deleteAll();
+        servicoRepository.deleteAll();
     }
-
     @Test
     void deveListarOrdemServico() throws Exception {
 
         mockMvc.perform(get(ORDEM_SERVICO_BASE_PATH + "/listar")
-                .header("Authorization", "Bearer " + tokenAdmin))
+                .header("Authorization", "Bearer " + tokenAdmin()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -79,8 +69,8 @@ class ServicoIT {
      void deveCriarServico() throws Exception {
 
         mockMvc.perform(post(ORDEM_SERVICO_BASE_PATH + "/salvar")
-                        .header("Authorization", "Bearer " + tokenAdmin)
-                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ordemServicoValida())))
+                        .header("Authorization", "Bearer " + tokenAdmin())
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(criarValido())))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
     }

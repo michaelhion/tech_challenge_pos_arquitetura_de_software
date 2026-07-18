@@ -11,10 +11,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AMERICA_SAO_PAULO;
+
 @Service
 public class JwtService {
 
-    private  static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
     @Value("${api.security.jwt.secret}")
     private String secret;
 

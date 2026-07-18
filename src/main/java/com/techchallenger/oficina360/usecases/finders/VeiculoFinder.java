@@ -15,7 +15,7 @@ public class VeiculoFinder {
 		this.gateway = gateway;
 	}
 
-	public Veiculo buscarPorPlaca(String placa) {
+	public Veiculo buscarPorPlacaOuFalhar(String placa) {
 		return gateway.findByPlaca(normalizarPlaca(placa))
 				.orElseThrow(() ->
 						new RecursoNaoEncontradoException(VEICULO_NAO_ENCONTRADO));

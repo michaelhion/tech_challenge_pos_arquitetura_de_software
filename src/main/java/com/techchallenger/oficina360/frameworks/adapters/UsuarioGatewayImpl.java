@@ -51,4 +51,16 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 		return repository.findById(id)
 				.map(mapper::toDomain);
 	}
+
+	@Override
+	public Usuario salvar(Usuario usuario) {
+		UsuarioEntity usuarioEntity = mapper.toEntity(usuario);
+		UsuarioEntity saved = repository.save(usuarioEntity);
+		return mapper.toDomain(saved);
+	}
+
+	@Override
+	public void excluirTodos() {
+		repository.deleteAll();
+	}
 }

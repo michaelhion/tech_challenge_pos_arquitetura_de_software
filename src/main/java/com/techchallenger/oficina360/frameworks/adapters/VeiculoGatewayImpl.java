@@ -49,7 +49,7 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
     }
 
     @Override
-    public List<Veiculo> findAll(Veiculo veiculo){
+    public List<Veiculo> findAll(){
         return repository.findAll()
                 .stream()
                 .map(veiculoMapper::toDomain)

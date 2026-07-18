@@ -1,5 +1,6 @@
 package com.techchallenger.oficina360.mappers;
 
+import com.techchallenger.oficina360.dominio.Usuario;
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 
@@ -36,4 +37,28 @@ public class UsuarioMapper {
         entity.setEmail(dto.email());
     }
 
+	public static Usuario toDomain(CriarUsuarioRequestDTO dto) {
+        return new Usuario(
+                null,
+                dto.email(),
+                dto.senha(),
+                dto.role(),
+                dto.documento()
+                );
+	}
+
+    public static Usuario entityToDomain(UsuarioEntity entity) {
+
+        if (entity == null) {
+            return null;
+        }
+
+        return new Usuario(
+                entity.getId(),
+                entity.getEmail(),
+                entity.getSenha(),
+                entity.getRole(),
+                entity.getDocumento()
+        );
+    }
 }
