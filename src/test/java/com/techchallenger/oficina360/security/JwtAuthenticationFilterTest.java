@@ -1,6 +1,7 @@
 package com.techchallenger.oficina360.security;
 
 import com.techchallenger.oficina360.dominio.Usuario;
+import com.techchallenger.oficina360.frameworks.security.JwtAuthenticationFilter;
 import com.techchallenger.oficina360.gateways.TokenGateway;
 import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import jakarta.servlet.FilterChain;
