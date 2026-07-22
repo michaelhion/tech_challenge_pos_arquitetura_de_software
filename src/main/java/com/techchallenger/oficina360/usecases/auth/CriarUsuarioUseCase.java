@@ -2,13 +2,13 @@ package com.techchallenger.oficina360.usecases.auth;
 
 import com.techchallenger.oficina360.dominio.Usuario;
 import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
-import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
 import com.techchallenger.oficina360.gateways.ClienteGateway;
 import com.techchallenger.oficina360.gateways.PasswordEncoderGateway;
 import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import com.techchallenger.oficina360.mappers.UsuarioMapper;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
+import com.techchallenger.oficina360.usecases.shared.exception.UsuarioJaCadastradoException;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class CriarUsuarioUseCase {
 	public void executar(CriarUsuarioRequestDTO dto) {
 
 		if (usuarioGateway.existsByEmail(dto.email())) {
-			throw new ConflitoException(
+			throw new UsuarioJaCadastradoException(
 					AUTH_SERV_E_MAIL_JA_CADASTRADO
 			);
 		}
@@ -54,9 +54,6 @@ public class CriarUsuarioUseCase {
 		usuario.setSenha(
 				passwordEncoderGateway.criptografar(dto.senha())
 		);
-		System.out.println("========================================================");
-		System.out.println("teste criptografia "+ passwordEncoderGateway.criptografar("abobrinha"));
-		System.out.println("========================================================");
 		usuarioGateway.salvar(usuario);
 	}
 

@@ -18,6 +18,10 @@ public class OrdemServicoServico {
         return valor != null ? valor : BigDecimal.ZERO;
     }
 
+    public OrdemServicoServico(){
+
+    }
+
     public OrdemServicoServico(UUID id, UUID servicoId, String descricao, BigDecimal valor) {
         this.id = id;
         this.servicoId = servicoId;

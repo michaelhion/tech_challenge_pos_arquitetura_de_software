@@ -1,7 +1,6 @@
 package com.techchallenger.oficina360.dominio;
 
-
-import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
+import com.techchallenger.oficina360.dominio.shared.exception.ItemEstoqueInvalidoException;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -9,75 +8,128 @@ import java.util.UUID;
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.ESTOQUE_ENTITY_QUANTIDADE_A_RESERVAR_DEVE_SER_MAIOR_QUE_ZERO;
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.ESTOQUE_ENTITY_QUANTIDADE_INDISPONIVEL_EM_ESTOQUE;
 
-
 public class Estoque {
 
+	private UUID id;
+	private String nome;
+	private BigDecimal valor;
+	private Integer quantidade;
+	private Integer reservados;
+	private String codigo;
 
-    private UUID id;
+	public Estoque(UUID id, String nome, BigDecimal valor, Integer quantidade, Integer reservados, String codigo) {
+		validarValor(valor);
+		validarQuantidadeTotal(quantidade);
+		validarQuantidadeReservada(quantidade, reservados);
 
-    private String nome;
+		this.id = id;
+		this.nome = nome;
+		this.valor = valor;
+		this.quantidade = quantidade == null ? 0 : quantidade;
+		this.reservados = reservados == null ? 0 : reservados;
+		this.codigo = codigo;
+	}
 
-    private BigDecimal valor;
+	public Integer getDisponiveis() {
+		return quantidade - reservados;
+	}
 
-    private Integer quantidade = 0;
+	public void reservar(Integer quantidadeSolicitada) {
+		validarQuantidadePositiva(quantidadeSolicitada);
 
-    private Integer reservados = 0;
+		if (quantidadeSolicitada > getDisponiveis()) {
+			throw new ItemEstoqueInvalidoException(ESTOQUE_ENTITY_QUANTIDADE_INDISPONIVEL_EM_ESTOQUE);
+		}
 
-    private String codigo;
+		this.reservados += quantidadeSolicitada;
+	}
 
+	public void liberarReserva(Integer quantidadeALiberar) {
+		validarQuantidadePositiva(quantidadeALiberar);
 
-    public Integer getDisponiveis() {
-        int qtd = quantidade != null ? quantidade : 0;
-        int res = reservados != null ? reservados : 0;
+		if (quantidadeALiberar > reservados) {
+			throw new ItemEstoqueInvalidoException(
+					"A quantidade a liberar não pode ser maior " + "que a quantidade reservada.");
+		}
 
-        return qtd - res;
-    }
+		this.reservados -= quantidadeALiberar;
+	}
 
-    public void reservar(Integer quantidadeReservar) {
-        if (quantidadeReservar == null || quantidadeReservar <= 0) {
-            throw new ConflitoException(ESTOQUE_ENTITY_QUANTIDADE_A_RESERVAR_DEVE_SER_MAIOR_QUE_ZERO);
-        }
+	public void consumirReserva(Integer quantidadeAConsumir) {
+		validarQuantidadePositiva(quantidadeAConsumir);
 
-        if (quantidadeReservar > getDisponiveis()) {
-            throw new ConflitoException(ESTOQUE_ENTITY_QUANTIDADE_INDISPONIVEL_EM_ESTOQUE);
-        }
+		if (quantidadeAConsumir > reservados) {
+			throw new ItemEstoqueInvalidoException(
+					"A quantidade a consumir não pode ser maior " + "que a quantidade reservada.");
+		}
 
-        this.reservados += quantidadeReservar;
-    }
+		if (quantidadeAConsumir > quantidade) {
+			throw new ItemEstoqueInvalidoException(
+					"A quantidade a consumir não pode ser maior " + "que a quantidade total.");
+		}
 
-    public Estoque(UUID id, String nome, BigDecimal valor, Integer quantidade, Integer reservados, String codigo) {
-        this.id = id;
-        this.nome = nome;
-        this.valor = valor;
-        this.quantidade = quantidade;
-        this.reservados = reservados;
-        this.codigo = codigo;
-    }
+		this.reservados -= quantidadeAConsumir;
+		this.quantidade -= quantidadeAConsumir;
+	}
 
-    public Estoque() {
-    }
+	private void validarQuantidadePositiva(Integer quantidade) {
+		if (quantidade == null || quantidade <= 0) {
+			throw new ItemEstoqueInvalidoException(ESTOQUE_ENTITY_QUANTIDADE_A_RESERVAR_DEVE_SER_MAIOR_QUE_ZERO);
+		}
+	}
 
-    public UUID getId() {
-        return id;
-    }
+	private void validarValor(BigDecimal valor) {
+		if (valor == null) {
+			throw new ItemEstoqueInvalidoException("O valor do item de estoque deve ser informado.");
+		}
 
-    public String getNome() {
-        return nome;
-    }
+		if (valor.signum() <= 0) {
+			throw new ItemEstoqueInvalidoException("O valor do item de estoque deve ser maior que zero.");
+		}
+	}
 
-    public BigDecimal getValor() {
-        return valor;
-    }
+	private void validarQuantidadeTotal(Integer quantidade) {
+		if (quantidade != null && quantidade < 0) {
+			throw new ItemEstoqueInvalidoException("A quantidade total não pode ser negativa.");
+		}
+	}
 
-    public Integer getQuantidade() {
-        return quantidade;
-    }
+	private void validarQuantidadeReservada(Integer quantidade, Integer reservados) {
+		int quantidadeNormalizada = quantidade == null ? 0 : quantidade;
 
-    public Integer getReservados() {
-        return reservados;
-    }
+		int reservadosNormalizados = reservados == null ? 0 : reservados;
 
-    public String getCodigo() {
-        return codigo;
-    }
+		if (reservadosNormalizados < 0) {
+			throw new ItemEstoqueInvalidoException("A quantidade reservada não pode ser negativa.");
+		}
+
+		if (reservadosNormalizados > quantidadeNormalizada) {
+			throw new ItemEstoqueInvalidoException(
+					"A quantidade reservada não pode ser maior " + "que a quantidade total.");
+		}
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public BigDecimal getValor() {
+		return valor;
+	}
+
+	public Integer getQuantidade() {
+		return quantidade;
+	}
+
+	public Integer getReservados() {
+		return reservados;
+	}
+
+	public String getCodigo() {
+		return codigo;
+	}
 }

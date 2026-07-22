@@ -23,6 +23,7 @@ import com.techchallenger.oficina360.usecases.ordemservico.EditarOrdemServicoUse
 import com.techchallenger.oficina360.usecases.ordemservico.FinalizarExecucaoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.IniciarExecucaoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.ListarOrdensServicoUseCase;
+import com.techchallenger.oficina360.usecases.services.MovimentacaoEstoqueService;
 import com.techchallenger.oficina360.usecases.services.ReservaEstoqueService;
 import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
 import com.techchallenger.oficina360.usecases.validators.DiagnosticoValidator;
@@ -40,10 +41,8 @@ public class OrdemServicoConfig {
 	}
 
 	@Bean
-	public DiagnosticoLoader diagnosticoLoader(
-			EstoqueGateway estoqueGateway,
-			ServicoGateway servicoGateway) {
-
+	@Transactional
+	public DiagnosticoLoader diagnosticoLoader(EstoqueGateway estoqueGateway, ServicoGateway servicoGateway) {
 		return new DiagnosticoLoader(servicoGateway, estoqueGateway);
 	}
 
@@ -53,8 +52,7 @@ public class OrdemServicoConfig {
 	}
 
 	@Bean
-	public DiagnosticoValidator diagnosticoValidator(
-			OrdemServicoServicoValidator servicoValidator,
+	public DiagnosticoValidator diagnosticoValidator(OrdemServicoServicoValidator servicoValidator,
 			OrdemServicoEstoqueValidator estoqueValidator) {
 
 		return new DiagnosticoValidator(servicoValidator, estoqueValidator);
@@ -62,34 +60,31 @@ public class OrdemServicoConfig {
 
 	@Bean
 	@Transactional
-	public ReservaEstoqueService reservaEstoqueService(
-			EstoqueGateway estoqueGateway) {
+	public MovimentacaoEstoqueService movimentacaoEstoqueService(EstoqueGateway estoqueGateway){
+		return new MovimentacaoEstoqueService(estoqueGateway);
+	}
+
+	@Bean
+	@Transactional
+	public ReservaEstoqueService reservaEstoqueService(EstoqueGateway estoqueGateway) {
 
 		return new ReservaEstoqueService(estoqueGateway);
 	}
 
 	@Bean
-	public DiagnosticoFactory diagnosticoFactory(){
+	public DiagnosticoFactory diagnosticoFactory() {
 		return new DiagnosticoFactory();
 	}
 
 	@Bean
 	@Transactional
-	public DiagnosticarOrdemServicoUseCase diagnosticarOrdemServicoUseCase(
-			OrdemServicoGateway ordemServicoGateway,
-			OrdemServicoFinder ordemServicoFinder,
-			DiagnosticoLoader diagnosticoLoader,
-			DiagnosticoValidator diagnosticoValidator,
-			DiagnosticoFactory diagnosticoFactory,
+	public DiagnosticarOrdemServicoUseCase diagnosticarOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
+			OrdemServicoFinder ordemServicoFinder, DiagnosticoLoader diagnosticoLoader,
+			DiagnosticoValidator diagnosticoValidator, DiagnosticoFactory diagnosticoFactory,
 			ReservaEstoqueService reservaEstoqueService) {
 
-		return new DiagnosticarOrdemServicoUseCase(
-				ordemServicoGateway,
-				diagnosticoFactory,
-				diagnosticoValidator,
-				ordemServicoFinder,
-				diagnosticoLoader,
-				reservaEstoqueService);
+		return new DiagnosticarOrdemServicoUseCase(ordemServicoGateway, diagnosticoFactory, diagnosticoValidator,
+				ordemServicoFinder, diagnosticoLoader, reservaEstoqueService);
 	}
 
 	@Bean
@@ -101,8 +96,8 @@ public class OrdemServicoConfig {
 	@Bean
 	@Transactional
 	public FinalizarExecucaoUseCase finalizarExecucaoUseCase(OrdemServicoGateway gateway,
-			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader) {
-		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader);
+			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader, MovimentacaoEstoqueService movimentacaoEstoqueService) {
+		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader,movimentacaoEstoqueService);
 	}
 
 	@Bean
@@ -121,16 +116,15 @@ public class OrdemServicoConfig {
 	}
 
 	@Bean
-	public OrdemServicoFactory ordemServicoFactory(){
+	public OrdemServicoFactory ordemServicoFactory() {
 		return new OrdemServicoFactory();
 	}
 
 	@Bean
 	@Transactional
 	public AbrirOrdemServicoUseCase abrirOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
-			OrdemServicoFactory ordemServicoFactory,
-			OrdemServicoValidator validator,
-			ClienteFinder clienteFinder, VeiculoFinder veiculoFinder) {
+			OrdemServicoFactory ordemServicoFactory, OrdemServicoValidator validator, ClienteFinder clienteFinder,
+			VeiculoFinder veiculoFinder) {
 		return new AbrirOrdemServicoUseCase(ordemServicoGateway, ordemServicoFactory, validator, clienteFinder,
 				veiculoFinder);
 
@@ -138,8 +132,8 @@ public class OrdemServicoConfig {
 
 	@Bean
 	@Transactional
-	public AprovarOrcamentoUseCase aprovarOrcamentoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader) {
-		return new AprovarOrcamentoUseCase(gateway, loader);
+	public AprovarOrcamentoUseCase aprovarOrcamentoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,MovimentacaoEstoqueService movimentacaoEstoqueService) {
+		return new AprovarOrcamentoUseCase(gateway, loader,movimentacaoEstoqueService);
 	}
 
 	@Bean
@@ -165,8 +159,9 @@ public class OrdemServicoConfig {
 	}
 
 	@Bean
-	public DeletarOrdemServicoUseCase deletarOrdemServicoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader) {
-		return new DeletarOrdemServicoUseCase(gateway,loader);
+	public DeletarOrdemServicoUseCase deletarOrdemServicoUseCase(OrdemServicoGateway gateway,
+			OrdemServicoFinder loader) {
+		return new DeletarOrdemServicoUseCase(gateway, loader);
 	}
 
 }

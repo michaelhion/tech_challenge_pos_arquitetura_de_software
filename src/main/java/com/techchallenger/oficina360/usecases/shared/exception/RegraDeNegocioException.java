@@ -1,4 +1,4 @@
-package com.techchallenger.oficina360.frameworks.web.exceptions;
+package com.techchallenger.oficina360.usecases.shared.exception;
 
 import java.util.List;
 

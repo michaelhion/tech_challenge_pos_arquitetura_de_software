@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.services.validators;
 
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
+import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
 
 import java.util.ArrayList;
 import java.util.List;

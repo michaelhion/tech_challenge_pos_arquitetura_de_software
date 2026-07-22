@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,6 +47,10 @@ public class EstoqueEntity {
 
     @Column(name = "CODIGO", nullable = false, unique = true, length = 100)
     private String codigo;
+
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
 
 
     @Transient

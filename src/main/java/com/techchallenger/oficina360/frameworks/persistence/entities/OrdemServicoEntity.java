@@ -23,66 +23,109 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrdemServicoEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ID", nullable = false, updatable = false)
-    private UUID id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = "ID", nullable = false, updatable = false)
+	private UUID id;
 
-    @Column(name = "DOCUMENTO_CLIENTE", nullable = false, length = 50)
-    private String documentoCliente;
+	@Column(name = "DOCUMENTO_CLIENTE", nullable = false)
+	private String documentoCliente;
 
-    @Column(name = "PLACA_VEICULO", nullable = false, updatable = false, length = 20)
-    private String placaVeiculo;
+	@Column(name = "PLACA_VEICULO", nullable = false)
+	private String placaVeiculo;
 
-    @Column(name = "DT_HORA_ABERTURA", nullable = false)
-    private LocalDateTime dtHoraAbertura;
+	@Column(name = "DT_HORA_ABERTURA", nullable = false)
+	private LocalDateTime dtHoraAbertura;
 
-    @Column(name = "DT_HORA_FECHAMENTO")
-    private LocalDateTime dtHoraFechamento;
+	@Column(name = "DT_HORA_FECHAMENTO")
+	private LocalDateTime dtHoraFechamento;
 
-    @Column(name = "DESCRICAO_PROBLEMA", length = 2000)
-    private String descricaoProblema;
+	@Column(name = "DESCRICAO_PROBLEMA", nullable = false)
+	private String descricaoProblema;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ORDEM_DE_SERVICO_STATUS", nullable = false, length = 50)
-    private OrdemDeServicoStatus ordemDeServicoStatus;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "ORDEM_DE_SERVICO_STATUS", nullable = false)
+	private OrdemDeServicoStatus ordemDeServicoStatus;
 
-    @Column(name = "OBSERVACAO_CLIENTE", length = 200)
-    private String observacaoCliente;
+	@Column(name = "OBSERVACAO_CLIENTE")
+	private String observacaoCliente;
 
-    @Builder.Default
-    @OneToMany(
-            mappedBy = "ordemServicoEntity",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private List<OrdemServicoServicoEntity> servicos = new ArrayList<>();
+	@Column(name = "VALOR_SERVICOS", nullable = false)
+	private BigDecimal valorServicos;
 
-    @Builder.Default
-    @OneToMany(
-            mappedBy = "ordemServicoEntity",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private List<OrdemServicoItemEstoqueEntity> itensEstoque = new ArrayList<>();
+	@Column(name = "VALOR_PECAS_INSUMOS", nullable = false)
+	private BigDecimal valorPecasInsumos;
 
-    @Builder.Default
-    @Column(name = "VALOR_SERVICOS", precision = 10, scale = 2)
-    private BigDecimal valorServicos = BigDecimal.ZERO;
+	@Column(name = "VALOR_OS", nullable = false)
+	private BigDecimal valorOs;
 
-    @Builder.Default
-    @Column(name = "VALOR_PECAS_INSUMOS", precision = 10, scale = 2)
-    private BigDecimal valorPecasInsumos = BigDecimal.ZERO;
+	@Column(name = "DT_HORA_INICIO_EXECUCAO")
+	private LocalDateTime dtHoraInicioExecucao;
 
-    @Builder.Default
-    @Column(name = "VALOR_OS", precision = 10, scale = 2)
-    private BigDecimal valorOs = BigDecimal.ZERO;
+	@Column(name = "DT_HORA_FIM_EXECUCAO")
+	private LocalDateTime dtHoraFimExecucao;
 
-    @Column(name = "DT_HORA_INICIO_EXECUCAO")
-    private LocalDateTime dtHoraInicioExecucao;
+	@Builder.Default
+	@OneToMany(mappedBy = "ordemServico", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrdemServicoServicoEntity> servicos = new ArrayList<>();
 
-    @Column(name = "DT_HORA_FIM_EXECUCAO")
-    private LocalDateTime dtHoraFimExecucao;
+	@Builder.Default
+	@OneToMany(mappedBy = "ordemServico", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrdemServicoItemEstoqueEntity> itensEstoque = new ArrayList<>();
+
+	public void adicionarServico(OrdemServicoServicoEntity servico) {
+		if (servico == null) {
+			return;
+		}
+
+		servico.setOrdemServico(this);
+		this.servicos.add(servico);
+	}
+
+	public void adicionarItemEstoque(OrdemServicoItemEstoqueEntity itemEstoque) {
+		if (itemEstoque == null) {
+			return;
+		}
+
+		itemEstoque.setOrdemServico(this);
+		this.itensEstoque.add(itemEstoque);
+	}
+
+	public void removerServico(OrdemServicoServicoEntity servico) {
+		if (servico == null) {
+			return;
+		}
+
+		this.servicos.remove(servico);
+		servico.setOrdemServico(null);
+	}
+
+	public void removerItemEstoque(OrdemServicoItemEstoqueEntity itemEstoque) {
+		if (itemEstoque == null) {
+			return;
+		}
+
+		this.itensEstoque.remove(itemEstoque);
+		itemEstoque.setOrdemServico(null);
+	}
+
+	public void substituirServicos(List<OrdemServicoServicoEntity> novosServicos) {
+		this.servicos.forEach(servico -> servico.setOrdemServico(null));
+
+		this.servicos.clear();
+
+		if (novosServicos != null) {
+			novosServicos.forEach(this::adicionarServico);
+		}
+	}
+
+	public void substituirItensEstoque(List<OrdemServicoItemEstoqueEntity> novosItens) {
+		this.itensEstoque.forEach(item -> item.setOrdemServico(null));
+
+		this.itensEstoque.clear();
+
+		if (novosItens != null) {
+			novosItens.forEach(this::adicionarItemEstoque);
+		}
+	}
 }

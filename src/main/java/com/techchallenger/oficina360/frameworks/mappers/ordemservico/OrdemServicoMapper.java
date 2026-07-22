@@ -5,6 +5,8 @@ import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServic
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 @RequiredArgsConstructor
 public class OrdemServicoMapper {
@@ -29,34 +31,46 @@ public class OrdemServicoMapper {
                 entity.getObservacaoCliente(),
                 ordemServicoServicoMapper.toDomainList(entity.getServicos()),
                 ordemServicoItemEstoqueMapper.toDomainList(entity.getItensEstoque()),
-                entity.getValorServicos(),
-                entity.getValorPecasInsumos(),
-                entity.getValorOs(),
                 entity.getDtHoraInicioExecucao(),
                 entity.getDtHoraFimExecucao());
     }
 
-    public OrdemServicoEntity toEntity(OrdemServico domain) {
-
+    public OrdemServicoEntity toEntity(
+            OrdemServico domain
+    ) {
         if (domain == null) {
             return null;
         }
 
-        return OrdemServicoEntity.builder()
-                .id(domain.getId())
-                .documentoCliente(domain.getDocumentoCliente())
-                .placaVeiculo(domain.getPlacaVeiculo())
-                .dtHoraAbertura(domain.getDtHoraAbertura())
-                .dtHoraFechamento(domain.getDtHoraFechamento())
-                .descricaoProblema(domain.getDescricaoProblema())
-                .ordemDeServicoStatus(domain.getOrdemDeServicoStatus())
-                .observacaoCliente(domain.getObservacaoCliente())
-                .valorServicos(domain.getValorServicos())
-                .valorPecasInsumos(domain.getValorPecasInsumos())
-                .valorOs(domain.getValorOs())
-                .dtHoraInicioExecucao(domain.getDtHoraInicioExecucao())
-                .dtHoraFimExecucao(domain.getDtHoraFimExecucao())
-                .build();
+        OrdemServicoEntity entity = OrdemServicoEntity.builder()
+                        .id(domain.getId())
+                        .documentoCliente(domain.getDocumentoCliente())
+                        .placaVeiculo(domain.getPlacaVeiculo())
+                        .dtHoraAbertura(domain.getDtHoraAbertura())
+                        .dtHoraFechamento(domain.getDtHoraFechamento())
+                        .descricaoProblema(domain.getDescricaoProblema())
+                        .ordemDeServicoStatus(domain.getOrdemDeServicoStatus())
+                        .observacaoCliente(domain.getObservacaoCliente())
+                        .valorServicos(domain.getValorServicos())
+                        .valorPecasInsumos(domain.getValorPecasInsumos())
+                        .valorOs(domain.getValorOs())
+                        .dtHoraInicioExecucao(domain.getDtHoraInicioExecucao())
+                        .dtHoraFimExecucao(domain.getDtHoraFimExecucao())
+                        .servicos(new ArrayList<>())
+                        .itensEstoque(new ArrayList<>())
+                        .build();
+
+        domain.getServicos()
+                .stream()
+                .map(ordemServicoServicoMapper::toEntity)
+                .forEach(entity::adicionarServico);
+
+        domain.getItensEstoque()
+                .stream()
+                .map(ordemServicoItemEstoqueMapper::toEntity)
+                .forEach(entity::adicionarItemEstoque);
+
+        return entity;
     }
 
 

@@ -9,6 +9,7 @@ import java.util.UUID;
 public interface EstoqueGateway {
     Optional<Estoque> findByCodigo(String codigo);
     List<Estoque> findByCodigoIn(List<String> codigos);
+    List<Estoque> findByIdIn(List<UUID> ids);
     void deleteByCodigo(String codigo);
 
     Estoque save(Estoque estoque);
@@ -17,4 +18,5 @@ public interface EstoqueGateway {
     List<Estoque> findAll();
 
     Optional<Estoque> findById(UUID id);
+
 }

@@ -23,7 +23,7 @@ public class EstoqueMapper {
                 entity.getQuantidade(),
                 entity.getReservados(),
                 entity.getCodigo()
-                );
+        );
     }
 
     public EstoqueEntity toEntity(Estoque domain) {
@@ -51,6 +51,14 @@ public class EstoqueMapper {
         return estoqueEntities.stream()
                 .map(this::toDomain)
                 .toList();
+    }
+
+    public void updateEntityFromDomain(Estoque domain,EstoqueEntity entity) {
+        entity.setNome(domain.getNome());
+        entity.setValor(domain.getValor());
+        entity.setQuantidade(domain.getQuantidade());
+        entity.setReservados(domain.getReservados());
+        entity.setCodigo(domain.getCodigo());
     }
 
 

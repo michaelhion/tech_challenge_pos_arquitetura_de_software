@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.JsonNode;
@@ -20,10 +21,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(value = "test")
-class AuthIntegrationTest {
+class AuthIT {
 
 	private static final String EMAIL = "admin1@oficina360.com";
 	private static final String PASSWORD = "123456";
@@ -87,7 +89,7 @@ class AuthIntegrationTest {
 		JsonNode json = objectMapper.readTree(response);
 
 		String token = json.get("token").asText();
-		// cria o cliente antes, pois usuários CLIENTE dependem dele
+
 		mockMvc.perform(
 				post("/clientes/salvar")
 						.header("Authorization", "Bearer " + token)
@@ -101,9 +103,7 @@ class AuthIntegrationTest {
                         }
                         """)
 		).andExpect(status().isCreated());
-		System.out.println("========================================================");
-		System.out.println("criou o cliente");
-		System.out.println("========================================================");
+
 		mockMvc.perform(
 				post("/auth/criar-usuario")
 						.header("Authorization", "Bearer " + token)
@@ -117,9 +117,7 @@ class AuthIntegrationTest {
                         }
                         """)
 		).andExpect(status().isOk());
-		System.out.println("========================================================");
-		System.out.println("criou o usuario");
-		System.out.println("========================================================");
+
 		LoginRequestDTO login1 = new LoginRequestDTO(
 				"cliente@teste.com",
 				"123456"
@@ -140,17 +138,11 @@ class AuthIntegrationTest {
 				objectMapper.readTree(response1)
 						.get("token")
 						.asText();
-		System.out.println("========================================================");
-		System.out.println("fez a segunda autenticação com novo usuario");
-		System.out.println("========================================================");
 
 		mockMvc.perform(
 						get("/clientes/listar")
 								.header("Authorization", "Bearer " + token1)
 				)
 				.andExpect(status().isOk());
-		System.out.println("========================================================");
-		System.out.println("finalizou");
-		System.out.println("========================================================");
 	}
 }

@@ -2,9 +2,9 @@ package com.techchallenger.oficina360.usecases.veiculo;
 
 import com.techchallenger.oficina360.dominio.Veiculo;
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
-import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
 import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
+import com.techchallenger.oficina360.usecases.shared.exception.VeiculosJaCadastradoException;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.VEICULO_SERV_VEICULO_CADASTRADO;
 import static com.techchallenger.oficina360.mappers.VeiculoMapper.domainToDTO;
@@ -38,7 +38,7 @@ public class CadastrarVeiculoUseCase {
 
 	private void validarPlacaDisponivelParaCadastro(String placa) {
 		if (veiculoGateway.existsByPlaca(placa)) {
-			throw new ConflitoException(VEICULO_SERV_VEICULO_CADASTRADO);
+			throw new VeiculosJaCadastradoException(VEICULO_SERV_VEICULO_CADASTRADO);
 		}
 	}
 

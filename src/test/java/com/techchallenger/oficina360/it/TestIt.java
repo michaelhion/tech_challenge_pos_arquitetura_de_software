@@ -1,9 +1,11 @@
 package com.techchallenger.oficina360.it;
 
 import com.techchallenger.oficina360.constants.Roles;
+import com.techchallenger.oficina360.dominio.Usuario;
 import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
-import com.techchallenger.oficina360.security.JwtService;
+import com.techchallenger.oficina360.gateways.TokenGateway;
+import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +25,17 @@ public class TestIt {
     private static final String PATH = "/clientes/listar";
     private static final String MAIL = "admin1@oficina360.com";
     private static final String PASSWORD = "123456";
-    private UsuarioEntity usuario;
+    private Usuario usuario;
     private String token;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private JwtService jwtService;
+    private TokenGateway tokenGateway;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UsuarioGateway usuarioRepository;
 
 
 
@@ -41,13 +43,15 @@ public class TestIt {
     void setup() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         usuario = usuarioRepository.save(
-                UsuarioEntity.builder()
-                        .email(MAIL)
-                        .senha(encoder.encode(PASSWORD))
-                        .role(Roles.ADMIN)
-                        .build()
+                new Usuario(
+                        null,
+                        MAIL,
+                        encoder.encode(PASSWORD),
+                        Roles.ADMIN,
+                        "12345678910"
+                )
         );
-        token = jwtService.gerarToken(usuario);
+        token = tokenGateway.gerarToken(usuario);
     }
 
     @Test

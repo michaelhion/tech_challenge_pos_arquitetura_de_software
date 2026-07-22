@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,9 +45,6 @@ class BuscarOrdemServicoPorIdUseCaseTest {
 						null,
 						List.of(),
 						List.of(),
-						BigDecimal.ZERO,
-						BigDecimal.ZERO,
-						BigDecimal.ZERO,
 						null,
 						null
 				);

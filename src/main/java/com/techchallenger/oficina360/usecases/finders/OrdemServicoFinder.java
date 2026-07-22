@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.usecases.finders;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 
 import java.util.UUID;
 

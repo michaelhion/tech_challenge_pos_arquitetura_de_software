@@ -4,8 +4,8 @@ import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException
 import com.techchallenger.oficina360.frameworks.web.exceptions.ErroRegraDeNegocioResponse;
 import com.techchallenger.oficina360.frameworks.web.exceptions.ErroResponse;
 import com.techchallenger.oficina360.frameworks.web.exceptions.GlobalExceptionHandler;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
@@ -33,249 +33,143 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
-    @InjectMocks
-    private GlobalExceptionHandler globalExceptionHandler;
+	@InjectMocks
+	private GlobalExceptionHandler globalExceptionHandler;
 
-    @Test
-    void deveRetornar404QuandoRecursoNaoEncontrado() {
+	@Test
+	void deveRetornar404QuandoRecursoNaoEncontrado() {
 
-        RecursoNaoEncontradoException ex =
-                new RecursoNaoEncontradoException(
-                        "Cliente não encontrado"
-                );
+		RecursoNaoEncontradoException ex = new RecursoNaoEncontradoException("Cliente não encontrado");
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleRecursoNaoEncontrado(ex);
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleRecursoNaoEncontrado(ex);
 
-        assertEquals(
-                HttpStatus.NOT_FOUND,
-                response.getStatusCode()
-        );
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
-        assertEquals(
-                "Cliente não encontrado",
-                response.getBody().mensagem()
-        );
-    }
+		assertEquals("Cliente não encontrado", response.getBody().mensagem());
+	}
 
-    @Test
-    void deveRetornar409QuandoConflito() {
+	@Test
+	void deveRetornar409QuandoConflito() {
 
-        ConflitoException ex =
-                new ConflitoException(
-                        "Email já cadastrado"
-                );
+		ConflitoException ex = new ConflitoException("Email já cadastrado");
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleConflito(ex);
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleConflito(ex);
 
-        assertEquals(
-                HttpStatus.CONFLICT,
-                response.getStatusCode()
-        );
-    }
+		assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+	}
 
-    @Test
-    void deveRetornar422QuandoRegraDeNegocio() {
+	@Test
+	void deveRetornar422QuandoRegraDeNegocio() {
 
-        RegraDeNegocioException ex =
-                new RegraDeNegocioException(
-                        "Regra inválida"
-                );
+		RegraDeNegocioException ex = new RegraDeNegocioException("Regra inválida");
 
-        ResponseEntity<ErroRegraDeNegocioResponse> response =
-                globalExceptionHandler
-                        .handleRegraDeNegocio(ex);
+		ResponseEntity<ErroRegraDeNegocioResponse> response = globalExceptionHandler.handleRegraDeNegocio(ex);
 
-        assertEquals(
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                response.getStatusCode()
-        );
-    }
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+	}
 
-    @Test
-    void deveRetornar403QuandoAcessoNegado() {
+	@Test
+	void deveRetornar403QuandoAcessoNegado() {
 
-        AuthorizationDeniedException ex =
-                mock(AuthorizationDeniedException.class);
+		AuthorizationDeniedException ex = mock(AuthorizationDeniedException.class);
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleAccessDenied(ex);
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleAccessDenied(ex);
 
-        assertEquals(
-                HttpStatus.FORBIDDEN,
-                response.getStatusCode()
-        );
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 
-        assertEquals(
-                "Acesso negado",
-                response.getBody().erro()
-        );
-    }
+		assertEquals("Acesso negado", response.getBody().erro());
+	}
 
-    @Test
-    void deveRetornar403QuandoAccessDeniedException() {
+	@Test
+	void deveRetornar403QuandoAccessDeniedException() {
 
-        AccessDeniedException ex =
-                new AccessDeniedException("Negado");
+		AccessDeniedException ex = new AccessDeniedException("Negado");
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleAccessDenied(ex);
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleAccessDenied(ex);
 
-        assertEquals(
-                HttpStatus.FORBIDDEN,
-                response.getStatusCode()
-        );
-    }
-    @Test
-    void deveRetornar500QuandoErroJpa() {
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
 
-        JpaSystemException ex =
-                mock(JpaSystemException.class);
+	@Test
+	void deveRetornar500QuandoErroJpa() {
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleJpaSystemException(ex);
+		JpaSystemException ex = mock(JpaSystemException.class);
 
-        assertEquals(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                response.getStatusCode()
-        );
-    }
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleJpaSystemException(ex);
 
-    @Test
-    void deveRetornar500QuandoExcecaoGenerica() {
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+	}
 
-        Exception ex =
-                new RuntimeException("Erro");
+	@Test
+	void deveRetornar500QuandoExcecaoGenerica() {
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleException(ex);
+		Exception ex = new RuntimeException("Erro");
 
-        assertEquals(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                response.getStatusCode()
-        );
-    }
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleException(ex);
 
-    @Test
-    void deveRetornar400QuandoMethodArgumentNotValid() {
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+	}
 
-        BindingResult bindingResult = mock(BindingResult.class);
-        FieldError fieldError =
-                new FieldError(
-                        "objeto",
-                        "email",
-                        "e-mail inválido"
-                );
+	@Test
+	void deveRetornar400QuandoMethodArgumentNotValid() {
 
-        MethodArgumentNotValidException ex =
-                mock(MethodArgumentNotValidException.class);
+		BindingResult bindingResult = mock(BindingResult.class);
+		FieldError fieldError = new FieldError("objeto", "email", "e-mail inválido");
 
-        when(ex.getBindingResult())
-                .thenReturn(bindingResult);
+		MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
 
-        when(bindingResult.getFieldErrors())
-                .thenReturn(List.of(fieldError));
+		when(ex.getBindingResult()).thenReturn(bindingResult);
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleMethodArgumentNotValid(ex);
+		when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
 
-        assertEquals(
-                HttpStatus.BAD_REQUEST,
-                response.getStatusCode()
-        );
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleMethodArgumentNotValid(ex);
 
-        assertEquals(
-                "email: e-mail inválido",
-                response.getBody().mensagem()
-        );
-    }
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
-    @Test
-    void deveRetornar400QuandoHandlerMethodValidationException() {
+		assertEquals("email: e-mail inválido", response.getBody().mensagem());
+	}
 
-        HandlerMethodValidationException ex =
-                mock(HandlerMethodValidationException.class);
+	@Test
+	void deveRetornar400QuandoHandlerMethodValidationException() {
 
-        when(ex.getMessage())
-                .thenReturn("Parâmetro inválido");
+		HandlerMethodValidationException ex = mock(HandlerMethodValidationException.class);
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleHandlerMethodValidation(ex);
+		when(ex.getMessage()).thenReturn("Parâmetro inválido");
 
-        assertEquals(
-                HttpStatus.BAD_REQUEST,
-                response.getStatusCode()
-        );
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleHandlerMethodValidation(ex);
 
-        assertEquals(
-                "Parâmetros inválidos",
-                response.getBody().erro()
-        );
-    }
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
-    @Test
-    void deveRetornar400QuandoConstraintViolationException() {
+		assertEquals("Parâmetros inválidos", response.getBody().erro());
+	}
 
-        ConstraintViolation<?> violation =
-                mock(ConstraintViolation.class);
+	@Test
+	void deveRetornar400QuandoConstraintViolationException() {
 
-        when(violation.getMessage())
-                .thenReturn("CPF inválido");
+		ConstraintViolation<?> violation = mock(ConstraintViolation.class);
 
-        ConstraintViolationException ex =
-                new ConstraintViolationException(
-                        Set.of(violation)
-                );
+		when(violation.getMessage()).thenReturn("CPF inválido");
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleConstraintViolation(ex);
+		ConstraintViolationException ex = new ConstraintViolationException(Set.of(violation));
 
-        assertEquals(
-                HttpStatus.BAD_REQUEST,
-                response.getStatusCode()
-        );
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleConstraintViolation(ex);
 
-        assertEquals(
-                "CPF inválido",
-                response.getBody().mensagem()
-        );
-    }
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
-    @Test
-    void deveRetornar400QuandoPayloadInvalido() {
+		assertEquals("CPF inválido", response.getBody().mensagem());
+	}
 
-        RuntimeException causa =
-                new RuntimeException("JSON inválido");
+	@Test
+	void deveRetornar400QuandoPayloadInvalido() {
 
-        HttpMessageNotReadableException ex =
-                new HttpMessageNotReadableException(
-                        "Erro",
-                        causa,
-                        null
-                );
+		RuntimeException causa = new RuntimeException("JSON inválido");
 
-        ResponseEntity<ErroResponse> response =
-                globalExceptionHandler
-                        .handleMessageNotReadable(ex);
+		HttpMessageNotReadableException ex = new HttpMessageNotReadableException("Erro", causa, null);
 
-        assertEquals(
-                HttpStatus.BAD_REQUEST,
-                response.getStatusCode()
-        );
+		ResponseEntity<ErroResponse> response = globalExceptionHandler.handleMessageNotReadable(ex);
 
-        assertEquals(
-                "Payload inválido",
-                response.getBody().erro()
-        );
-    }
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
+		assertEquals("Payload inválido", response.getBody().erro());
+	}
 }

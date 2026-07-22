@@ -18,9 +18,23 @@ public class OrdemServicoItemEstoqueMapper {
                 entity.getEstoqueId(),
                 entity.getNome(),
                 entity.getValorUnitario(),
-                entity.getQuantidade(),
-                entity.getValorTotal()
+                entity.getQuantidade()
         );
+    }
+
+    public OrdemServicoItemEstoqueEntity toEntity(OrdemServicoItemEstoque domain) {
+        if (domain == null) {
+            return null;
+        }
+
+        return OrdemServicoItemEstoqueEntity.builder()
+                .id(domain.getId())
+                .estoqueId(domain.getEstoqueId())
+                .nome(domain.getNome())
+                .valorUnitario(domain.getValorUnitario())
+                .quantidade(domain.getQuantidade())
+                .valorTotal(domain.getValorTotal())
+                .build();
     }
 
     public List<OrdemServicoItemEstoque> toDomainList(
@@ -33,6 +47,19 @@ public class OrdemServicoItemEstoqueMapper {
 
         return entities.stream()
                 .map(this::toDomain)
+                .toList();
+    }
+
+    public List<OrdemServicoItemEstoqueEntity> toEntityList(
+            List<OrdemServicoItemEstoque> domains
+    ) {
+
+        if (domains == null) {
+            return List.of();
+        }
+
+        return domains.stream()
+                .map(this::toEntity)
                 .toList();
     }
 }

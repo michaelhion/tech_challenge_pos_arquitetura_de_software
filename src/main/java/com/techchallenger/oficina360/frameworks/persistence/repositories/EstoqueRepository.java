@@ -12,5 +12,6 @@ import java.util.UUID;
 public interface EstoqueRepository extends JpaRepository<EstoqueEntity, UUID> {
     Optional<EstoqueEntity> findByCodigo(String codigo);
     List<EstoqueEntity> findByCodigoIn(List<String> codigos);
+    List<EstoqueEntity> findByIdIn(List<UUID> id);
     void deleteByCodigo(String codigo);
 }

@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.usecases.finders;
 
 import com.techchallenger.oficina360.dominio.Veiculo;
-import com.techchallenger.oficina360.frameworks.web.exceptions.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.VEICULO_NAO_ENCONTRADO;
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;

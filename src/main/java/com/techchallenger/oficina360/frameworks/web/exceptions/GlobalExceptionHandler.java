@@ -1,5 +1,9 @@
 package com.techchallenger.oficina360.frameworks.web.exceptions;
 
+import com.techchallenger.oficina360.dominio.shared.exception.DominioException;
+import com.techchallenger.oficina360.usecases.shared.exception.AplicacaoException;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,181 +22,110 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AMERICA_SAO_PAULO;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final String AMERICA_SAO_PAULO = "America/Sao_Paulo";
+	@ExceptionHandler(RecursoNaoEncontradoException.class)
+	public ResponseEntity<ErroResponse> handleRecursoNaoEncontrado(RecursoNaoEncontradoException ex) {
+		return erro(HttpStatus.NOT_FOUND, "Recurso não encontrado", ex.getMessage());
+	}
 
-    @ExceptionHandler(RecursoNaoEncontradoException.class)
-    public ResponseEntity<ErroResponse> handleRecursoNaoEncontrado(
-            RecursoNaoEncontradoException ex
-    ) {
-        return erro(
-                HttpStatus.NOT_FOUND,
-                "Recurso não encontrado",
-                ex.getMessage()
-        );
-    }
+	@ExceptionHandler(ConflitoException.class)
+	public ResponseEntity<ErroResponse> handleConflito(ConflitoException ex) {
+		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+	}
 
-    @ExceptionHandler(ConflitoException.class)
-    public ResponseEntity<ErroResponse> handleConflito(
-            ConflitoException ex
-    ) {
-        return erro(
-                HttpStatus.CONFLICT,
-                "Conflito",
-                ex.getMessage()
-        );
-    }
+	@ExceptionHandler(ConflitoConcorrenciaEstoqueException.class)
+	public ResponseEntity<ErroResponse> handlerConflitoConcorrenciaEstoqueException(
+			ConflitoConcorrenciaEstoqueException ex) {
+		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+	}
 
-    @ExceptionHandler(RegraDeNegocioException.class)
-    public ResponseEntity<ErroRegraDeNegocioResponse> handleRegraDeNegocio(
-            RegraDeNegocioException ex
-    ) {
-        ErroRegraDeNegocioResponse erro = new ErroRegraDeNegocioResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Regra de negócio violada",
-                ex.getMessage(),
-                ex.getMensagens(),
-                LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))
-        );
+	@ExceptionHandler(DominioException.class)
+	public ResponseEntity<ErroResponse> handleDominioException(DominioException ex) {
+		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+	}
 
-        return ResponseEntity
-                .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(erro);
-    }
+	@ExceptionHandler(AplicacaoException.class)
+	public ResponseEntity<ErroResponse> handleAplicacaoException(AplicacaoException ex) {
+		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+	}
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErroResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex
-    ) {
+	@ExceptionHandler(RegraDeNegocioException.class)
+	public ResponseEntity<ErroRegraDeNegocioResponse> handleRegraDeNegocio(RegraDeNegocioException ex) {
+		ErroRegraDeNegocioResponse erro = new ErroRegraDeNegocioResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+				"Regra de negócio violada", ex.getMessage(), ex.getMensagens(),
+				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));
 
-        String mensagem = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .findFirst()
-                .orElse("Dados inválidos");
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(erro);
+	}
 
-        return erro(
-                HttpStatus.BAD_REQUEST,
-                "Dados inválidos",
-                mensagem
-        );
-    }
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErroResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErroResponse> handleHandlerMethodValidation(
-            HandlerMethodValidationException ex
-    ) {
-        return erro(
-                HttpStatus.BAD_REQUEST,
-                "Parâmetros inválidos",
-                ex.getMessage()
-        );
-    }
+		String mensagem = ex.getBindingResult().getFieldErrors().stream()
+				.map(error -> error.getField() + ": " + error.getDefaultMessage()).findFirst()
+				.orElse("Dados inválidos");
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErroResponse> handleConstraintViolation(
-            ConstraintViolationException ex
-    ) {
+		return erro(HttpStatus.BAD_REQUEST, "Dados inválidos", mensagem);
+	}
 
-        String mensagem = ex.getConstraintViolations()
-                .stream()
-                .map(ConstraintViolation::getMessage)
-                .findFirst()
-                .orElse("Validação inválida");
+	@ExceptionHandler(HandlerMethodValidationException.class)
+	public ResponseEntity<ErroResponse> handleHandlerMethodValidation(HandlerMethodValidationException ex) {
+		return erro(HttpStatus.BAD_REQUEST, "Parâmetros inválidos", ex.getMessage());
+	}
 
-        return erro(
-                HttpStatus.BAD_REQUEST,
-                "Validação inválida",
-                mensagem
-        );
-    }
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ErroResponse> handleConstraintViolation(ConstraintViolationException ex) {
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErroResponse> handleMessageNotReadable(
-            HttpMessageNotReadableException ex
-    ) {
-        return erro(
-                HttpStatus.BAD_REQUEST,
-                "Payload inválido",
-                "O corpo da requisição possui formato inválido"
-        );
-    }
+		String mensagem = ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).findFirst()
+				.orElse("Validação inválida");
 
-    @ExceptionHandler({
-            AuthorizationDeniedException.class,
-            AccessDeniedException.class
-    })
-    public ResponseEntity<ErroResponse> handleAccessDenied(
-            Exception ex
-    ) {
-        return erro(
-                HttpStatus.FORBIDDEN,
-                "Acesso negado",
-                "Você não tem permissão para executar esta operação"
-        );
-    }
+		return erro(HttpStatus.BAD_REQUEST, "Validação inválida", mensagem);
+	}
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErroResponse> handleDataIntegrityViolation(
-            DataIntegrityViolationException ex
-    ) {
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<ErroResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+		return erro(HttpStatus.BAD_REQUEST, "Payload inválido", "O corpo da requisição possui formato inválido");
+	}
 
-        log.warn("Violação de integridade de dados", ex);
+	@ExceptionHandler({ AuthorizationDeniedException.class, AccessDeniedException.class })
+	public ResponseEntity<ErroResponse> handleAccessDenied(Exception ex) {
+		return erro(HttpStatus.FORBIDDEN, "Acesso negado", "Você não tem permissão para executar esta operação");
+	}
 
-        return erro(
-                HttpStatus.CONFLICT,
-                "Violação de integridade",
-                "Operação não permitida devido à integridade dos dados"
-        );
-    }
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErroResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 
-    @ExceptionHandler(JpaSystemException.class)
-    public ResponseEntity<ErroResponse> handleJpaSystemException(
-            JpaSystemException ex
-    ) {
+		log.warn("Violação de integridade de dados", ex);
 
-        log.error("Erro de persistência", ex);
+		return erro(HttpStatus.CONFLICT, "Violação de integridade",
+				"Operação não permitida devido à integridade dos dados");
+	}
 
-        return erro(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erro de persistência",
-                "Falha ao processar os dados da aplicação"
-        );
-    }
+	@ExceptionHandler(JpaSystemException.class)
+	public ResponseEntity<ErroResponse> handleJpaSystemException(JpaSystemException ex) {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErroResponse> handleException(
-            Exception ex
-    ) {
+		log.error("Erro de persistência", ex);
 
-        log.error("Erro inesperado", ex);
+		return erro(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de persistência",
+				"Falha ao processar os dados da aplicação");
+	}
 
-        return erro(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erro interno",
-                "Ocorreu um erro inesperado"
-        );
-    }
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErroResponse> handleException(Exception ex) {
 
-    private ResponseEntity<ErroResponse> erro(
-            HttpStatus status,
-            String erro,
-            String mensagem
-    ) {
+		log.error("Erro inesperado", ex);
 
-        return ResponseEntity
-                .status(status)
-                .body(
-                        new ErroResponse(
-                                status.value(),
-                                erro,
-                                mensagem,
-                                LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))
-                        )
-                );
-    }
+		return erro(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", "Ocorreu um erro inesperado");
+	}
+
+	private ResponseEntity<ErroResponse> erro(HttpStatus status, String erro, String mensagem) {
+
+		return ResponseEntity.status(status).body(new ErroResponse(status.value(), erro, mensagem,
+				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))));
+	}
 }

@@ -2,11 +2,11 @@ package com.techchallenger.oficina360.usecases.veiculo;
 
 import com.techchallenger.oficina360.dominio.Veiculo;
 import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
-import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
 import com.techchallenger.oficina360.mappers.VeiculoMapper;
 import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
 import com.techchallenger.oficina360.usecases.finders.VeiculoFinder;
+import com.techchallenger.oficina360.usecases.veiculo.exception.PlacaJaExisteException;
 
 import java.util.UUID;
 
@@ -50,7 +50,7 @@ public class AtualizarVeiculoUseCase {
 			UUID id
 	) {
 		if (veiculoGateway.existsByPlacaAndIdNot(novaPlaca, id)) {
-			throw new ConflitoException(VEICULO_SERV_VEICULO_CADASTRADO);
+			throw new PlacaJaExisteException(VEICULO_SERV_VEICULO_CADASTRADO);
 		}
 	}
 }

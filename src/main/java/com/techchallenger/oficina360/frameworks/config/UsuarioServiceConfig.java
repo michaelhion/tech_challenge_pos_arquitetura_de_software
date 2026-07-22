@@ -10,17 +10,15 @@ import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 
 @Configuration
 public class UsuarioServiceConfig {
 
 	@Bean
 	@Transactional
-	public AutenticarUsuarioUseCase autenticarUsuarioUseCase(
-			AuthenticationManager authenticationManager, UsuarioGateway usuarioGateway,
+	public AutenticarUsuarioUseCase autenticarUsuarioUseCase(UsuarioGateway usuarioGateway,
 			TokenGateway tokenGateway, AuthenticationGateway authenticationGateway) {
-		return new AutenticarUsuarioUseCase(authenticationManager,usuarioGateway,tokenGateway,authenticationGateway);
+		return new AutenticarUsuarioUseCase(usuarioGateway,tokenGateway,authenticationGateway);
 
 	}
 

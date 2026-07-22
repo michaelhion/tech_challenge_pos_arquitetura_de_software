@@ -1,7 +1,5 @@
 package com.techchallenger.oficina360.dominio;
 
-import com.techchallenger.oficina360.frameworks.web.exceptions.RegraDeNegocioException;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -56,9 +54,6 @@ public class Servico {
     }
 
     public void inicializaTempoDeExecucao(int tempoInicial) {
-        if(this.tempoMedioExecucaoMinutos == null || this.tempoMedioExecucaoMinutos == 0){
-            this.tempoMedioExecucaoMinutos = tempoInicial;
-        }
-        throw new RegraDeNegocioException("N\u00E3o pode alterar tempo j\u00E1 computado!");
+        this.tempoMedioExecucaoMinutos = tempoInicial;
     }
 }

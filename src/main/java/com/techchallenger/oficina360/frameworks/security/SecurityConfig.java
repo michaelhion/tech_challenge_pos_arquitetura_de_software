@@ -1,6 +1,5 @@
 package com.techchallenger.oficina360.frameworks.security;
 
-import com.techchallenger.oficina360.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

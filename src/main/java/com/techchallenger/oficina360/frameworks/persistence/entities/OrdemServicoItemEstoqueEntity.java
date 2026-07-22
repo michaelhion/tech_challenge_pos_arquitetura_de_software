@@ -27,27 +27,27 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrdemServicoItemEstoqueEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ID", nullable = false, updatable = false)
-    private UUID id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = "ID", nullable = false, updatable = false)
+	private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ORDEM_SERVICO_ID", nullable = false)
-    private OrdemServicoEntity ordemServicoEntity;
+	@Column(name = "ESTOQUE_ID", nullable = false, updatable = false)
+	private UUID estoqueId;
 
-    @Column(name = "ESTOQUE_ID", nullable = false)
-    private UUID estoqueId;
+	@Column(name = "NOME", nullable = false)
+	private String nome;
 
-    @Column(name = "NOME", nullable = false, length = 255)
-    private String nome;
+	@Column(name = "VALOR_UNITARIO", precision = 10, scale = 2, nullable = false)
+	private BigDecimal valorUnitario;
 
-    @Column(name = "VALOR_UNITARIO", nullable = false, precision = 10, scale = 2)
-    private BigDecimal valorUnitario;
+	@Column(name = "QUANTIDADE", nullable = false)
+	private Integer quantidade;
 
-    @Column(name = "QUANTIDADE", nullable = false)
-    private Integer quantidade;
+	@Column(name = "VALOR_TOTAL", precision = 10, scale = 2, nullable = false)
+	private BigDecimal valorTotal;
 
-    @Column(name = "VALOR_TOTAL", nullable = false, precision = 10, scale = 2)
-    private BigDecimal valorTotal;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "ORDEM_SERVICO_ID", nullable = false, updatable = false)
+	private OrdemServicoEntity ordemServico;
 }

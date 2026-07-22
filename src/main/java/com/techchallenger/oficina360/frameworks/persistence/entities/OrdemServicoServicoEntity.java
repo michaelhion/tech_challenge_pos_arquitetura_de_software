@@ -27,25 +27,21 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrdemServicoServicoEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ID", nullable = false, updatable = false)
-    private UUID id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = "ID", nullable = false, updatable = false)
+	private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ORDEM_SERVICO_ID", nullable = false)
-    private OrdemServicoEntity ordemServicoEntity;
+	@Column(name = "SERVICO_ID", nullable = false, updatable = false)
+	private UUID servicoId;
 
-    @Column(name = "SERVICO_ID", nullable = false)
-    private UUID servicoId;
+	@Column(name = "DESCRICAO", nullable = false)
+	private String descricao;
 
-    @Column(name = "DESCRICAO", nullable = false, length = 500)
-    private String descricao;
+	@Column(name = "VALOR", precision = 10, scale = 2, nullable = false)
+	private BigDecimal valor;
 
-    @Column(name = "VALOR", nullable = false, precision = 10, scale = 2)
-    private BigDecimal valor;
-
-    public BigDecimal getValorTotal() {
-        return valor != null ? valor : BigDecimal.ZERO;
-    }
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "ORDEM_SERVICO_ID", nullable = false, updatable = false)
+	private OrdemServicoEntity ordemServico;
 }
