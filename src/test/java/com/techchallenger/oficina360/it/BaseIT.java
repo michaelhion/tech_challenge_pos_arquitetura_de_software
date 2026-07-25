@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
-import static com.techchallenger.oficina360.it.fixtures.ordemservico.OrdemServicoFixture.*;
+import static com.techchallenger.oficina360.it.fixtures.ordemservico.OrderServiceFixture.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc

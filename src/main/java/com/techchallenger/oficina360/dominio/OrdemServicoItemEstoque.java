@@ -34,6 +34,10 @@ public class OrdemServicoItemEstoque {
 		this.valorTotal = calcularValorTotal(valorUnitario, quantidade);
 	}
 
+	public OrdemServicoItemEstoque() {
+
+	}
+
 	private static BigDecimal calcularValorTotal(BigDecimal valorUnitario, Integer quantidade) {
 		return valorUnitario.multiply(BigDecimal.valueOf(quantidade));
 	}

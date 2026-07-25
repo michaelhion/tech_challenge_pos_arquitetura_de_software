@@ -2,8 +2,6 @@ package com.techchallenger.oficina360.it;
 
 import com.techchallenger.oficina360.constants.Roles;
 import com.techchallenger.oficina360.dominio.Usuario;
-import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
-import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
 import com.techchallenger.oficina360.gateways.TokenGateway;
 import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import org.junit.jupiter.api.BeforeEach;
