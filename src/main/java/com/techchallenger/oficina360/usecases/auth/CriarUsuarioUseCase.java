@@ -54,7 +54,7 @@ public class CriarUsuarioUseCase {
 		usuario.setSenha(
 				passwordEncoderGateway.criptografar(dto.senha())
 		);
-		usuarioGateway.salvar(usuario);
+		usuarioGateway.save(usuario);
 	}
 
 
