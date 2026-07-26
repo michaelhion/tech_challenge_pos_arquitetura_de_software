@@ -2,8 +2,6 @@ package com.techchallenger.oficina360.frameworks.persistence.repositories;
 
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

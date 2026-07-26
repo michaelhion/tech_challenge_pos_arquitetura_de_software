@@ -6,7 +6,6 @@ import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
-import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoMapper;
 import com.techchallenger.oficina360.usecases.ordemservico.AbrirOrdemServicoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;

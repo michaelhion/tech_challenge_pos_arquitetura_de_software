@@ -133,6 +133,23 @@ public class OrdemServico {
 		}
 	}
 
+	public static OrdemServico criar(String documentoCliente,String placaVeiculo,String descricaoProblema) {
+		return new OrdemServico(
+				null,
+				documentoCliente,
+				placaVeiculo,
+				LocalDateTime.now(),
+				null,
+				descricaoProblema,
+				OrdemDeServicoStatus.RECEBIDA,
+				null,
+				new ArrayList<>(),
+				new ArrayList<>(),
+				null,
+				null
+		);
+	}
+
 	public void iniciarExecucao() {
 		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.ORCAMENTO_APROVADO) {
 			throw new TransicaoStatusInvalidaException(
