@@ -4,6 +4,7 @@ import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
+import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
 import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
 import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
 
@@ -17,13 +18,16 @@ public class FinalizarExecucaoUseCase {
 	private final TempoExecucaoService tempoExecucaoService;
 	private final OrdemServicoFinder ordemServicoFinder;
 	private final MovimentacaoEstoqueService movimentacaoEstoqueService;
+	private final NotificarStatusOrdemServicoService notificarStatusOrdemServicoService;
 
 	public FinalizarExecucaoUseCase(OrdemServicoGateway ordemServicoGateway, TempoExecucaoService tempoExecucaoService,
-			OrdemServicoFinder ordemServicoFinder, MovimentacaoEstoqueService movimentacaoEstoqueService) {
+			OrdemServicoFinder ordemServicoFinder, MovimentacaoEstoqueService movimentacaoEstoqueService,
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
 		this.ordemServicoGateway = ordemServicoGateway;
 		this.tempoExecucaoService = tempoExecucaoService;
 		this.ordemServicoFinder = ordemServicoFinder;
 		this.movimentacaoEstoqueService = movimentacaoEstoqueService;
+		this.notificarStatusOrdemServicoService = notificarStatusOrdemServicoService;
 	}
 
 	public OrdemServicoDTO finalizarExecucao(UUID id) {
@@ -34,7 +38,7 @@ public class FinalizarExecucaoUseCase {
 		movimentacaoEstoqueService.consumirReservas(ordemServico.getItensEstoque());
 
 		tempoExecucaoService.registrar(ordemServico);
-
+		notificarStatusOrdemServicoService.notificar(ordemServico);
 		OrdemServico atualizada = ordemServicoGateway.save(ordemServico);
 
 		return toDTO(atualizada);

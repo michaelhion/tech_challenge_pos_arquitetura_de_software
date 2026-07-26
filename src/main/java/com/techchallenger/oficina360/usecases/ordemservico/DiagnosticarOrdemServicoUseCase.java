@@ -12,6 +12,7 @@ import com.techchallenger.oficina360.usecases.factories.DiagnosticoFactory;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
 import com.techchallenger.oficina360.usecases.loaders.DiagnosticoDados;
 import com.techchallenger.oficina360.usecases.loaders.DiagnosticoLoader;
+import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
 import com.techchallenger.oficina360.usecases.services.ReservaEstoqueService;
 import com.techchallenger.oficina360.usecases.validators.DiagnosticoValidator;
 
@@ -30,23 +31,25 @@ public class DiagnosticarOrdemServicoUseCase {
 	private final OrdemServicoFinder ordemServicoFinder;
 	private final DiagnosticoLoader diagnosticoLoader;
 	private final ReservaEstoqueService reservaEstoqueService;
+	private final NotificarStatusOrdemServicoService notificarStatusOrdemServicoService;
 
 	public DiagnosticarOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
 			DiagnosticoFactory diagnosticoFactory, DiagnosticoValidator diagnosticoValidator,
 			OrdemServicoFinder ordemServicoFinder, DiagnosticoLoader diagnosticoLoader,
-			ReservaEstoqueService reservaEstoqueService) {
+			ReservaEstoqueService reservaEstoqueService,
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
 		this.ordemServicoGateway = ordemServicoGateway;
 		this.diagnosticoFactory = diagnosticoFactory;
 		this.diagnosticoValidator = diagnosticoValidator;
 		this.ordemServicoFinder = ordemServicoFinder;
 		this.diagnosticoLoader = diagnosticoLoader;
 		this.reservaEstoqueService = reservaEstoqueService;
+		this.notificarStatusOrdemServicoService = notificarStatusOrdemServicoService;
 	}
 
 	public OrdemServicoDTO diagnosticar(UUID id, DiagnosticoDTO dto) {
 
 		OrdemServico ordemServico = ordemServicoFinder.obterOuFalhar(id);
-
 		DiagnosticoDados diagnosticoDados = diagnosticoLoader.carregar(dto);
 
 		diagnosticoValidator.validar(diagnosticoDados);
@@ -60,8 +63,9 @@ public class DiagnosticarOrdemServicoUseCase {
 		ordemServico.iniciarDiagnostico();
 		ordemServico.adicionarDiagnostico(servicos, itens);
 		ordemServico.finalizarDiagnostico();
-
-		return toDTO(ordemServicoGateway.save(ordemServico));
+		notificarStatusOrdemServicoService.notificar(ordemServico);
+		OrdemServico ordemServicoSaved = ordemServicoGateway.save(ordemServico);
+		return toDTO(ordemServicoSaved);
 	}
 
 	private List<OrdemServicoServico> criarServicos(DiagnosticoDados dados) {

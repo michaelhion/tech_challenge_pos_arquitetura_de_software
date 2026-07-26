@@ -15,6 +15,7 @@ import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
 import com.techchallenger.oficina360.usecases.finders.VeiculoFinder;
 import com.techchallenger.oficina360.usecases.loaders.DiagnosticoLoader;
 import com.techchallenger.oficina360.usecases.ordemservico.*;
+import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
 import com.techchallenger.oficina360.usecases.services.ReservaEstoqueService;
 import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
 import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
@@ -73,10 +74,10 @@ public class OrdemServicoConfig {
 	public DiagnosticarOrdemServicoUseCase diagnosticarOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
 			OrdemServicoFinder ordemServicoFinder, DiagnosticoLoader diagnosticoLoader,
 			DiagnosticoValidator diagnosticoValidator, DiagnosticoFactory diagnosticoFactory,
-			ReservaEstoqueService reservaEstoqueService) {
+			ReservaEstoqueService reservaEstoqueService, NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
 
 		return new DiagnosticarOrdemServicoUseCase(ordemServicoGateway, diagnosticoFactory, diagnosticoValidator,
-				ordemServicoFinder, diagnosticoLoader, reservaEstoqueService);
+				ordemServicoFinder, diagnosticoLoader, reservaEstoqueService,notificarStatusOrdemServicoService);
 	}
 
 	@Bean
@@ -88,8 +89,8 @@ public class OrdemServicoConfig {
 	@Bean
 	@Transactional
 	public FinalizarExecucaoUseCase finalizarExecucaoUseCase(OrdemServicoGateway gateway,
-			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader, MovimentacaoEstoqueService movimentacaoEstoqueService) {
-		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader,movimentacaoEstoqueService);
+			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader, MovimentacaoEstoqueService movimentacaoEstoqueService,NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader,movimentacaoEstoqueService,notificarStatusOrdemServicoService);
 	}
 
 	@Bean
