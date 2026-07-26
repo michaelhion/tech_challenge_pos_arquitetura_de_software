@@ -1,8 +1,12 @@
 package com.techchallenger.oficina360.docs.api;
 
+import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
+import com.techchallenger.oficina360.usecases.ordemservico.query.OrdemServicoOrdenacao;
+import com.techchallenger.oficina360.usecases.shared.paginacao.DirecaoOrdenacao;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,9 +14,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.techchallenger.oficina360.docs.OrdemServicoSwaggerConstants.*;
@@ -38,7 +43,11 @@ public interface OrdemServicoOficinaApi {
                     )
             )
     })
-    ResponseEntity<List<OrdemServicoDTO>> listarOrdensServico();
+    ResponseEntity<Page<OrdemServicoDTO>> listarOrdensServico(OrdemServicoFiltroDTO filtro,
+            int page,
+            int size,
+            OrdemServicoOrdenacao ordenarPor,
+            DirecaoOrdenacao direcao);
 
     @Operation(
             summary = SUMMARY_BUSCAR_POR_ID,
@@ -303,4 +312,11 @@ public interface OrdemServicoOficinaApi {
             )
             UUID id
     );
+
+    public ResponseEntity<ConsultarStatusDTO> consultarStatus(
+            @Parameter(
+            description = PARAM_ID_DESCRIPTION,
+            example = EXAMPLE_UUID,
+            required = true
+    )@PathVariable UUID id);
 }

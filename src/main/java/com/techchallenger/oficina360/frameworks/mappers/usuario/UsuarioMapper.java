@@ -23,7 +23,7 @@ public class UsuarioMapper {
                 );
     }
 
-    public UsuarioEntity toEntity(Usuario domain) {
+    public static UsuarioEntity toEntity(Usuario domain) {
         if (domain == null) {
             return null;
         }

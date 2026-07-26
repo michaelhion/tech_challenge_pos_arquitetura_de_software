@@ -5,7 +5,7 @@ import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
-import com.techchallenger.oficina360.usecases.services.MovimentacaoEstoqueService;
+import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
 
 import java.util.UUID;
 

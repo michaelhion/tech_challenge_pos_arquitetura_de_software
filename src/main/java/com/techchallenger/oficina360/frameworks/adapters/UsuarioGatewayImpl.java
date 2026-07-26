@@ -18,6 +18,7 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 
 	private final UsuarioMapper mapper;
 	private final UsuarioRepository repository;
+	private final UsuarioMapper usuarioMapper;
 
 	@Override
 	public Optional<Usuario> findByEmail(String email) {
@@ -39,6 +40,13 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 	}
 
 	@Override
+	public List<Usuario> saveAll(List<Usuario> usuarios) {
+		List<UsuarioEntity> usuarioEntityList = usuarios.stream().map(UsuarioMapper::toEntity).toList();
+		List<UsuarioEntity> usuarioEntitiesSaved = repository.saveAll(usuarioEntityList);
+		return usuarioEntitiesSaved.stream().map(usuarioMapper::toDomain).toList();
+	}
+
+	@Override
 	public List<Usuario> findAll() {
 		return repository.findAll()
 				.stream()
@@ -52,12 +60,6 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 				.map(mapper::toDomain);
 	}
 
-	@Override
-	public Usuario salvar(Usuario usuario) {
-		UsuarioEntity usuarioEntity = mapper.toEntity(usuario);
-		UsuarioEntity saved = repository.save(usuarioEntity);
-		return mapper.toDomain(saved);
-	}
 
 	@Override
 	public void excluirTodos() {

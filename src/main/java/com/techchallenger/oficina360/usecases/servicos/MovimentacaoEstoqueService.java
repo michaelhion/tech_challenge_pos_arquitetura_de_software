@@ -1,4 +1,4 @@
-package com.techchallenger.oficina360.usecases.services;
+package com.techchallenger.oficina360.usecases.servicos;
 
 import com.techchallenger.oficina360.dominio.Estoque;
 import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;

@@ -50,7 +50,7 @@ class AuthIT {
 
 		Usuario usuario = new Usuario(null, EMAIL, passwordEncoderGateway.criptografar(PASSWORD), Roles.ADMIN, CPF);
 
-		usuarioGateway.salvar(usuario);
+		usuarioGateway.save(usuario);
 	}
 
 	@Test

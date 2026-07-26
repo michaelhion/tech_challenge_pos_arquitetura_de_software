@@ -14,18 +14,10 @@ import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
 import com.techchallenger.oficina360.usecases.finders.VeiculoFinder;
 import com.techchallenger.oficina360.usecases.loaders.DiagnosticoLoader;
-import com.techchallenger.oficina360.usecases.ordemservico.AbrirOrdemServicoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.AprovarOrcamentoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.DeletarOrdemServicoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.DiagnosticarOrdemServicoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.EditarOrdemServicoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.FinalizarExecucaoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.IniciarExecucaoUseCase;
-import com.techchallenger.oficina360.usecases.ordemservico.ListarOrdensServicoUseCase;
-import com.techchallenger.oficina360.usecases.services.MovimentacaoEstoqueService;
+import com.techchallenger.oficina360.usecases.ordemservico.*;
 import com.techchallenger.oficina360.usecases.services.ReservaEstoqueService;
 import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
+import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
 import com.techchallenger.oficina360.usecases.validators.DiagnosticoValidator;
 import com.techchallenger.oficina360.usecases.validators.OrdemServicoValidator;
 import jakarta.transaction.Transactional;
@@ -118,6 +110,11 @@ public class OrdemServicoConfig {
 	@Bean
 	public OrdemServicoFactory ordemServicoFactory() {
 		return new OrdemServicoFactory();
+	}
+
+	@Bean
+	public ConsultarStatusOsUseCase consultarStatusOsUseCase(OrdemServicoFinder ordemServicoFinder) {
+		return new ConsultarStatusOsUseCase(ordemServicoFinder);
 	}
 
 	@Bean

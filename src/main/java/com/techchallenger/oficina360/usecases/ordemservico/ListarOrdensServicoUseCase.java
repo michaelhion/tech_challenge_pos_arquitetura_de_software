@@ -1,24 +1,38 @@
 package com.techchallenger.oficina360.usecases.ordemservico;
 
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
-import com.techchallenger.oficina360.mappers.OrdemServicoMapper;
-
-import java.util.List;
+import com.techchallenger.oficina360.usecases.ordemservico.output.OrdemServicoResumoOutput;
+import com.techchallenger.oficina360.usecases.ordemservico.query.ListarOrdensServicoQuery;
+import com.techchallenger.oficina360.usecases.shared.paginacao.ResultadoPaginado;
 
 public class ListarOrdensServicoUseCase {
 
-	private final OrdemServicoGateway gateway;
+	private final OrdemServicoGateway ordemServicoGateway;
 
-	public ListarOrdensServicoUseCase(OrdemServicoGateway ordemServicoGateway){
-		gateway = ordemServicoGateway;
+	public ListarOrdensServicoUseCase(OrdemServicoGateway ordemServicoGateway) {
+		this.ordemServicoGateway = ordemServicoGateway;
 	}
 
-	//todo deve retornar classe de dominio, não deve reconhecer dto da camada externa
-	public List<OrdemServicoDTO> findAll() {
-		return gateway.findAll()
-				.stream()
-				.map(OrdemServicoMapper::toDTO)
-				.toList();
+	public ResultadoPaginado<OrdemServicoResumoOutput> executar(ListarOrdensServicoQuery query) {
+		ResultadoPaginado<OrdemServico> resultado = ordemServicoGateway.filtrar(query);
+
+		return resultado.map(this::toOutput);
+	}
+
+	private OrdemServicoResumoOutput toOutput(
+			OrdemServico ordemServico
+	) {
+		return new OrdemServicoResumoOutput(
+				ordemServico.getId(),
+				ordemServico.getDocumentoCliente(),
+				ordemServico.getPlacaVeiculo(),
+				ordemServico.getDescricaoProblema(),
+				ordemServico.getOrdemDeServicoStatus(),
+				ordemServico.getDtHoraAbertura(),
+				ordemServico.getValorServicos(),
+				ordemServico.getValorPecasInsumos(),
+				ordemServico.getValorOs()
+		);
 	}
 }

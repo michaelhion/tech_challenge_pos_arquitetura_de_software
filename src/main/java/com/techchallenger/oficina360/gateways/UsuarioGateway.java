@@ -13,12 +13,12 @@ public interface UsuarioGateway {
     boolean existsByEmail(String email);
 
     Usuario save(Usuario usuario);
+    List<Usuario> saveAll(List<Usuario> usuarios);
 
     List<Usuario> findAll();
 
     Optional<Usuario> findById(UUID id);
 
-    Usuario salvar(Usuario usuario);
 
     void excluirTodos();
 }

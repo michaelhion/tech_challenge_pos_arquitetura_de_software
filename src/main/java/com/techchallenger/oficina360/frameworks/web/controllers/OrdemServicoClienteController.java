@@ -25,33 +25,27 @@ import static com.techchallenger.oficina360.constants.Roles.CLIENTE;
 @RequiredArgsConstructor
 public class OrdemServicoClienteController implements OrdemServicoClienteApi {
 
-    private final AprovarOrcamentoUseCase aprovar;
-    private final BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
-    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
-//    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoCliente.podeAcessarOrdemServico(#id, authentication)")
-    @GetMapping("/listar/{id}")
-    @Override
-    public ResponseEntity<OrdemServicoDTO> buscarPorId(
-            @PathVariable UUID id
-    ) {
-        return buscarOrdemServicoPorIdUseCase.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+	private final AprovarOrcamentoUseCase aprovar;
+	private final BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
 
-    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
-//    @PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoCliente.podeAcessarOrdemServico(#id, authentication)")
-    @PatchMapping("/aprovacao/{id}")
-    @Override
-    public ResponseEntity<OrdemServicoDTO> aprovar(
-            @PathVariable UUID id,
-            @Valid @RequestBody AprovacaoOrdemServicoDTO aprovacaoDTO
+	@PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
+	@GetMapping("/listar/{id}")
+	@Override
+	public ResponseEntity<OrdemServicoDTO> buscarPorId(@PathVariable UUID id) {
+		return buscarOrdemServicoPorIdUseCase.findById(id).map(ResponseEntity::ok)
+				.orElse(ResponseEntity.notFound().build());
+	}
 
-    ) {
-        OrdemServicoDTO ordemServicoAtualizada =
-                aprovar.aprovar(id, aprovacaoDTO);
+	@PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
+	@PatchMapping("/aprovacao/{id}")
+	@Override
+	public ResponseEntity<OrdemServicoDTO> aprovar(@PathVariable UUID id,
+			@Valid @RequestBody AprovacaoOrdemServicoDTO aprovacaoDTO
 
-        return ResponseEntity.ok(ordemServicoAtualizada);
-    }
+	) {
+		OrdemServicoDTO ordemServicoAtualizada = aprovar.aprovar(id, aprovacaoDTO);
+
+		return ResponseEntity.ok(ordemServicoAtualizada);
+	}
 
 }
