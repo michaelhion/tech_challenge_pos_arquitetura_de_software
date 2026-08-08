@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.adapters;
 
 import com.techchallenger.oficina360.dominio.Estoque;
-import com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueMapper;
+import com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueDTOMapper;
 import com.techchallenger.oficina360.frameworks.persistence.entities.EstoqueEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.EstoqueRepository;
 import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoConcorrenciaEstoqueException;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EstoqueGatewayImpl implements EstoqueGateway {
 
-	private final EstoqueMapper mapper;
+	private final EstoqueDTOMapper mapper;
 	private final EstoqueRepository repository;
 
 	@Override

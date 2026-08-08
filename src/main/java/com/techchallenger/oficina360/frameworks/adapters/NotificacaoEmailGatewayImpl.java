@@ -33,7 +33,7 @@ public class NotificacaoEmailGatewayImpl implements NotificacaoEmailGateway {
 			javaMailSender.send(email);
 		} catch (MailException e) {
 			log.info(e.getMessage());
-			throw new RuntimeException("falha ao enviar email");
+			log.error("falha ao enviar email");
 		}
 	}
 }

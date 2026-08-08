@@ -1,5 +1,6 @@
 package com.techchallenger.oficina360.it.ordemservicos;
 
+import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -23,6 +25,9 @@ public class OrdemServicoFinalizarExecucaoIT extends BaseIT {
 	//todo validar a possibilidade de trocar massa de dados do flyway para jpa em tempo de execução
 	private static final String OS_COM_STATUS_RECEBIDA = "76dba7d9-2ded-426f-aae8-fd8f8506a7cc";
 	private static final String OS_COM_STATUS_EM_EXECUCAO = "4baecc4b-57d2-419b-b080-ae6615a44052";
+
+	@MockitoBean
+	private NotificacaoEmailGateway notificacaoEmailGateway;
 
 	@Test
 	void deveFinalizarExecucao() throws Exception {

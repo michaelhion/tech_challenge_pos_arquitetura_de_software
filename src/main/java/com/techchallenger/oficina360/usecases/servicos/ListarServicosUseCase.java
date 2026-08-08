@@ -1,9 +1,9 @@
 package com.techchallenger.oficina360.usecases.servicos;
 
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
 import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
+import com.techchallenger.oficina360.usecases.servicos.commands.ServicoCommand;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class ListarServicosUseCase {
 		this.tempoExecucaoServicoGateway = tempoExecucaoServicoGateway;
 	}
 
-	public List<ServicoDTO> findAll() {
+	public List<ServicoCommand> findAll() {
 
 		return servicoGateway.findAll()
 				.stream()
@@ -26,7 +26,7 @@ public class ListarServicosUseCase {
 				.toList();
 	}
 
-	private ServicoDTO toDTOComTempoMedio(Servico servico) {
+	private ServicoCommand toDTOComTempoMedio(Servico servico) {
 
 		Double media = tempoExecucaoServicoGateway
 				.calcularTempoMedio(servico.getId());
@@ -35,7 +35,7 @@ public class ListarServicosUseCase {
 				? (int) Math.round(media)
 				: 0;
 
-		return new ServicoDTO(
+		return new ServicoCommand(
 				servico.getCodigo(),
 				servico.getDescricao(),
 				servico.getValor(),

@@ -5,13 +5,13 @@ import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;
 import com.techchallenger.oficina360.dominio.OrdemServicoServico;
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.usecases.factories.DiagnosticoFactory;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
 import com.techchallenger.oficina360.usecases.loaders.DiagnosticoDados;
 import com.techchallenger.oficina360.usecases.loaders.DiagnosticoLoader;
+import com.techchallenger.oficina360.usecases.ordemservico.command.DiagnosticoCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoDiagnosticoRespCommand;
 import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
 import com.techchallenger.oficina360.usecases.services.ReservaEstoqueService;
 import com.techchallenger.oficina360.usecases.validators.DiagnosticoValidator;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.techchallenger.oficina360.mappers.OrdemServicoMapper.toDTO;
+import static com.techchallenger.oficina360.mappers.OrdemServicoCommandMapper.domainToDiagnosticoCommand;
 
 public class DiagnosticarOrdemServicoUseCase {
 
@@ -47,10 +47,10 @@ public class DiagnosticarOrdemServicoUseCase {
 		this.notificarStatusOrdemServicoService = notificarStatusOrdemServicoService;
 	}
 
-	public OrdemServicoDTO diagnosticar(UUID id, DiagnosticoDTO dto) {
+	public OrdemServicoDiagnosticoRespCommand diagnosticar(UUID id, DiagnosticoCommand command) {
 
 		OrdemServico ordemServico = ordemServicoFinder.obterOuFalhar(id);
-		DiagnosticoDados diagnosticoDados = diagnosticoLoader.carregar(dto);
+		DiagnosticoDados diagnosticoDados = diagnosticoLoader.carregar(command);
 
 		diagnosticoValidator.validar(diagnosticoDados);
 
@@ -65,7 +65,7 @@ public class DiagnosticarOrdemServicoUseCase {
 		ordemServico.finalizarDiagnostico();
 		notificarStatusOrdemServicoService.notificar(ordemServico);
 		OrdemServico ordemServicoSaved = ordemServicoGateway.save(ordemServico);
-		return toDTO(ordemServicoSaved);
+		return domainToDiagnosticoCommand(ordemServicoSaved);
 	}
 
 	private List<OrdemServicoServico> criarServicos(DiagnosticoDados dados) {

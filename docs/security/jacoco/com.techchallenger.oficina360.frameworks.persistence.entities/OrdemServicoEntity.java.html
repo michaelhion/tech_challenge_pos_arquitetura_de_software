@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.persistence.entities</a> &gt; <span class="el_source">OrdemServicoEntity.java</span></div><h1>OrdemServicoEntity.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.persistence.entities;
+
+import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;ORDEM_SERVICO&quot;)
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrdemServicoEntity {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = &quot;ID&quot;, nullable = false, updatable = false)
+	private UUID id;
+
+	@Column(name = &quot;DOCUMENTO_CLIENTE&quot;, nullable = false)
+	private String documentoCliente;
+
+	@Column(name = &quot;PLACA_VEICULO&quot;, nullable = false)
+	private String placaVeiculo;
+
+	@Column(name = &quot;DT_HORA_ABERTURA&quot;, nullable = false)
+	private LocalDateTime dtHoraAbertura;
+
+	@Column(name = &quot;DT_HORA_FECHAMENTO&quot;)
+	private LocalDateTime dtHoraFechamento;
+
+	@Column(name = &quot;DESCRICAO_PROBLEMA&quot;, nullable = false)
+	private String descricaoProblema;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = &quot;ORDEM_DE_SERVICO_STATUS&quot;, nullable = false)
+	private OrdemDeServicoStatus ordemDeServicoStatus;
+
+	@Column(name = &quot;OBSERVACAO_CLIENTE&quot;)
+	private String observacaoCliente;
+
+	@Column(name = &quot;VALOR_SERVICOS&quot;, nullable = false)
+	private BigDecimal valorServicos;
+
+	@Column(name = &quot;VALOR_PECAS_INSUMOS&quot;, nullable = false)
+	private BigDecimal valorPecasInsumos;
+
+	@Column(name = &quot;VALOR_OS&quot;, nullable = false)
+	private BigDecimal valorOs;
+
+	@Column(name = &quot;DT_HORA_INICIO_EXECUCAO&quot;)
+	private LocalDateTime dtHoraInicioExecucao;
+
+	@Column(name = &quot;DT_HORA_FIM_EXECUCAO&quot;)
+	private LocalDateTime dtHoraFimExecucao;
+
+	@Builder.Default
+	@OneToMany(mappedBy = &quot;ordemServico&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List&lt;OrdemServicoServicoEntity&gt; servicos = new ArrayList&lt;&gt;();
+
+	@Builder.Default
+	@OneToMany(mappedBy = &quot;ordemServico&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List&lt;OrdemServicoItemEstoqueEntity&gt; itensEstoque = new ArrayList&lt;&gt;();
+
+	public void adicionarServico(OrdemServicoServicoEntity servico) {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if (servico == null) {</span>
+<span class="nc" id="L78">			return;</span>
+		}
+
+<span class="nc" id="L81">		servico.setOrdemServico(this);</span>
+<span class="nc" id="L82">		this.servicos.add(servico);</span>
+<span class="nc" id="L83">	}</span>
+
+	public void adicionarItemEstoque(OrdemServicoItemEstoqueEntity itemEstoque) {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if (itemEstoque == null) {</span>
+<span class="nc" id="L87">			return;</span>
+		}
+
+<span class="nc" id="L90">		itemEstoque.setOrdemServico(this);</span>
+<span class="nc" id="L91">		this.itensEstoque.add(itemEstoque);</span>
+<span class="nc" id="L92">	}</span>
+
+	public void removerServico(OrdemServicoServicoEntity servico) {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		if (servico == null) {</span>
+<span class="nc" id="L96">			return;</span>
+		}
+
+<span class="nc" id="L99">		this.servicos.remove(servico);</span>
+<span class="nc" id="L100">		servico.setOrdemServico(null);</span>
+<span class="nc" id="L101">	}</span>
+
+	public void removerItemEstoque(OrdemServicoItemEstoqueEntity itemEstoque) {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if (itemEstoque == null) {</span>
+<span class="nc" id="L105">			return;</span>
+		}
+
+<span class="nc" id="L108">		this.itensEstoque.remove(itemEstoque);</span>
+<span class="nc" id="L109">		itemEstoque.setOrdemServico(null);</span>
+<span class="nc" id="L110">	}</span>
+
+	public void substituirServicos(List&lt;OrdemServicoServicoEntity&gt; novosServicos) {
+<span class="nc" id="L113">		this.servicos.forEach(servico -&gt; servico.setOrdemServico(null));</span>
+
+<span class="nc" id="L115">		this.servicos.clear();</span>
+
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		if (novosServicos != null) {</span>
+<span class="nc" id="L118">			novosServicos.forEach(this::adicionarServico);</span>
+		}
+<span class="nc" id="L120">	}</span>
+
+	public void substituirItensEstoque(List&lt;OrdemServicoItemEstoqueEntity&gt; novosItens) {
+<span class="nc" id="L123">		this.itensEstoque.forEach(item -&gt; item.setOrdemServico(null));</span>
+
+<span class="nc" id="L125">		this.itensEstoque.clear();</span>
+
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		if (novosItens != null) {</span>
+<span class="nc" id="L128">			novosItens.forEach(this::adicionarItemEstoque);</span>
+		}
+<span class="nc" id="L130">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

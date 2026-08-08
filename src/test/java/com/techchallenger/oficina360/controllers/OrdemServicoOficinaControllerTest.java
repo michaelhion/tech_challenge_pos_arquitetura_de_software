@@ -1,7 +1,11 @@
 package com.techchallenger.oficina360.controllers;
 
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
@@ -16,6 +20,12 @@ import com.techchallenger.oficina360.usecases.ordemservico.EditarOrdemServicoUse
 import com.techchallenger.oficina360.usecases.ordemservico.FinalizarExecucaoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.IniciarExecucaoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.ListarOrdensServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.command.DadosFinanceirosCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoDiagnosticoRespCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoReqCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoRespCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.PecasInsumosAdicionadosCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.ServicosAdicionadosCommand;
 import com.techchallenger.oficina360.usecases.ordemservico.output.OrdemServicoResumoOutput;
 import com.techchallenger.oficina360.usecases.ordemservico.query.ListarOrdensServicoQuery;
 import com.techchallenger.oficina360.usecases.ordemservico.query.OrdemServicoOrdenacao;
@@ -33,10 +43,13 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.commandToDTO;
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.diagnosticoDTOTOCommand;
+import static com.techchallenger.oficina360.mappers.OrdemServicoCommandMapper.domainToCommand;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -82,7 +95,7 @@ class OrdemServicoOficinaControllerTest {
 
 	private UUID ordemServicoId;
 	private OrdemServicoDTO ordemServicoDTO;
-	private CriarOrdemServicoDTO criarOrdemServicoDTO;
+	private CriarOrdemServicoRequestDTO criarOrdemServicoRequestDTO;
 	private LocalDateTime dataAbertura;
 
 	@BeforeEach
@@ -91,11 +104,9 @@ class OrdemServicoOficinaControllerTest {
 
 		dataAbertura = LocalDateTime.of(2026, 7, 16, 1, 30);
 
-		ordemServicoDTO = new OrdemServicoDTO(ordemServicoId, CPF, PLACA, RECLAMACAO_CLIENTE,
-				OrdemDeServicoStatus.RECEBIDA, null);
+		ordemServicoDTO = new OrdemServicoDTO(CPF, PLACA, RECLAMACAO_CLIENTE, OrdemDeServicoStatus.RECEBIDA);
 
-		criarOrdemServicoDTO = new CriarOrdemServicoDTO(ordemServicoId, CPF, PLACA, RECLAMACAO_CLIENTE,
-				OrdemDeServicoStatus.RECEBIDA);
+		criarOrdemServicoRequestDTO = new CriarOrdemServicoRequestDTO(CPF, PLACA, RECLAMACAO_CLIENTE);
 	}
 
 	@Test
@@ -137,7 +148,6 @@ class OrdemServicoOficinaControllerTest {
 
 		OrdemServicoDTO primeiraResposta = pagina.getContent().get(0);
 
-		assertEquals(ordemServicoId, primeiraResposta.id());
 		assertEquals(CPF, primeiraResposta.documentoCliente());
 		assertEquals(PLACA, primeiraResposta.placaVeiculo());
 		assertEquals(RECLAMACAO_CLIENTE, primeiraResposta.descricaoProblema());
@@ -213,40 +223,56 @@ class OrdemServicoOficinaControllerTest {
 
 	@Test
 	void deveBuscarOrdemServicoPorIdComSucesso() {
-		when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId)).thenReturn(Optional.of(ordemServicoDTO));
+		OrdemServico ordemServico = criarOrdemServico(ordemServicoId);
+
+		OrdemServicoRespCommand command = domainToCommand(ordemServico);
+
+		OrdemServicoDTO dtoEsperado = commandToDTO(command);
+
+		when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId)).thenReturn(command);
 
 		ResponseEntity<OrdemServicoDTO> response = controller.buscarPorId(ordemServicoId);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
+
 		assertNotNull(response.getBody());
-		assertEquals(ordemServicoId, response.getBody().id());
-		assertEquals(CPF, response.getBody().documentoCliente());
-		assertEquals(PLACA, response.getBody().placaVeiculo());
-		assertEquals(RECLAMACAO_CLIENTE, response.getBody().descricaoProblema());
-		assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus());
+
+		assertAll(() -> assertEquals(dtoEsperado.documentoCliente(), response.getBody().documentoCliente()),
+				() -> assertEquals(dtoEsperado.placaVeiculo(), response.getBody().placaVeiculo()),
+				() -> assertEquals(dtoEsperado.descricaoProblema(), response.getBody().descricaoProblema()),
+				() -> assertEquals(dtoEsperado.ordemDeServicoStatus(), response.getBody().ordemDeServicoStatus()));
 
 		verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
+
+		verifyNoMoreInteractions(buscarOrdemServicoPorIdUseCase);
 	}
 
 	@Test
-	void deveRetornarNotFoundQuandoOrdemNaoForEncontrada() {
-		when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId)).thenReturn(Optional.empty());
+	void devePropagarExcecaoQuandoOrdemNaoForEncontrada() {
+		RuntimeException excecaoEsperada = new RuntimeException("Ordem de serviço não encontrada");
 
-		ResponseEntity<OrdemServicoDTO> response = controller.buscarPorId(ordemServicoId);
+		when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId)).thenThrow(excecaoEsperada);
 
-		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-		assertNull(response.getBody());
+		RuntimeException excecaoObtida = assertThrows(RuntimeException.class,
+				() -> controller.buscarPorId(ordemServicoId));
+
+		assertAll(() -> assertEquals(excecaoEsperada, excecaoObtida),
+				() -> assertEquals("Ordem de serviço não encontrada", excecaoObtida.getMessage()));
 
 		verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
+
+		verifyNoMoreInteractions(buscarOrdemServicoPorIdUseCase);
 	}
 
 	@Test
 	void deveSalvarOrdemServicoComSucesso() {
-		CriarOrdemServicoDTO request = new CriarOrdemServicoDTO(null, CPF, PLACA, RECLAMACAO_CLIENTE, null);
+		CriarOrdemServicoRequestDTO request = new CriarOrdemServicoRequestDTO(CPF, PLACA, RECLAMACAO_CLIENTE);
+		OrdemServicoReqCommand commandReqEsperado = new OrdemServicoReqCommand(CPF, PLACA, RECLAMACAO_CLIENTE);
+		OrdemServicoRespCommand commandEsperado = new OrdemServicoRespCommand(ordemServicoId, CPF, PLACA,
+				RECLAMACAO_CLIENTE, OrdemDeServicoStatus.RECEBIDA);
+		when(abrirOrdemServicoUseCase.abrirOrdemServico(commandReqEsperado)).thenReturn(commandEsperado);
 
-		when(abrirOrdemServicoUseCase.abrirOrdemServico(request)).thenReturn(criarOrdemServicoDTO);
-
-		ResponseEntity<CriarOrdemServicoDTO> response = controller.salvar(request);
+		ResponseEntity<CriarOrdemServicoResponseDTO> response = controller.salvar(request);
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertNotNull(response.getBody());
@@ -256,26 +282,39 @@ class OrdemServicoOficinaControllerTest {
 		assertEquals(RECLAMACAO_CLIENTE, response.getBody().descricaoProblema());
 		assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus());
 
-		verify(abrirOrdemServicoUseCase, times(1)).abrirOrdemServico(request);
+		verify(abrirOrdemServicoUseCase, times(1)).abrirOrdemServico(commandReqEsperado);
 	}
 
 	@Test
 	void deveEditarOrdemServicoComSucesso() {
 		String novaDescricao = "Veículo apresenta ruído ao frear após " + "troca recente de pastilhas.";
 
-		OrdemServicoDTO atualizada = new OrdemServicoDTO(ordemServicoId, CPF, PLACA, novaDescricao,
-				OrdemDeServicoStatus.RECEBIDA, null);
+		OrdemServicoDTO request = new OrdemServicoDTO(CPF, PLACA, novaDescricao, OrdemDeServicoStatus.RECEBIDA);
 
-		when(editarOrdemServicoUseCase.edit(ordemServicoId, atualizada)).thenReturn(atualizada);
+		OrdemServicoReqCommand commandEsperado = new OrdemServicoReqCommand(CPF, PLACA, novaDescricao);
+		OrdemServicoRespCommand commandRespEsperado = new OrdemServicoRespCommand(ordemServicoId, CPF, PLACA,
+				novaDescricao, OrdemDeServicoStatus.AGUARDANDO_APROVACAO);
 
-		ResponseEntity<OrdemServicoDTO> response = controller.editar(ordemServicoId, atualizada);
+		OrdemServico ordemServicoAtualizada = new OrdemServico(ordemServicoId, CPF, PLACA,
+				LocalDateTime.of(2026, 7, 20, 8, 0), null, novaDescricao, OrdemDeServicoStatus.RECEBIDA, null,
+				new ArrayList<>(), new ArrayList<>(), null, null);
+
+		when(editarOrdemServicoUseCase.edit(ordemServicoId, commandEsperado)).thenReturn(ordemServicoAtualizada);
+
+		ResponseEntity<OrdemServicoDTO> response = controller.editar(ordemServicoId, request);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertEquals(ordemServicoId, response.getBody().id());
-		assertEquals(novaDescricao, response.getBody().descricaoProblema());
 
-		verify(editarOrdemServicoUseCase, times(1)).edit(ordemServicoId, atualizada);
+		assertNotNull(response.getBody());
+
+		assertAll(() -> assertEquals(CPF, response.getBody().documentoCliente()),
+				() -> assertEquals(PLACA, response.getBody().placaVeiculo()),
+				() -> assertEquals(novaDescricao, response.getBody().descricaoProblema()),
+				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus()));
+
+		verify(editarOrdemServicoUseCase, times(1)).edit(ordemServicoId, commandEsperado);
+
+		verifyNoMoreInteractions(editarOrdemServicoUseCase);
 	}
 
 	@Test
@@ -296,24 +335,52 @@ class OrdemServicoOficinaControllerTest {
 				List.of(new DiagnosticoEstoqueDTO("EST-FILTRO-OLEO", 1),
 						new DiagnosticoEstoqueDTO("EST-OLEO-5W30", 4)));
 
-		OrdemServicoDTO diagnosticada = new OrdemServicoDTO(ordemServicoId, CPF, PLACA, RECLAMACAO_CLIENTE,
-				OrdemDeServicoStatus.AGUARDANDO_APROVACAO, null);
+		var diagnosticoCommand = diagnosticoDTOTOCommand(diagnosticoDTO);
 
-		when(diagnosticarOrdemServicoUseCase.diagnosticar(ordemServicoId, diagnosticoDTO)).thenReturn(diagnosticada);
+		DadosFinanceirosCommand dadosFinanceiros = new DadosFinanceirosCommand(
+				List.of(new ServicosAdicionadosCommand("Troca de óleo", new BigDecimal("100.00")),
+						new ServicosAdicionadosCommand("Alinhamento", new BigDecimal("80.00"))),
+				List.of(new PecasInsumosAdicionadosCommand("Filtro de óleo", new BigDecimal("45.90"), 1,
+								new BigDecimal("45.90")),
+						new PecasInsumosAdicionadosCommand("Óleo 5W30", new BigDecimal("50.00"), 4,
+								new BigDecimal("200.00"))), new BigDecimal("180.00"), new BigDecimal("245.90"),
+				new BigDecimal("425.90"));
 
-		ResponseEntity<OrdemServicoDTO> response = controller.diagnosticar(ordemServicoId, diagnosticoDTO);
+		OrdemServicoDiagnosticoRespCommand retornoUseCase = new OrdemServicoDiagnosticoRespCommand(ordemServicoId, CPF,
+				PLACA, RECLAMACAO_CLIENTE, OrdemDeServicoStatus.AGUARDANDO_APROVACAO, dadosFinanceiros);
+
+		when(diagnosticarOrdemServicoUseCase.diagnosticar(ordemServicoId, diagnosticoCommand)).thenReturn(
+				retornoUseCase);
+
+		ResponseEntity<OrdemServicoDetailDTO> response = controller.diagnosticar(ordemServicoId, diagnosticoDTO);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertEquals(ordemServicoId, response.getBody().id());
-		assertEquals(OrdemDeServicoStatus.AGUARDANDO_APROVACAO, response.getBody().ordemDeServicoStatus());
 
-		verify(diagnosticarOrdemServicoUseCase, times(1)).diagnosticar(ordemServicoId, diagnosticoDTO);
+		assertNotNull(response.getBody());
+
+		OrdemServicoDetailDTO responseBody = response.getBody();
+
+		assertAll(
+//				() -> assertEquals(ordemServicoId, responseBody.id()),
+				() -> assertEquals(CPF, responseBody.documentoCliente()),
+				() -> assertEquals(PLACA, responseBody.placaVeiculo()),
+				() -> assertEquals(RECLAMACAO_CLIENTE, responseBody.descricaoProblema()),
+				() -> assertEquals(OrdemDeServicoStatus.AGUARDANDO_APROVACAO, responseBody.ordemDeServicoStatus()),
+				() -> assertNotNull(responseBody.dadosFinanceiros()), () -> assertEquals(0,
+						new BigDecimal("180.00").compareTo(responseBody.dadosFinanceiros().valorServicos())),
+				() -> assertEquals(0,
+						new BigDecimal("245.90").compareTo(responseBody.dadosFinanceiros().valorPecasInsumos())),
+				() -> assertEquals(0, new BigDecimal("425.90").compareTo(responseBody.dadosFinanceiros().valorTotal())),
+				() -> assertEquals(2, responseBody.dadosFinanceiros().servicos().size()),
+				() -> assertEquals(2, responseBody.dadosFinanceiros().pecasInsumos().size()));
+
+		verify(diagnosticarOrdemServicoUseCase, times(1)).diagnosticar(ordemServicoId, diagnosticoCommand);
+
+		verifyNoMoreInteractions(diagnosticarOrdemServicoUseCase);
 	}
 
 	@Test
 	void deveIniciarExecucaoComSucesso() {
-		when(iniciarExecucaoUseCase.iniciarExecucao(ordemServicoId)).thenReturn(ordemServicoDTO);
 
 		ResponseEntity<OrdemServicoDTO> response = controller.iniciarExecucao(ordemServicoId);
 
@@ -339,6 +406,29 @@ class OrdemServicoOficinaControllerTest {
 		verify(finalizarExecucaoUseCase, times(1)).finalizarExecucao(ordemServicoId);
 
 		verifyNoMoreInteractions(finalizarExecucaoUseCase);
+	}
+
+	@Test
+	void deveConsultarStatusDaOrdemServico() {
+		when(consultarStatusOsUseCase.executar(ordemServicoId)).thenReturn(OrdemDeServicoStatus.RECEBIDA);
+
+		ResponseEntity<ConsultarStatusDTO> response = controller.consultarStatus(ordemServicoId);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		assertNotNull(response.getBody());
+
+		assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().status());
+
+		verify(consultarStatusOsUseCase, times(1)).executar(ordemServicoId);
+
+		verifyNoMoreInteractions(consultarStatusOsUseCase);
+	}
+
+	private OrdemServico criarOrdemServico(UUID id) {
+		return new OrdemServico(id, CPF, PLACA, dataAbertura, null,
+				OrdemServicoOficinaControllerTest.RECLAMACAO_CLIENTE, OrdemDeServicoStatus.AGUARDANDO_APROVACAO, null,
+				new ArrayList<>(), new ArrayList<>(), null, null);
 	}
 
 	private OrdemServicoFiltroDTO filtroVazio() {

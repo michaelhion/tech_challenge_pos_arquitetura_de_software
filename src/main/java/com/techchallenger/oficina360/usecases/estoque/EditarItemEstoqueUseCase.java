@@ -1,12 +1,11 @@
 package com.techchallenger.oficina360.usecases.estoque;
 
 import com.techchallenger.oficina360.dominio.Estoque;
-import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
-import com.techchallenger.oficina360.mappers.EstoqueMapper;
 import com.techchallenger.oficina360.usecases.finders.EstoqueFinder;
+import com.techchallenger.oficina360.usecases.ordemservico.command.EstoqueCommand;
 
-import static com.techchallenger.oficina360.mappers.EstoqueMapper.domaintoDTO;
+import static com.techchallenger.oficina360.mappers.EstoqueCommandMapper.domaintoCommand;
 
 public class EditarItemEstoqueUseCase {
 
@@ -18,13 +17,12 @@ public class EditarItemEstoqueUseCase {
 		this.estoqueGateway = estoqueGateway;
 	}
 
-	public EstoqueDTO edit(String codigo, EstoqueDTO estoqueDTO) {
+	public EstoqueCommand edit(String codigo, EstoqueCommand command) {
 		Estoque estoque = estoqueFinder.obterOuFalhar(codigo);
 
-		EstoqueMapper.updateDomainFromDto(estoqueDTO, estoque);
-
+		estoque.editar(command.codigo(),command.nome(),command.valor(),command.quantidade(),command.reservados());
 		Estoque estoqueAtualizado = estoqueGateway.save(estoque);
 
-		return domaintoDTO(estoqueAtualizado);
+		return domaintoCommand(estoqueAtualizado);
 	}
 }

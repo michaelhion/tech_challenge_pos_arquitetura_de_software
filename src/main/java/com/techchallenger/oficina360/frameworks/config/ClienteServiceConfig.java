@@ -6,6 +6,7 @@ import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoU
 import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
+import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,8 @@ public class ClienteServiceConfig {
 	}
 	@Bean
 	@Transactional
-	public BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase(ClienteGateway clienteGateway) {
-		return new BuscarClientePorDocumentoUseCase(clienteGateway);
+	public BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase(ClienteFinder clienteFinder) {
+		return new BuscarClientePorDocumentoUseCase(clienteFinder);
 
 	}
 	@Bean

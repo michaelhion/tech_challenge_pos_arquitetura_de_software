@@ -5,21 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import java.util.UUID;
-
 @Schema(
         name = &quot;OrdemServicoDTO&quot;,
         description = &quot;DTO utilizado para criação, consulta e atualização de ordens de serviço da oficina.&quot;
 )
-<span class="fc" id="L14">public record OrdemServicoDTO(</span>
-
-        @Schema(
-                description = &quot;Identificador da ordem de serviço.&quot;,
-                example = &quot;7b5a3247-a14a-44f8-872f-016e179a92fd&quot;,
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        UUID id,
-
+<span class="fc" id="L12">public record OrdemServicoDTO(</span>
         @Schema(
                 description = &quot;CPF ou CNPJ do cliente responsável pela ordem de serviço. Deve ser informado somente com números.&quot;,
                 example = &quot;12345678901&quot;,
@@ -57,13 +47,7 @@ import java.util.UUID;
                 example = &quot;RECEBIDA&quot;,
                 accessMode = Schema.AccessMode.READ_ONLY
         )
-        OrdemDeServicoStatus ordemDeServicoStatus,
-
-        @Schema(
-                description = &quot;Dados financeiros da ordem de serviço, incluindo serviços adicionados, peças/insumos e valor total.&quot;,
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        DadosFinanceirosDTO dadosFinanceiros
+        OrdemDeServicoStatus ordemDeServicoStatus
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -30,6 +30,32 @@ public class Estoque {
 		this.codigo = codigo;
 	}
 
+	public Estoque(){}
+
+	public void editar(String codigo, String nome, BigDecimal valor, Integer quantidade, Integer reservados){
+		this.codigo = codigo;
+		this.nome = nome;
+		this.valor = valor;
+		this.quantidade = quantidade;
+		this.reservados = reservados;
+	}
+
+	public Estoque criar(String codigo, String nome, BigDecimal valor, Integer quantidade){
+		this.codigo = codigo;
+		this.nome = nome;
+		this.valor = valor;
+		this.quantidade = quantidade;
+		this.reservados = 0;
+		return this;
+	}
+
+	public Estoque(String codigo, String nome, BigDecimal valor, Integer quantidade){
+		this.codigo = codigo;
+		this.nome = nome;
+		this.valor = valor;
+		this.quantidade = quantidade;
+	}
+
 	public Integer getDisponiveis() {
 		return quantidade - reservados;
 	}

@@ -89,6 +89,15 @@ public class OrdemServico {
 		recalcularValores();
 	}
 
+	public void editarOSRecebida(String documentoCliente,String placa,String descricaoProblema){
+		if(this.ordemDeServicoStatus != OrdemDeServicoStatus.RECEBIDA){
+			throw new TransicaoStatusInvalidaException( "A ordem de serviço precisa estar com Status RECEBIDA para realizar esta operação.");
+		}
+		this.documentoCliente = documentoCliente;
+		this.placaVeiculo = placa;
+		this.descricaoProblema = descricaoProblema;
+	}
+
 	private void validarDiagnosticoEmAndamento() {
 		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_DIAGNOSTICO) {
 			throw new TransicaoStatusInvalidaException( "A ordem de serviço precisa estar em diagnóstico para realizar esta operação.");

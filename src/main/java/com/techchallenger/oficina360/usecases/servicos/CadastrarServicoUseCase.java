@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.usecases.servicos;
 
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
+import com.techchallenger.oficina360.usecases.servicos.commands.ServicoCommand;
 
-import static com.techchallenger.oficina360.mappers.ServicoMapper.domainToDTO;
-import static com.techchallenger.oficina360.mappers.ServicoMapper.toDomain;
+import static com.techchallenger.oficina360.mappers.ServicoCommandMapper.commandToDomain;
+import static com.techchallenger.oficina360.mappers.ServicoCommandMapper.domainToCommand;
 
 public class CadastrarServicoUseCase {
 
@@ -15,11 +15,11 @@ public class CadastrarServicoUseCase {
 		this.servicoGateway = servicoGateway;
 	}
 
-	public ServicoDTO save(ServicoDTO servicoDTO) {
-		Servico servico = toDomain(servicoDTO);
+	public ServicoCommand save(ServicoCommand command) {
+		Servico servico = new Servico();
 		servico.inicializaTempoDeExecucao(0);
-		Servico servicoSalvo = servicoGateway.save(servico);
+		Servico servicoSalvo = servicoGateway.save(commandToDomain(command));
 
-		return domainToDTO(servicoSalvo);
+		return domainToCommand(servicoSalvo);
 	}
 }

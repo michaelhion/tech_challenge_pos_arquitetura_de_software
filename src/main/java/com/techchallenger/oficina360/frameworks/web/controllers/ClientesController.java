@@ -2,11 +2,13 @@ package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.ClientesApi;
 import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.mappers.cliente.ClienteDTOMapper;
 import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;
 import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.command.ClienteCommand;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,58 +23,52 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.techchallenger.oficina360.frameworks.mappers.cliente.ClienteDTOMapper.commandToDTO;
+import static com.techchallenger.oficina360.frameworks.mappers.cliente.ClienteDTOMapper.dtoToCommand;
+
 @RestController
 @RequestMapping("/clientes")
 @RequiredArgsConstructor
 public class ClientesController implements ClientesApi {
 
-    private final BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase;
-    private final CadastrarClienteUseCase cadastrarClienteUseCase;
-    private final ExcluirClienteUseCase excluirClienteUseCase;
-    private final ListarClientesUseCase listarClientesUseCase;
-    private final AtualizarClienteUseCase atualizarClienteUseCase;
+	private final BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase;
+	private final CadastrarClienteUseCase cadastrarClienteUseCase;
+	private final ExcluirClienteUseCase excluirClienteUseCase;
+	private final ListarClientesUseCase listarClientesUseCase;
+	private final AtualizarClienteUseCase atualizarClienteUseCase;
 
-    @Override
-    @GetMapping("/listar/{documento}")
-    public ResponseEntity<ClienteDTO> buscarPorDocumento(
-            @PathVariable String documento
-    ) {
-        return buscarClientePorDocumentoUseCase.findByDocumento(documento)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+	@Override
+	@GetMapping("/listar/{documento}")
+	public ResponseEntity<ClienteDTO> buscarPorDocumento(@PathVariable String documento) {
+		ClienteCommand command = buscarClientePorDocumentoUseCase.findByDocumento(documento);
+		return ResponseEntity.ok(commandToDTO(command));
+	}
 
-    @Override
-    @PostMapping("/salvar")
-    public ResponseEntity<ClienteDTO> salvar(
-            @Valid @RequestBody ClienteDTO cliente
-    ) {
-        ClienteDTO clienteSalvo = cadastrarClienteUseCase.save(cliente);
-        return ResponseEntity.status(201).body(clienteSalvo);
-    }
+	@Override
+	@PostMapping("/salvar")
+	public ResponseEntity<ClienteDTO> salvar(@Valid @RequestBody ClienteDTO cliente) {
+		ClienteDTO clienteSalvo = commandToDTO(cadastrarClienteUseCase.save(dtoToCommand(cliente)));
+		return ResponseEntity.status(201).body(clienteSalvo);
+	}
 
-    @Override
-    @PutMapping("/editar/{documento}")
-    public ResponseEntity<ClienteDTO> editar(
-            @PathVariable String documento,
-            @Valid @RequestBody ClienteDTO cliente
-    ) {
-        ClienteDTO clienteAtualizado = atualizarClienteUseCase.edit(documento, cliente);
-        return ResponseEntity.ok(clienteAtualizado);
-    }
+	@Override
+	@PutMapping("/editar/{documento}")
+	public ResponseEntity<ClienteDTO> editar(@PathVariable String documento, @Valid @RequestBody ClienteDTO cliente) {
+		ClienteDTO clienteAtualizado = commandToDTO(atualizarClienteUseCase.edit(documento, dtoToCommand(cliente)));
+		return ResponseEntity.ok(clienteAtualizado);
+	}
 
-    @Override
-    @DeleteMapping("/deletar/{documento}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable String documento
-    ) {
-        excluirClienteUseCase.delete(documento);
-        return ResponseEntity.noContent().build();
-    }
+	@Override
+	@DeleteMapping("/deletar/{documento}")
+	public ResponseEntity<Void> deletar(@PathVariable String documento) {
+		excluirClienteUseCase.delete(documento);
+		return ResponseEntity.noContent().build();
+	}
 
-    @Override
-    @GetMapping("/listar")
-    public ResponseEntity<List<ClienteDTO>> listarClientes() {
-        return ResponseEntity.ok(listarClientesUseCase.findAll());
-    }
+	@Override
+	@GetMapping("/listar")
+	public ResponseEntity<List<ClienteDTO>> listarClientes() {
+		List<ClienteDTO> clienteDTOList = listarClientesUseCase.findAll().stream().map(ClienteDTOMapper::commandToDTO).toList();
+		return ResponseEntity.ok(clienteDTOList);
+	}
 }

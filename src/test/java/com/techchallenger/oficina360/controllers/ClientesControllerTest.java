@@ -7,6 +7,8 @@ import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoU
 import com.techchallenger.oficina360.usecases.cliente.CadastrarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ExcluirClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.ListarClientesUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.command.ClienteCommand;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 
 @ExtendWith(MockitoExtension.class)
 class ClientesControllerTest {
@@ -46,10 +46,18 @@ class ClientesControllerTest {
     private ClientesController clientesController;
 
     private ClienteDTO clienteDTO;
+    private ClienteCommand clienteCommand;
 
     @BeforeEach
     void setUp() {
         clienteDTO = new ClienteDTO(
+                DOCUMENTO,
+                "João da Silva",
+                "joao.silva@email.com",
+                "11999999999"
+        );
+
+        clienteCommand = new ClienteCommand(
                 DOCUMENTO,
                 "João da Silva",
                 "joao.silva@email.com",
@@ -62,7 +70,7 @@ class ClientesControllerTest {
         String documento = DOCUMENTO;
 
         when(buscarClientePorDocumentoUseCase.findByDocumento(documento))
-                .thenReturn(Optional.of(clienteDTO));
+                .thenReturn(clienteCommand);
 
         ResponseEntity<ClienteDTO> response = clientesController.buscarPorDocumento(documento);
 
@@ -81,20 +89,20 @@ class ClientesControllerTest {
         String documento = "00000000000";
 
         when(buscarClientePorDocumentoUseCase.findByDocumento(documento))
-                .thenReturn(Optional.empty());
+                .thenThrow(new RecursoNaoEncontradoException("Cliente não encontrado"));
 
-        ResponseEntity<ClienteDTO> response = clientesController.buscarPorDocumento(documento);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(RecursoNaoEncontradoException.class, () -> {
+            clientesController.buscarPorDocumento(documento);
+        });
 
         verify(buscarClientePorDocumentoUseCase, times(1)).findByDocumento(documento);
     }
 
+
     @Test
     void deveSalvarClienteComSucesso() {
-        when(cadastrarClienteUseCase.save(clienteDTO))
-                .thenReturn(clienteDTO);
+        when(cadastrarClienteUseCase.save(clienteCommand))
+                .thenReturn(clienteCommand);
 
         ResponseEntity<ClienteDTO> response = clientesController.salvar(clienteDTO);
 
@@ -105,7 +113,7 @@ class ClientesControllerTest {
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
 
-        verify(cadastrarClienteUseCase, times(1)).save(clienteDTO);
+        verify(cadastrarClienteUseCase, times(1)).save(clienteCommand);
     }
 
     @Test
@@ -117,9 +125,15 @@ class ClientesControllerTest {
                 "joao.atualizado@email.com",
                 "11888888888"
         );
+        ClienteCommand clienteCommandAtualizado = new ClienteCommand(
+                DOCUMENTO,
+                "João da Silva Atualizado",
+                "joao.atualizado@email.com",
+                "11888888888"
+        );
 
-        when(atualizarClienteUseCase.edit(DOCUMENTO, clienteAtualizado))
-                .thenReturn(clienteAtualizado);
+        when(atualizarClienteUseCase.edit(DOCUMENTO, clienteCommandAtualizado))
+                .thenReturn(clienteCommandAtualizado);
 
         ResponseEntity<ClienteDTO> response = clientesController.editar(DOCUMENTO, clienteAtualizado);
 
@@ -130,7 +144,7 @@ class ClientesControllerTest {
         assertEquals("joao.atualizado@email.com", response.getBody().email());
         assertEquals("11888888888", response.getBody().telefone());
 
-        verify(atualizarClienteUseCase, times(1)).edit(DOCUMENTO, clienteAtualizado);
+        verify(atualizarClienteUseCase, times(1)).edit(DOCUMENTO, clienteCommandAtualizado);
     }
 
     @Test
@@ -155,9 +169,14 @@ class ClientesControllerTest {
                 "maria.oliveira@email.com",
                 "11988887777"
         );
-
+        ClienteCommand segundoClientCommand = new ClienteCommand(
+                "98765432100",
+                "Maria Oliveira",
+                "maria.oliveira@email.com",
+                "11988887777"
+        );
         when(listarClientesUseCase.findAll())
-                .thenReturn(List.of(clienteDTO, segundoCliente));
+                .thenReturn(List.of(clienteCommand, segundoClientCommand));
 
         ResponseEntity<List<ClienteDTO>> response = clientesController.listarClientes();
 

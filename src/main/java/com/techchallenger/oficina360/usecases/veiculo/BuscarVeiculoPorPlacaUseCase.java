@@ -1,11 +1,11 @@
 package com.techchallenger.oficina360.usecases.veiculo;
 
-import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.dominio.Veiculo;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
-import com.techchallenger.oficina360.mappers.VeiculoMapper;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
+import com.techchallenger.oficina360.usecases.veiculo.commands.VeiculoCommand;
 
-import java.util.Optional;
-
+import static com.techchallenger.oficina360.mappers.VeiculoCommandMapper.domainToCommand;
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
 
 public class BuscarVeiculoPorPlacaUseCase {
@@ -16,10 +16,11 @@ public class BuscarVeiculoPorPlacaUseCase {
 		this.veiculoGateway = veiculoGateway;
 	}
 
-	public Optional<VeiculoDTO> findByPlaca(String placa) {
+	public VeiculoCommand findByPlaca(String placa) {
 		String placaNormalizada = normalizarPlaca(placa);
 
-		return veiculoGateway.findByPlaca(placaNormalizada)
-				.map(VeiculoMapper::domainToDTO);
+		Veiculo veiculo = veiculoGateway.findByPlaca(placaNormalizada)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo não encontrado"));
+		return domainToCommand(veiculo);
 	}
 }

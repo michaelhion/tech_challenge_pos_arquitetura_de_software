@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ListarOrdensServicoUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.ordemservico</a> &gt; <span class="el_source">ListarOrdensServicoUseCase.java</span></div><h1>ListarOrdensServicoUseCase.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.ordemservico;
+
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
+import com.techchallenger.oficina360.usecases.ordemservico.output.OrdemServicoResumoOutput;
+import com.techchallenger.oficina360.usecases.ordemservico.query.ListarOrdensServicoQuery;
+import com.techchallenger.oficina360.usecases.shared.paginacao.ResultadoPaginado;
+
+public class ListarOrdensServicoUseCase {
+
+	private final OrdemServicoGateway ordemServicoGateway;
+
+<span class="fc" id="L13">	public ListarOrdensServicoUseCase(OrdemServicoGateway ordemServicoGateway) {</span>
+<span class="fc" id="L14">		this.ordemServicoGateway = ordemServicoGateway;</span>
+<span class="fc" id="L15">	}</span>
+
+	public ResultadoPaginado&lt;OrdemServicoResumoOutput&gt; executar(ListarOrdensServicoQuery query) {
+<span class="nc" id="L18">		ResultadoPaginado&lt;OrdemServico&gt; resultado = ordemServicoGateway.filtrar(query);</span>
+
+<span class="nc" id="L20">		return resultado.map(this::toOutput);</span>
+	}
+
+	private OrdemServicoResumoOutput toOutput(
+			OrdemServico ordemServico
+	) {
+<span class="nc" id="L26">		return new OrdemServicoResumoOutput(</span>
+<span class="nc" id="L27">				ordemServico.getId(),</span>
+<span class="nc" id="L28">				ordemServico.getDocumentoCliente(),</span>
+<span class="nc" id="L29">				ordemServico.getPlacaVeiculo(),</span>
+<span class="nc" id="L30">				ordemServico.getDescricaoProblema(),</span>
+<span class="nc" id="L31">				ordemServico.getOrdemDeServicoStatus(),</span>
+<span class="nc" id="L32">				ordemServico.getDtHoraAbertura(),</span>
+<span class="nc" id="L33">				ordemServico.getValorServicos(),</span>
+<span class="nc" id="L34">				ordemServico.getValorPecasInsumos(),</span>
+<span class="nc" id="L35">				ordemServico.getValorOs()</span>
+		);
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

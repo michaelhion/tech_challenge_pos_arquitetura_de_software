@@ -4,6 +4,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.Estoque;
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
+import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
@@ -37,11 +39,13 @@ public class OrdemServicoAprovacaoIT extends BaseIT {
 	@Autowired
 	private EstoqueGateway estoqueGateway;
 
+	@MockitoBean
+	private NotificacaoEmailGateway notificacaoEmailGateway;
+
 	@Test
 	void deveAprovarOrcamento() throws Exception {
 		aprovar(OS_COM_STATUS_AGUARDANDO_APROVACAO, aprovacaoOrdemServicoDTOValido(), tokenCliente()).andExpect(
-						status().isOk())
-				.andDo(print());
+				status().isAccepted()).andDo(print());
 
 	}
 
@@ -59,6 +63,7 @@ public class OrdemServicoAprovacaoIT extends BaseIT {
 						post("/ordem-servico/salvar").contentType(MediaType.APPLICATION_JSON)
 								.content(json(ordemServicoValida())), tokenAdmin())).andReturn().getResponse()
 				.getContentAsString();
+
 		UUID id = UUID.fromString(JsonPath.read(response, "$.id"));
 		mockMvc.perform(autenticado(patch("/ordem-servico/{id}/diagnostico", id),
 						tokenAdmin()).contentType(MediaType.APPLICATION_JSON).content(json(diagnosticoDTOValido())))
@@ -71,7 +76,7 @@ public class OrdemServicoAprovacaoIT extends BaseIT {
 		AprovacaoOrdemServicoDTO aprovacaoOrdemServicoDTO = new AprovacaoOrdemServicoDTO(false, "Não quero executar");
 
 		aprovar(id.toString(), aprovacaoOrdemServicoDTO, tokenCliente2())
-				.andExpect(status().isOk()).andDo(print());
+				.andExpect(status().isAccepted()).andDo(print());
 
 		Estoque estoqueDepois = estoqueGateway.findByCodigo("PNEU-205-55-R16").orElseThrow();
 		//todo o valor esta como 1 por sujeira na massa de dados

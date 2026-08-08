@@ -2,10 +2,10 @@ package com.techchallenger.oficina360.usecases.loaders;
 
 import com.techchallenger.oficina360.dominio.Estoque;
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
+import com.techchallenger.oficina360.usecases.ordemservico.command.DiagnosticoCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.DiagnosticoEstoqueCommand;
 
 import java.util.List;
 import java.util.Map;
@@ -21,9 +21,9 @@ public class DiagnosticoLoader {
 		this.estoqueGateway = estoqueGateway;
 	}
 
-	public DiagnosticoDados carregar(DiagnosticoDTO dto){
-		List<String> codigosServicos = dto.codigosServicos();
-		List<DiagnosticoEstoqueDTO> itensEstoque = dto.itensEstoque();
+	public DiagnosticoDados carregar(DiagnosticoCommand command){
+		List<String> codigosServicos = command.codigosServicos();
+		List<DiagnosticoEstoqueCommand> itensEstoque = command.itensEstoque();
 		List<String> codigosEstoque = buildCodigosEstoque(itensEstoque);
 		Map<String, Estoque> estoqueDB = buildMapEstoquePorCodigo(codigosEstoque);
 		return new DiagnosticoDados(
@@ -35,9 +35,9 @@ public class DiagnosticoLoader {
 		);
 	}
 
-	private List<String> buildCodigosEstoque(List<DiagnosticoEstoqueDTO> itensEstoque) {
+	private List<String> buildCodigosEstoque(List<DiagnosticoEstoqueCommand> itensEstoque) {
 		return itensEstoque.stream()
-				.map(DiagnosticoEstoqueDTO::codigo)
+				.map(DiagnosticoEstoqueCommand::codigo)
 				.toList();
 	}
 
@@ -45,8 +45,8 @@ public class DiagnosticoLoader {
 		return estoqueGateway.findByCodigoIn(codigosEstoque).stream().collect(Collectors.toMap(Estoque::getCodigo, estoque -> estoque));
 	}
 
-	private Map<String, Integer> buildMapQuantidadeEstoquePorCodigo(List<DiagnosticoEstoqueDTO> itensEstoque) {
-		return itensEstoque.stream().collect(Collectors.toMap(DiagnosticoEstoqueDTO::codigo,DiagnosticoEstoqueDTO::quantidade));
+	private Map<String, Integer> buildMapQuantidadeEstoquePorCodigo(List<DiagnosticoEstoqueCommand> itensEstoque) {
+		return itensEstoque.stream().collect(Collectors.toMap(DiagnosticoEstoqueCommand::codigo,DiagnosticoEstoqueCommand::quantidade));
 	}
 
 	private Map<String, Servico> buildMapCodigoPorServico(List<String> codigosServicos) {

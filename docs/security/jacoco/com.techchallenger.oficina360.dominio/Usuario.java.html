@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Usuario.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dominio</a> &gt; <span class="el_source">Usuario.java</span></div><h1>Usuario.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dominio;
+
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.constants.Roles.ADMIN;
+import static com.techchallenger.oficina360.constants.Roles.CLIENTE;
+
+public class Usuario {
+
+    private UUID id;
+
+    private String email;
+
+    private String senha;
+
+    private String role;
+
+    private String documento;
+
+    public String getPassword() {
+<span class="nc" id="L21">        return senha;</span>
+    }
+
+    public String getUsername() {
+<span class="nc" id="L25">        return email;</span>
+    }
+
+    public boolean isAccountNonExpired() {
+<span class="nc" id="L29">        return true;</span>
+    }
+
+    public boolean isAccountNonLocked() {
+<span class="nc" id="L33">        return true;</span>
+    }
+
+    public boolean isCredentialsNonExpired() {
+<span class="nc" id="L37">        return true;</span>
+    }
+
+    public boolean isEnabled() {
+<span class="nc" id="L41">        return true;</span>
+    }
+
+<span class="fc" id="L44">    public Usuario(UUID id, String email, String senha, String role, String documento) {</span>
+<span class="fc" id="L45">        this.id = id;</span>
+<span class="fc" id="L46">        this.email = email;</span>
+<span class="fc" id="L47">        this.senha = senha;</span>
+<span class="fc" id="L48">        this.role = role;</span>
+<span class="fc" id="L49">        this.documento = documento;</span>
+<span class="fc" id="L50">    }</span>
+
+<span class="nc" id="L52">    public Usuario(String email, String senha, String role, String documento) {</span>
+<span class="nc" id="L53">        this.email = email;</span>
+<span class="nc" id="L54">        this.senha = senha;</span>
+<span class="nc" id="L55">        this.role = role;</span>
+<span class="nc" id="L56">        this.documento = documento;</span>
+<span class="nc" id="L57">    }</span>
+
+<span class="nc" id="L59">    public Usuario() {</span>
+<span class="nc" id="L60">    }</span>
+
+    public UUID getId() {
+<span class="fc" id="L63">        return id;</span>
+    }
+
+    public String getEmail() {
+<span class="fc" id="L67">        return email;</span>
+    }
+
+    public String getSenha() {
+<span class="fc" id="L71">        return senha;</span>
+    }
+
+    public String getRole() {
+<span class="fc" id="L75">        return role;</span>
+    }
+
+    public String getDocumento() {
+<span class="fc" id="L79">        return documento;</span>
+    }
+
+    public void setRole(String role) {
+<span class="nc" id="L83">        this.role = role;</span>
+<span class="nc" id="L84">    }</span>
+
+    public void setSenha(String criptografar) {
+<span class="nc" id="L87">        this.senha = criptografar;</span>
+<span class="nc" id="L88">    }</span>
+
+    public static Usuario criarCliente(
+            String email,
+            String senha,
+            String documento
+    ){
+
+<span class="nc" id="L96">        return new Usuario(</span>
+                null,
+                email,
+                senha,
+                CLIENTE,
+                documento
+        );
+    }
+
+
+    public static Usuario criarAdmin(
+            String email,
+            String senha
+    ){
+
+<span class="nc" id="L111">        return new Usuario(</span>
+                null,
+                email,
+                senha,
+                ADMIN,
+                null
+        );
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

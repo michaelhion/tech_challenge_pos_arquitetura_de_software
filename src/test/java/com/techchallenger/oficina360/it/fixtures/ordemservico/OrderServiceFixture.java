@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.it.fixtures.ordemservico;
 
 import com.techchallenger.oficina360.dominio.Usuario;
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import org.springframework.stereotype.Component;
@@ -19,14 +19,14 @@ public final class OrderServiceFixture {
 	private OrderServiceFixture() {
 	}
 
-	public static CriarOrdemServicoDTO ordemServicoValida() {
+	public static CriarOrdemServicoRequestDTO ordemServicoValida() {
 
-		return new CriarOrdemServicoDTO(null, "98765432100", "DEF2G34", "Barulho no motor", null);
+		return new CriarOrdemServicoRequestDTO("98765432100", "DEF2G34", "Barulho no motor");
 	}
 
-	public static CriarOrdemServicoDTO ordemServicoPlacaDeOutroCliente() {
+	public static CriarOrdemServicoRequestDTO ordemServicoPlacaDeOutroCliente() {
 
-		return new CriarOrdemServicoDTO(null, "98765432100", "GHI3J45", "Barulho no motor", null);
+		return new CriarOrdemServicoRequestDTO( "98765432100", "GHI3J45", "Barulho no motor");
 	}
 
 	public static DiagnosticoDTO diagnosticoDTOValido() {
@@ -82,9 +82,9 @@ public final class OrderServiceFixture {
 				new DiagnosticoEstoqueDTO("ITEM-INEXISTENTE", 1)));
 	}
 
-	public static CriarOrdemServicoDTO ordemServicoEditada() {
+	public static CriarOrdemServicoRequestDTO ordemServicoEditada() {
 
-		return new CriarOrdemServicoDTO(null, "98765432100", "DEF2G34", "Problema atualizado", null);
+		return new CriarOrdemServicoRequestDTO( "98765432100", "DEF2G34", "Problema atualizado");
 	}
 
 }

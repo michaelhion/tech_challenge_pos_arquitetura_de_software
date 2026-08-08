@@ -2,6 +2,7 @@ package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.ServicosApi;
 import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
+import com.techchallenger.oficina360.frameworks.mappers.servico.ServicoDTOMapper;
 import com.techchallenger.oficina360.usecases.servicos.AtualizarServicoUseCase;
 import com.techchallenger.oficina360.usecases.servicos.BuscarServicoPorCodigoUseCase;
 import com.techchallenger.oficina360.usecases.servicos.CadastrarServicoUseCase;
@@ -21,59 +22,52 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.techchallenger.oficina360.frameworks.mappers.servico.ServicoDTOMapper.commandToDTO;
+import static com.techchallenger.oficina360.frameworks.mappers.servico.ServicoDTOMapper.dtoToCommand;
+
 @RestController
 @RequestMapping("/servicos")
 @RequiredArgsConstructor
 public class ServicosController implements ServicosApi {
 
-    private final CadastrarServicoUseCase cadastrarServicoUseCase;
-    private final BuscarServicoPorCodigoUseCase buscarServicoPorCodigoUseCase;
-    private final ListarServicosUseCase listarServicosUseCase;
-    private final AtualizarServicoUseCase atualizarServicoUseCase;
-    private final ExcluirServicoUseCase excluirServicoUseCase;
+	private final CadastrarServicoUseCase cadastrarServicoUseCase;
+	private final BuscarServicoPorCodigoUseCase buscarServicoPorCodigoUseCase;
+	private final ListarServicosUseCase listarServicosUseCase;
+	private final AtualizarServicoUseCase atualizarServicoUseCase;
+	private final ExcluirServicoUseCase excluirServicoUseCase;
 
-    @Override
-    @GetMapping("/listar/{codigo}")
-    public ResponseEntity<ServicoDTO> buscarPorId(
-            @PathVariable String codigo
-    ) {
-        return buscarServicoPorCodigoUseCase.findByCodigo(codigo)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+	@Override
+	@GetMapping("/listar/{codigo}")
+	public ResponseEntity<ServicoDTO> buscarPorId(@PathVariable String codigo) {
+		ServicoDTO servicoDTO = commandToDTO(buscarServicoPorCodigoUseCase.findByCodigo(codigo));
+		return ResponseEntity.ok(servicoDTO);
+	}
 
-    @Override
-    @PostMapping("/salvar")
-    public ResponseEntity<ServicoDTO> salvar(
-            @Valid @RequestBody ServicoDTO servico
-    ) {
-        ServicoDTO servicoSalvo = cadastrarServicoUseCase.save(servico);
-        return ResponseEntity.status(201).body(servicoSalvo);
-    }
+	@Override
+	@PostMapping("/salvar")
+	public ResponseEntity<ServicoDTO> salvar(@Valid @RequestBody ServicoDTO servico) {
+		ServicoDTO servicoSalvo = commandToDTO(cadastrarServicoUseCase.save(dtoToCommand(servico)));
+		return ResponseEntity.status(201).body(servicoSalvo);
+	}
 
-    @Override
-    @PutMapping("/editar/{codigo}")
-    public ResponseEntity<ServicoDTO> editar(
-            @PathVariable String codigo,
-            @Valid @RequestBody ServicoDTO servico
-    ) {
-        ServicoDTO servicoAtualizado = atualizarServicoUseCase.edit(codigo, servico);
-        return ResponseEntity.ok(servicoAtualizado);
-    }
+	@Override
+	@PutMapping("/editar/{codigo}")
+	public ResponseEntity<ServicoDTO> editar(@PathVariable String codigo, @Valid @RequestBody ServicoDTO servico) {
+		ServicoDTO servicoAtualizado = commandToDTO(atualizarServicoUseCase.edit(codigo, dtoToCommand(servico)));
+		return ResponseEntity.ok(servicoAtualizado);
+	}
 
-    @Override
-    @DeleteMapping("/deletar/{codigo}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable String codigo
-    ) {
-        excluirServicoUseCase.delete(codigo);
-        return ResponseEntity.noContent().build();
-    }
+	@Override
+	@DeleteMapping("/deletar/{codigo}")
+	public ResponseEntity<Void> deletar(@PathVariable String codigo) {
+		excluirServicoUseCase.delete(codigo);
+		return ResponseEntity.noContent().build();
+	}
 
-    @Override
-    @GetMapping("/listar")
-    public ResponseEntity<List<ServicoDTO>> listarServicos() {
-        List<ServicoDTO> servicos = listarServicosUseCase.findAll();
-        return ResponseEntity.ok(servicos);
-    }
+	@Override
+	@GetMapping("/listar")
+	public ResponseEntity<List<ServicoDTO>> listarServicos() {
+		List<ServicoDTO> servicos = listarServicosUseCase.findAll().stream().map(ServicoDTOMapper::commandToDTO).toList();
+		return ResponseEntity.ok(servicos);
+	}
 }

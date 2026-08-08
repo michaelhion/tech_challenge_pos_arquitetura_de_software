@@ -23,6 +23,12 @@ public class Servico {
         this.tempoMedioExecucaoMinutos = tempoMedioExecucaoMinutos;
     }
 
+    public void editar(String descricao,BigDecimal valor,String codigo){
+        this.descricao = descricao;
+        this.valor = valor;
+        this.codigo = codigo;
+    }
+
     public Servico(UUID id, String descricao, BigDecimal valor, String codigo) {
         this.id = id;
         this.descricao = descricao;

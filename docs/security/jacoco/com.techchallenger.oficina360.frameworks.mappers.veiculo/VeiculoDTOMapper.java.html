@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VeiculoDTOMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.mappers.veiculo</a> &gt; <span class="el_source">VeiculoDTOMapper.java</span></div><h1>VeiculoDTOMapper.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.mappers.veiculo;
+
+import com.techchallenger.oficina360.dominio.Veiculo;
+import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
+import com.techchallenger.oficina360.usecases.veiculo.commands.VeiculoCommand;
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="fc" id="L10">public class VeiculoDTOMapper {</span>
+
+    public static VeiculoDTO commandToDTO(VeiculoCommand command){
+<span class="fc" id="L13">        return new VeiculoDTO(</span>
+<span class="fc" id="L14">                command.placa(),</span>
+<span class="fc" id="L15">                command.marca(),</span>
+<span class="fc" id="L16">                command.modelo(),</span>
+<span class="fc" id="L17">                Integer.valueOf(command.ano()),</span>
+<span class="fc" id="L18">                command.clienteDocumento()</span>
+        );
+    }
+
+    public static VeiculoCommand dtoToCommand(VeiculoDTO dto){
+<span class="fc" id="L23">        return new VeiculoCommand(</span>
+<span class="fc" id="L24">                dto.placa(),</span>
+<span class="fc" id="L25">                dto.marca(),</span>
+<span class="fc" id="L26">                dto.modelo(),</span>
+<span class="fc" id="L27">                dto.ano().toString(),</span>
+<span class="fc" id="L28">                dto.clienteDocumento()</span>
+        );
+    }
+
+    public Veiculo toDomain(VeiculoEntity entity){
+<span class="nc" id="L33">        return new Veiculo(</span>
+                null,
+<span class="nc" id="L35">                entity.getPlaca(),</span>
+<span class="nc" id="L36">                entity.getMarca(),</span>
+<span class="nc" id="L37">                entity.getModelo(),</span>
+<span class="nc" id="L38">                entity.getAno(),</span>
+<span class="nc" id="L39">                entity.getClienteDocumento()</span>
+        );
+    }
+
+    public VeiculoEntity toEntity(Veiculo veiculo){
+<span class="nc" id="L44">        return new VeiculoEntity(</span>
+                null,
+<span class="nc" id="L46">                veiculo.getPlaca(),</span>
+<span class="nc" id="L47">                veiculo.getMarca(),</span>
+<span class="nc" id="L48">                veiculo.getModelo(),</span>
+<span class="nc" id="L49">                veiculo.getAno(),</span>
+<span class="nc" id="L50">                veiculo.getClienteDocumento()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

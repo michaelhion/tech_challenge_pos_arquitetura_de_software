@@ -49,14 +49,15 @@ public class Veiculo {
         this.clienteDocumento = clienteDocumento;
     }
 
+    public void editar(String placa, String marca, String modelo, String ano, String clienteDocumento){
+        this.placa = placa;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.ano = ano;
+        this.clienteDocumento = clienteDocumento;
+    }
+
     public Veiculo() {
     }
 
-    public void atualizarVeiculo(Veiculo newVeiculo){
-        this.placa = newVeiculo.getPlaca();
-        this.marca= newVeiculo.getMarca();
-        this.modelo= newVeiculo.getModelo();
-        this.ano = newVeiculo.getAno();
-        this.clienteDocumento = newVeiculo.getClienteDocumento();
-    }
 }

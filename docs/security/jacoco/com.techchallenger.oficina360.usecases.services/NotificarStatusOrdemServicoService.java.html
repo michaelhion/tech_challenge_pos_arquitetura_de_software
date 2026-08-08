@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificarStatusOrdemServicoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.services</a> &gt; <span class="el_source">NotificarStatusOrdemServicoService.java</span></div><h1>NotificarStatusOrdemServicoService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.services;
+
+import com.techchallenger.oficina360.dominio.Cliente;
+import com.techchallenger.oficina360.dominio.MensagemEmail;
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.gateways.ClienteGateway;
+import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
+
+public class NotificarStatusOrdemServicoService {
+
+	private final ClienteGateway clienteGateway;
+	private final NotificacaoEmailGateway emailGateway;
+
+<span class="fc" id="L14">	public NotificarStatusOrdemServicoService(ClienteGateway clienteGateway, NotificacaoEmailGateway emailGateway) {</span>
+<span class="fc" id="L15">		this.clienteGateway = clienteGateway;</span>
+<span class="fc" id="L16">		this.emailGateway = emailGateway;</span>
+<span class="fc" id="L17">	}</span>
+
+	public void notificar(OrdemServico ordemServico) {
+<span class="nc" id="L20">		Cliente cliente = buscarCliente(ordemServico);</span>
+
+<span class="nc bnc" id="L22" title="All 4 branches missed.">		if (cliente.getEmail() == null || cliente.getEmail().isBlank()) {</span>
+<span class="nc" id="L23">			return;</span>
+		}
+
+<span class="nc" id="L26">		MensagemEmail mensagem = criarMensagem(cliente, ordemServico);</span>
+
+<span class="nc" id="L28">		emailGateway.enviar(mensagem);</span>
+<span class="nc" id="L29">	}</span>
+
+	private Cliente buscarCliente(OrdemServico ordemServico) {
+<span class="nc" id="L32">		return clienteGateway.findByDocumento(ordemServico.getDocumentoCliente())</span>
+<span class="nc" id="L33">				.orElseThrow(() -&gt; new IllegalStateException(&quot;Cliente da Ordem de Serviço &quot; + &quot;não foi encontrado.&quot;));</span>
+	}
+
+	private MensagemEmail criarMensagem(Cliente cliente, OrdemServico ordemServico) {
+<span class="nc" id="L37">		String assunto = &quot;Atualização da Ordem de Serviço &quot; + ordemServico.getId();</span>
+
+<span class="nc" id="L39">		String conteudo = &quot;&quot;&quot;</span>
+				Olá, %s.
+				
+				A sua Ordem de Serviço foi atualizada.
+				
+				Número da OS: %s
+				Veículo: %s
+				Status atual: %s
+				Problema informado: %s
+				Valor total: R$ %s
+				
+				Oficina360
+<span class="nc" id="L51">				&quot;&quot;&quot;.formatted(cliente.getNome(), ordemServico.getId(), ordemServico.getPlacaVeiculo(),</span>
+<span class="nc" id="L52">				formatarStatus(ordemServico.getOrdemDeServicoStatus().name()), ordemServico.getDescricaoProblema(),</span>
+<span class="nc" id="L53">				ordemServico.getValorOs());</span>
+
+<span class="nc" id="L55">		return new MensagemEmail(cliente.getEmail(), assunto, conteudo);</span>
+	}
+
+	private String formatarStatus(String status) {
+<span class="nc" id="L59">		String texto = status.replace(&quot;_&quot;, &quot; &quot;).toLowerCase();</span>
+
+<span class="nc" id="L61">		return Character.toUpperCase(texto.charAt(0)) + texto.substring(1);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

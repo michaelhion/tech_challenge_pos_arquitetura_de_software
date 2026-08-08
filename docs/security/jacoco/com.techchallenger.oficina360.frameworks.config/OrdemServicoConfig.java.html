@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.config</a> &gt; <span class="el_source">OrdemServicoConfig.java</span></div><h1>OrdemServicoConfig.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.config;
+
+import com.techchallenger.oficina360.gateways.ClienteGateway;
+import com.techchallenger.oficina360.gateways.EstoqueGateway;
+import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
+import com.techchallenger.oficina360.gateways.ServicoGateway;
+import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
+import com.techchallenger.oficina360.gateways.VeiculoGateway;
+import com.techchallenger.oficina360.services.validators.OrdemServicoEstoqueValidator;
+import com.techchallenger.oficina360.services.validators.OrdemServicoServicoValidator;
+import com.techchallenger.oficina360.usecases.factories.DiagnosticoFactory;
+import com.techchallenger.oficina360.usecases.factories.OrdemServicoFactory;
+import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
+import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
+import com.techchallenger.oficina360.usecases.finders.VeiculoFinder;
+import com.techchallenger.oficina360.usecases.loaders.DiagnosticoLoader;
+import com.techchallenger.oficina360.usecases.ordemservico.*;
+import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
+import com.techchallenger.oficina360.usecases.services.ReservaEstoqueService;
+import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
+import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
+import com.techchallenger.oficina360.usecases.validators.DiagnosticoValidator;
+import com.techchallenger.oficina360.usecases.validators.OrdemServicoValidator;
+import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+<span class="fc" id="L29">public class OrdemServicoConfig {</span>
+
+	@Bean
+	public OrdemServicoFinder ordemServicoFinder(OrdemServicoGateway gateway) {
+<span class="fc" id="L33">		return new OrdemServicoFinder(gateway);</span>
+	}
+
+	@Bean
+	@Transactional
+	public DiagnosticoLoader diagnosticoLoader(EstoqueGateway estoqueGateway, ServicoGateway servicoGateway) {
+<span class="fc" id="L39">		return new DiagnosticoLoader(servicoGateway, estoqueGateway);</span>
+	}
+
+	@Bean
+	public OrdemServicoServicoValidator ordemServicoServicoValidator() {
+<span class="fc" id="L44">		return new OrdemServicoServicoValidator();</span>
+	}
+
+	@Bean
+	public DiagnosticoValidator diagnosticoValidator(OrdemServicoServicoValidator servicoValidator,
+			OrdemServicoEstoqueValidator estoqueValidator) {
+
+<span class="fc" id="L51">		return new DiagnosticoValidator(servicoValidator, estoqueValidator);</span>
+	}
+
+	@Bean
+	@Transactional
+	public MovimentacaoEstoqueService movimentacaoEstoqueService(EstoqueGateway estoqueGateway) {
+<span class="fc" id="L57">		return new MovimentacaoEstoqueService(estoqueGateway);</span>
+	}
+
+	@Bean
+	@Transactional
+	public ReservaEstoqueService reservaEstoqueService(EstoqueGateway estoqueGateway) {
+
+<span class="fc" id="L64">		return new ReservaEstoqueService(estoqueGateway);</span>
+	}
+
+	@Bean
+	public DiagnosticoFactory diagnosticoFactory() {
+<span class="fc" id="L69">		return new DiagnosticoFactory();</span>
+	}
+
+	@Bean
+	@Transactional
+	public DiagnosticarOrdemServicoUseCase diagnosticarOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
+			OrdemServicoFinder ordemServicoFinder, DiagnosticoLoader diagnosticoLoader,
+			DiagnosticoValidator diagnosticoValidator, DiagnosticoFactory diagnosticoFactory,
+			ReservaEstoqueService reservaEstoqueService,
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+
+<span class="fc" id="L80">		return new DiagnosticarOrdemServicoUseCase(ordemServicoGateway, diagnosticoFactory, diagnosticoValidator,</span>
+				ordemServicoFinder, diagnosticoLoader, reservaEstoqueService, notificarStatusOrdemServicoService);
+	}
+
+	@Bean
+	@Transactional
+	TempoExecucaoService tempoExecucaoServic(TempoExecucaoServicoGateway tempoExecucaoServicoGateway) {
+<span class="fc" id="L87">		return new TempoExecucaoService(tempoExecucaoServicoGateway);</span>
+	}
+
+	@Bean
+	@Transactional
+	public FinalizarExecucaoUseCase finalizarExecucaoUseCase(OrdemServicoGateway gateway,
+			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader,
+			MovimentacaoEstoqueService movimentacaoEstoqueService,
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+<span class="fc" id="L96">		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader, movimentacaoEstoqueService,</span>
+				notificarStatusOrdemServicoService);
+	}
+
+	@Bean
+	public ClienteFinder clienteFinder(ClienteGateway clienteGateway) {
+<span class="fc" id="L102">		return new ClienteFinder(clienteGateway);</span>
+	}
+
+	@Bean
+	public VeiculoFinder veiculoFinder(VeiculoGateway veiculoGateway) {
+<span class="fc" id="L107">		return new VeiculoFinder(veiculoGateway);</span>
+	}
+
+	@Bean
+	public OrdemServicoValidator validator(OrdemServicoGateway ordemServicoGateway) {
+<span class="fc" id="L112">		return new OrdemServicoValidator(ordemServicoGateway);</span>
+	}
+
+	@Bean
+	public OrdemServicoFactory ordemServicoFactory() {
+<span class="fc" id="L117">		return new OrdemServicoFactory();</span>
+	}
+
+	@Bean
+	public ConsultarStatusOsUseCase consultarStatusOsUseCase(OrdemServicoFinder ordemServicoFinder) {
+<span class="fc" id="L122">		return new ConsultarStatusOsUseCase(ordemServicoFinder);</span>
+	}
+
+	@Bean
+	@Transactional
+	public AbrirOrdemServicoUseCase abrirOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
+			OrdemServicoValidator validator, ClienteFinder clienteFinder, VeiculoFinder veiculoFinder) {
+<span class="fc" id="L129">		return new AbrirOrdemServicoUseCase(ordemServicoGateway, validator, clienteFinder, veiculoFinder);</span>
+
+	}
+
+	@Bean
+	@Transactional
+	public AprovarOrcamentoUseCase aprovarOrcamentoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,
+			MovimentacaoEstoqueService movimentacaoEstoqueService) {
+<span class="fc" id="L137">		return new AprovarOrcamentoUseCase(gateway, loader, movimentacaoEstoqueService);</span>
+	}
+
+	@Bean
+	public BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase(OrdemServicoFinder ordemServicoFinder) {
+<span class="fc" id="L142">		return new BuscarOrdemServicoPorIdUseCase(ordemServicoFinder);</span>
+	}
+
+	@Bean
+	@Transactional
+	public EditarOrdemServicoUseCase editarOrdemServicoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,
+			OrdemServicoValidator ordemServicoValidator, ClienteFinder clienteFinder, VeiculoFinder veiculoFinder) {
+<span class="fc" id="L149">		return new EditarOrdemServicoUseCase(gateway, loader, ordemServicoValidator, clienteFinder, veiculoFinder);</span>
+	}
+
+	@Bean
+	@Transactional
+	public IniciarExecucaoUseCase iniciarExecucaoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader) {
+<span class="fc" id="L155">		return new IniciarExecucaoUseCase(gateway, loader);</span>
+	}
+
+	@Bean
+	public ListarOrdensServicoUseCase listarOrdensServicoUseCase(OrdemServicoGateway gateway) {
+<span class="fc" id="L160">		return new ListarOrdensServicoUseCase(gateway);</span>
+	}
+
+	@Bean
+	public DeletarOrdemServicoUseCase deletarOrdemServicoUseCase(OrdemServicoGateway gateway,
+			OrdemServicoFinder loader) {
+<span class="fc" id="L166">		return new DeletarOrdemServicoUseCase(gateway, loader);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

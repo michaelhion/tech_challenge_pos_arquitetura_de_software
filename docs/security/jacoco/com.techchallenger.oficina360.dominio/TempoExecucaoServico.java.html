@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TempoExecucaoServico.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dominio</a> &gt; <span class="el_source">TempoExecucaoServico.java</span></div><h1>TempoExecucaoServico.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dominio;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+
+public class TempoExecucaoServico {
+
+    private UUID id;
+
+    private UUID servicoID;
+
+    private Integer tempoExecucaoMinutos;
+
+    private LocalDateTime dataExecucao;
+
+<span class="nc" id="L17">    public TempoExecucaoServico(UUID id, UUID servicoID, Integer tempoExecucaoMinutos, LocalDateTime dataExecucao) {</span>
+<span class="nc" id="L18">        this.id = id;</span>
+<span class="nc" id="L19">        this.servicoID = servicoID;</span>
+<span class="nc" id="L20">        this.tempoExecucaoMinutos = tempoExecucaoMinutos;</span>
+<span class="nc" id="L21">        this.dataExecucao = dataExecucao;</span>
+<span class="nc" id="L22">    }</span>
+
+<span class="nc" id="L24">    public TempoExecucaoServico( UUID servicoID, Integer tempoExecucaoMinutos, LocalDateTime dataExecucao) {</span>
+<span class="nc" id="L25">        this.servicoID = servicoID;</span>
+<span class="nc" id="L26">        this.tempoExecucaoMinutos = tempoExecucaoMinutos;</span>
+<span class="nc" id="L27">        this.dataExecucao = dataExecucao;</span>
+<span class="nc" id="L28">    }</span>
+
+<span class="nc" id="L30">    public TempoExecucaoServico() {</span>
+<span class="nc" id="L31">    }</span>
+
+    public UUID getId() {
+<span class="nc" id="L34">        return id;</span>
+    }
+
+    public UUID getServicoID() {
+<span class="nc" id="L38">        return servicoID;</span>
+    }
+
+    public Integer getTempoExecucaoMinutos() {
+<span class="nc" id="L42">        return tempoExecucaoMinutos;</span>
+    }
+
+    public LocalDateTime getDataExecucao() {
+<span class="nc" id="L46">        return dataExecucao;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

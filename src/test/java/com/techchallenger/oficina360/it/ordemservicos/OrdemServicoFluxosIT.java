@@ -5,6 +5,7 @@ import com.techchallenger.oficina360.dominio.Estoque;
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
+import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
@@ -36,6 +38,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @ActiveProfiles(value = "test")
 public class OrdemServicoFluxosIT extends BaseIT {
+
+	@MockitoBean
+	private NotificacaoEmailGateway notificacaoEmailGateway;
 
 	@Autowired
 	private OrdemServicoGateway ordemServicoGateway;
@@ -63,8 +68,7 @@ public class OrdemServicoFluxosIT extends BaseIT {
 
 		mockMvc.perform(patch(("/ordem-servico/clientes/aprovacao/%s").formatted(idString)).header("Authorization",
 								"Bearer " + tokenCliente2()).contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(aprovacaoOrdemServicoDTOValido()))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.ordemDeServicoStatus").value("ORCAMENTO_APROVADO")).andDo(print());
+						.content(objectMapper.writeValueAsString(aprovacaoOrdemServicoDTOValido()))).andExpect(status().isAccepted()).andDo(print());
 
 		System.out.println("======================================================================");
 		System.out.println("aprovou a ordem de servico");

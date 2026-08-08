@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClienteDTOMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.mappers.cliente</a> &gt; <span class="el_source">ClienteDTOMapper.java</span></div><h1>ClienteDTOMapper.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.mappers.cliente;
+
+import com.techchallenger.oficina360.dominio.Cliente;
+import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
+import com.techchallenger.oficina360.usecases.ordemservico.command.ClienteCommand;
+import org.springframework.stereotype.Component;
+
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocumento;
+
+@Component
+<span class="fc" id="L12">public class ClienteDTOMapper {</span>
+
+
+    public Cliente toDomain(ClienteEntity entity) {
+
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (entity == null) {</span>
+<span class="nc" id="L18">            return null;</span>
+        }
+
+<span class="fc" id="L21">        return new Cliente(</span>
+<span class="fc" id="L22">                entity.getId(),</span>
+<span class="fc" id="L23">                entity.getDocumento(),</span>
+<span class="fc" id="L24">                entity.getNome(),</span>
+<span class="fc" id="L25">                entity.getEmail(),</span>
+<span class="fc" id="L26">                entity.getTelefone()</span>
+                );
+    }
+
+    public ClienteEntity toEntity(Cliente domain) {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (domain == null) {</span>
+<span class="nc" id="L32">            return null;</span>
+        }
+
+<span class="nc" id="L35">        return ClienteEntity.builder()</span>
+<span class="nc" id="L36">                .id(domain.getId())</span>
+<span class="nc" id="L37">                .documento(domain.getDocumento())</span>
+<span class="nc" id="L38">                .nome(domain.getNome())</span>
+<span class="nc" id="L39">                .email(domain.getEmail())</span>
+<span class="nc" id="L40">                .telefone(domain.getTelefone())</span>
+<span class="nc" id="L41">                .build();</span>
+    }
+
+    public static ClienteDTO toDTO(ClienteEntity clienteEntity) {
+<span class="nc" id="L45">        return new ClienteDTO(</span>
+<span class="nc" id="L46">                mascararDocumento(clienteEntity.getDocumento()),</span>
+<span class="nc" id="L47">                clienteEntity.getNome(),</span>
+<span class="nc" id="L48">                clienteEntity.getEmail(),</span>
+<span class="nc" id="L49">                clienteEntity.getTelefone()</span>
+        );
+    }
+
+    public static ClienteEntity toEntity(ClienteDTO clienteDTO) {
+<span class="nc" id="L54">        return ClienteEntity.builder()</span>
+<span class="nc" id="L55">                .documento(clienteDTO.documento())</span>
+<span class="nc" id="L56">                .nome(clienteDTO.nome())</span>
+<span class="nc" id="L57">                .email(clienteDTO.email())</span>
+<span class="nc" id="L58">                .telefone(clienteDTO.telefone())</span>
+<span class="nc" id="L59">                .build();</span>
+    }
+
+    public static void updateEntityFromDto(ClienteDTO dto, ClienteEntity entity) {
+<span class="nc bnc" id="L63" title="All 4 branches missed.">        if (dto == null || entity == null) {</span>
+<span class="nc" id="L64">            return;</span>
+        }
+
+<span class="nc" id="L67">        entity.setDocumento(dto.documento());</span>
+<span class="nc" id="L68">        entity.setNome(dto.nome());</span>
+<span class="nc" id="L69">        entity.setEmail(dto.email());</span>
+<span class="nc" id="L70">        entity.setTelefone(dto.telefone());</span>
+<span class="nc" id="L71">    }</span>
+
+    public static void updateDomainFromDto(ClienteDTO dto, Cliente domain) {
+<span class="nc bnc" id="L74" title="All 4 branches missed.">        if (dto == null || domain == null) {</span>
+<span class="nc" id="L75">            return;</span>
+        }
+<span class="nc" id="L77">        Cliente newCliente = new Cliente(</span>
+<span class="nc" id="L78">                domain.getId(),</span>
+<span class="nc" id="L79">                domain.getDocumento(),</span>
+<span class="nc" id="L80">                domain.getNome(),</span>
+<span class="nc" id="L81">                domain.getEmail(),</span>
+<span class="nc" id="L82">                domain.getTelefone()</span>
+        );
+<span class="nc" id="L84">        domain = newCliente;</span>
+
+<span class="nc" id="L86">    }</span>
+
+    public static ClienteDTO commandToDTO(ClienteCommand command){
+<span class="fc" id="L89">        return new ClienteDTO(</span>
+<span class="fc" id="L90">                command.documento(),</span>
+<span class="fc" id="L91">                command.nome(),</span>
+<span class="fc" id="L92">                command.email(),</span>
+<span class="fc" id="L93">                command.telefone()</span>
+        );
+    }
+
+
+
+    public static ClienteCommand dtoToCommand(ClienteDTO command){
+<span class="fc" id="L100">        return new ClienteCommand(</span>
+<span class="fc" id="L101">                command.documento(),</span>
+<span class="fc" id="L102">                command.nome(),</span>
+<span class="fc" id="L103">                command.email(),</span>
+<span class="fc" id="L104">                command.telefone()</span>
+        );
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

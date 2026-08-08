@@ -14,38 +14,25 @@ public class OrdemServicoValidator {
 
 	private final OrdemServicoGateway ordemServicoGateway;
 
-
 	public OrdemServicoValidator(OrdemServicoGateway ordemServicoGateway) {
 		this.ordemServicoGateway = ordemServicoGateway;
 	}
 
-	public void validarVeiculoPertenceAoCliente(
-			Veiculo veiculo,
-			Cliente cliente) {
+	public void validarVeiculoPertenceAoCliente(Veiculo veiculo, Cliente cliente) {
 
 		if (!veiculo.getClienteDocumento().equals(cliente.getDocumento())) {
-			throw new RegraDeNegocioException(
-					MensagensDeErroConstant.OS_VEICULO_NAO_PERTENCE_AO_CLIENTE
-			);
+			throw new RegraDeNegocioException(MensagensDeErroConstant.OS_VEICULO_NAO_PERTENCE_AO_CLIENTE);
 		}
 	}
 
 	public void validarNaoExisteOrdemServicoAtiva(String placaVeiculo) {
 
-		ordemServicoGateway
-				.findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(
-						normalizarPlaca(placaVeiculo),
-						OrdemDeServicoStatus.ativos())
-				.ifPresent(os -> {
-					throw new RegraDeNegocioException(
-							String.format(
-									OS_ORDEM_DE_SERVICO_ATIVA_PARA_O_VEICULO,
-									os.getPlacaVeiculo(),
-									os.getId(),
-									os.getOrdemDeServicoStatus()
-							)
-					);
-				});
+		ordemServicoGateway.findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(normalizarPlaca(placaVeiculo),
+				OrdemDeServicoStatus.ativos()).ifPresent(os -> {
+			throw new RegraDeNegocioException(
+					String.format(OS_ORDEM_DE_SERVICO_ATIVA_PARA_O_VEICULO, os.getPlacaVeiculo(), os.getId(),
+							os.getOrdemDeServicoStatus()));
+		});
 	}
 
 }

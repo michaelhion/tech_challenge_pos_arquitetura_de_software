@@ -53,7 +53,7 @@ public class OrdemServicoConfig {
 
 	@Bean
 	@Transactional
-	public MovimentacaoEstoqueService movimentacaoEstoqueService(EstoqueGateway estoqueGateway){
+	public MovimentacaoEstoqueService movimentacaoEstoqueService(EstoqueGateway estoqueGateway) {
 		return new MovimentacaoEstoqueService(estoqueGateway);
 	}
 
@@ -74,10 +74,11 @@ public class OrdemServicoConfig {
 	public DiagnosticarOrdemServicoUseCase diagnosticarOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
 			OrdemServicoFinder ordemServicoFinder, DiagnosticoLoader diagnosticoLoader,
 			DiagnosticoValidator diagnosticoValidator, DiagnosticoFactory diagnosticoFactory,
-			ReservaEstoqueService reservaEstoqueService, NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+			ReservaEstoqueService reservaEstoqueService,
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
 
 		return new DiagnosticarOrdemServicoUseCase(ordemServicoGateway, diagnosticoFactory, diagnosticoValidator,
-				ordemServicoFinder, diagnosticoLoader, reservaEstoqueService,notificarStatusOrdemServicoService);
+				ordemServicoFinder, diagnosticoLoader, reservaEstoqueService, notificarStatusOrdemServicoService);
 	}
 
 	@Bean
@@ -89,8 +90,11 @@ public class OrdemServicoConfig {
 	@Bean
 	@Transactional
 	public FinalizarExecucaoUseCase finalizarExecucaoUseCase(OrdemServicoGateway gateway,
-			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader, MovimentacaoEstoqueService movimentacaoEstoqueService,NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
-		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader,movimentacaoEstoqueService,notificarStatusOrdemServicoService);
+			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader,
+			MovimentacaoEstoqueService movimentacaoEstoqueService,
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader, movimentacaoEstoqueService,
+				notificarStatusOrdemServicoService);
 	}
 
 	@Bean
@@ -121,28 +125,28 @@ public class OrdemServicoConfig {
 	@Bean
 	@Transactional
 	public AbrirOrdemServicoUseCase abrirOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
-			OrdemServicoFactory ordemServicoFactory, OrdemServicoValidator validator, ClienteFinder clienteFinder,
-			VeiculoFinder veiculoFinder) {
-		return new AbrirOrdemServicoUseCase(ordemServicoGateway, ordemServicoFactory, validator, clienteFinder,
-				veiculoFinder);
+			OrdemServicoValidator validator, ClienteFinder clienteFinder, VeiculoFinder veiculoFinder) {
+		return new AbrirOrdemServicoUseCase(ordemServicoGateway, validator, clienteFinder, veiculoFinder);
 
 	}
 
 	@Bean
 	@Transactional
-	public AprovarOrcamentoUseCase aprovarOrcamentoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,MovimentacaoEstoqueService movimentacaoEstoqueService) {
-		return new AprovarOrcamentoUseCase(gateway, loader,movimentacaoEstoqueService);
+	public AprovarOrcamentoUseCase aprovarOrcamentoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,
+			MovimentacaoEstoqueService movimentacaoEstoqueService) {
+		return new AprovarOrcamentoUseCase(gateway, loader, movimentacaoEstoqueService);
 	}
 
 	@Bean
-	public BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase(OrdemServicoGateway gateway) {
-		return new BuscarOrdemServicoPorIdUseCase(gateway);
+	public BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase(OrdemServicoFinder ordemServicoFinder) {
+		return new BuscarOrdemServicoPorIdUseCase(ordemServicoFinder);
 	}
 
 	@Bean
 	@Transactional
-	public EditarOrdemServicoUseCase editarOrdemServicoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader) {
-		return new EditarOrdemServicoUseCase(gateway, loader);
+	public EditarOrdemServicoUseCase editarOrdemServicoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,
+			OrdemServicoValidator ordemServicoValidator, ClienteFinder clienteFinder, VeiculoFinder veiculoFinder) {
+		return new EditarOrdemServicoUseCase(gateway, loader, ordemServicoValidator, clienteFinder, veiculoFinder);
 	}
 
 	@Bean

@@ -5,21 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import java.util.UUID;
-
 @Schema(
         name = "OrdemServicoDTO",
         description = "DTO utilizado para criação, consulta e atualização de ordens de serviço da oficina."
 )
 public record OrdemServicoDTO(
-
-        @Schema(
-                description = "Identificador da ordem de serviço.",
-                example = "7b5a3247-a14a-44f8-872f-016e179a92fd",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        UUID id,
-
         @Schema(
                 description = "CPF ou CNPJ do cliente responsável pela ordem de serviço. Deve ser informado somente com números.",
                 example = "12345678901",
@@ -57,12 +47,6 @@ public record OrdemServicoDTO(
                 example = "RECEBIDA",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
-        OrdemDeServicoStatus ordemDeServicoStatus,
-
-        @Schema(
-                description = "Dados financeiros da ordem de serviço, incluindo serviços adicionados, peças/insumos e valor total.",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
-        DadosFinanceirosDTO dadosFinanceiros
+        OrdemDeServicoStatus ordemDeServicoStatus
 ) {
 }

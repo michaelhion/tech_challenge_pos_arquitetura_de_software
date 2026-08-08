@@ -3,73 +3,81 @@ package com.techchallenger.oficina360.services.factories;
 import com.techchallenger.oficina360.dominio.Cliente;
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dominio.Veiculo;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.usecases.factories.OrdemServicoFactory;
+import com.techchallenger.oficina360.usecases.ordemservico.command.CriarOrdemServicoCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrdemServicoFactoryTest {
 
-    private OrdemServicoFactory ordemServicoFactory;
+	private static final ZoneId ZONA_SAO_PAULO = ZoneId.of("America/Sao_Paulo");
 
-    @BeforeEach
-    void setUp() {
-        ordemServicoFactory = new OrdemServicoFactory();
-    }
+	private static final String DOCUMENTO_CLIENTE = "12345678901";
 
-    @Test
-    void deveCriarOrdemServicoComDadosIniciaisCorretos() {
-        CriarOrdemServicoDTO dto = criarOrdemServicoDTO();
-        Cliente cliente = criarCliente();
-        Veiculo veiculo = criarVeiculo();
+	private static final String PLACA_VEICULO = "ABC1D23";
 
-        OrdemServico resultado = ordemServicoFactory.criar(dto, cliente.getDocumento(), veiculo.getPlaca());
+	private static final String DESCRICAO_PROBLEMA = "Veículo apresenta ruído ao frear";
 
-        assertNotNull(resultado);
-        assertEquals("12345678901", resultado.getDocumentoCliente());
-        assertEquals("ABC1D23", resultado.getPlacaVeiculo());
-        assertEquals("Veículo apresenta ruído ao frear", resultado.getDescricaoProblema());
-        assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.getOrdemDeServicoStatus());
-        assertNotNull(resultado.getDtHoraAbertura());
+	private OrdemServicoFactory ordemServicoFactory;
 
-        assertEquals(BigDecimal.ZERO, resultado.getValorServicos());
-        assertEquals(BigDecimal.ZERO, resultado.getValorPecasInsumos());
-        assertEquals(BigDecimal.ZERO, resultado.getValorOs());
-    }
+	@BeforeEach
+	void setUp() {
+		ordemServicoFactory = new OrdemServicoFactory();
+	}
 
-    private CriarOrdemServicoDTO criarOrdemServicoDTO() {
-        return new CriarOrdemServicoDTO(
-                null,
-                "12345678901",
-                "ABC1D23",
-                "Veículo apresenta ruído ao frear",
-                null
-        );
-    }
+	@Test
+	void deveCriarOrdemServicoComDadosIniciaisCorretos() {
+		CriarOrdemServicoCommand command = criarOrdemServicoCommand();
 
-    private Cliente criarCliente() {
-        return new Cliente(
-                UUID.randomUUID(),
-                "12345678901",
-                "João da Silva",
-                "joao.silva@email.com",
-                "11999999999");
-    }
+		Cliente cliente = criarCliente();
 
-    private Veiculo criarVeiculo() {
-        return new Veiculo(
-                UUID.randomUUID(),
-                "ABC1D23",
-                "Volkswagen",
-                "Gol",
-                "2020",
-                "12345678901");
-    }
+		Veiculo veiculo = criarVeiculo();
+
+		LocalDateTime instanteAnterior = LocalDateTime.now(ZONA_SAO_PAULO);
+
+		OrdemServico resultado = ordemServicoFactory.criar(command, cliente.getDocumento(), veiculo.getPlaca());
+
+		LocalDateTime instantePosterior = LocalDateTime.now(ZONA_SAO_PAULO);
+
+		assertNotNull(resultado);
+
+		assertAll(() -> assertNull(resultado.getId(), "Uma nova OS ainda não deve possuir ID"),
+				() -> assertEquals(DOCUMENTO_CLIENTE, resultado.getDocumentoCliente()),
+				() -> assertEquals(PLACA_VEICULO, resultado.getPlacaVeiculo()),
+				() -> assertEquals(DESCRICAO_PROBLEMA, resultado.getDescricaoProblema()),
+				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.getOrdemDeServicoStatus()),
+				() -> assertNotNull(resultado.getDtHoraAbertura()),
+				() -> assertFalse(resultado.getDtHoraAbertura().isBefore(instanteAnterior),
+						"A abertura não deve ser anterior " + "à execução da factory"),
+				() -> assertFalse(resultado.getDtHoraAbertura().isAfter(instantePosterior),
+						"A abertura não deve ser posterior " + "à execução da factory"),
+				() -> assertNull(resultado.getDtHoraFechamento()),
+				() -> assertNull(resultado.getDtHoraInicioExecucao()),
+				() -> assertNull(resultado.getDtHoraFimExecucao()), () -> assertTrue(resultado.getServicos().isEmpty()),
+				() -> assertTrue(resultado.getItensEstoque().isEmpty()),
+				() -> assertEquals(0, BigDecimal.ZERO.compareTo(resultado.getValorServicos())),
+				() -> assertEquals(0, BigDecimal.ZERO.compareTo(resultado.getValorPecasInsumos())),
+				() -> assertEquals(0, BigDecimal.ZERO.compareTo(resultado.getValorOs())));
+	}
+
+	private CriarOrdemServicoCommand criarOrdemServicoCommand() {
+		return new CriarOrdemServicoCommand(DOCUMENTO_CLIENTE, PLACA_VEICULO, DESCRICAO_PROBLEMA,OrdemDeServicoStatus.RECEBIDA);
+	}
+
+	private Cliente criarCliente() {
+		return new Cliente(UUID.randomUUID(), DOCUMENTO_CLIENTE, "João da Silva", "joao.silva@email.com",
+				"11999999999");
+	}
+
+	private Veiculo criarVeiculo() {
+		return new Veiculo(UUID.randomUUID(), PLACA_VEICULO, "Volkswagen", "Gol", "2020", DOCUMENTO_CLIENTE);
+	}
 }

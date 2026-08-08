@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.it.ordemservicos;
 
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class OrdemServicoCriacaoIT extends BaseIT {
 				.andDo(print());
 	}
 
-	private ResultActions criarOrdemServico(CriarOrdemServicoDTO os) throws Exception {
+	private ResultActions criarOrdemServico(CriarOrdemServicoRequestDTO os) throws Exception {
 		return mockMvc.perform(autenticado(
 				post("/ordem-servico/salvar").contentType(MediaType.APPLICATION_JSON)
 						.content(json(os)), tokenAdmin()));

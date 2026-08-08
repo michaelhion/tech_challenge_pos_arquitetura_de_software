@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtualizarVeiculoUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.veiculo</a> &gt; <span class="el_source">AtualizarVeiculoUseCase.java</span></div><h1>AtualizarVeiculoUseCase.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.veiculo;
+
+import com.techchallenger.oficina360.dominio.Veiculo;
+import com.techchallenger.oficina360.gateways.VeiculoGateway;
+import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
+import com.techchallenger.oficina360.usecases.finders.VeiculoFinder;
+import com.techchallenger.oficina360.usecases.veiculo.commands.VeiculoCommand;
+import com.techchallenger.oficina360.usecases.veiculo.exception.PlacaJaExisteException;
+
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.VEICULO_SERV_VEICULO_CADASTRADO;
+import static com.techchallenger.oficina360.mappers.VeiculoCommandMapper.domainToCommand;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
+
+public class AtualizarVeiculoUseCase {
+
+	private final VeiculoGateway veiculoGateway;
+	private final VeiculoFinder veiculoFinder;
+	private final ClienteFinder clienteFinder;
+
+	public AtualizarVeiculoUseCase(VeiculoGateway veiculoGateway, VeiculoFinder veiculoFinder,
+<span class="fc" id="L24">			ClienteFinder clienteFinder) {</span>
+<span class="fc" id="L25">		this.veiculoGateway = veiculoGateway;</span>
+<span class="fc" id="L26">		this.veiculoFinder = veiculoFinder;</span>
+<span class="fc" id="L27">		this.clienteFinder = clienteFinder;</span>
+<span class="fc" id="L28">	}</span>
+
+	public VeiculoCommand edit(String placaAtual, VeiculoCommand command) {
+<span class="nc" id="L31">		String placaAtualNormalizada = normalizarPlaca(placaAtual);</span>
+<span class="nc" id="L32">		String novaPlacaNormalizada = normalizarPlaca(command.placa());</span>
+<span class="nc" id="L33">		String documentoClienteNormalizado = normalizarDocumento(command.clienteDocumento());</span>
+
+<span class="nc" id="L35">		Veiculo veiculo = veiculoFinder.buscarPorPlacaOuFalhar(placaAtualNormalizada);</span>
+
+<span class="nc" id="L37">		clienteFinder.buscarPorDocumentoOuFalhar(documentoClienteNormalizado);</span>
+<span class="nc" id="L38">		validarPlacaDisponivelParaEdicao(novaPlacaNormalizada, veiculo.getId());</span>
+
+<span class="nc" id="L40">		veiculo.editar(</span>
+<span class="nc" id="L41">				command.placa(),</span>
+<span class="nc" id="L42">				command.marca(),</span>
+<span class="nc" id="L43">				command.modelo(),</span>
+<span class="nc" id="L44">				command.ano(),</span>
+<span class="nc" id="L45">				command.clienteDocumento()</span>
+		);
+
+<span class="nc" id="L48">		Veiculo veiculoAtualizado = veiculoGateway.save(veiculo);</span>
+
+<span class="nc" id="L50">		return domainToCommand(veiculoAtualizado);</span>
+	}
+
+	private void validarPlacaDisponivelParaEdicao(
+			String novaPlaca,
+			UUID id
+	) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">		if (veiculoGateway.existsByPlacaAndIdNot(novaPlaca, id)) {</span>
+<span class="nc" id="L58">			throw new PlacaJaExisteException(VEICULO_SERV_VEICULO_CADASTRADO);</span>
+		}
+<span class="nc" id="L60">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

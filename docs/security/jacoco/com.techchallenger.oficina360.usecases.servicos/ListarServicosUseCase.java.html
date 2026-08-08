@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ListarServicosUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.servicos</a> &gt; <span class="el_source">ListarServicosUseCase.java</span></div><h1>ListarServicosUseCase.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.servicos;
+
+import com.techchallenger.oficina360.dominio.Servico;
+import com.techchallenger.oficina360.gateways.ServicoGateway;
+import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
+import com.techchallenger.oficina360.usecases.servicos.commands.ServicoCommand;
+
+import java.util.List;
+
+public class ListarServicosUseCase {
+
+	private final ServicoGateway servicoGateway;
+	private final TempoExecucaoServicoGateway tempoExecucaoServicoGateway;
+
+	public ListarServicosUseCase(ServicoGateway servicoGateway,
+<span class="fc" id="L16">			TempoExecucaoServicoGateway tempoExecucaoServicoGateway) {</span>
+<span class="fc" id="L17">		this.servicoGateway = servicoGateway;</span>
+<span class="fc" id="L18">		this.tempoExecucaoServicoGateway = tempoExecucaoServicoGateway;</span>
+<span class="fc" id="L19">	}</span>
+
+	public List&lt;ServicoCommand&gt; findAll() {
+
+<span class="nc" id="L23">		return servicoGateway.findAll()</span>
+<span class="nc" id="L24">				.stream()</span>
+<span class="nc" id="L25">				.map(this::toDTOComTempoMedio)</span>
+<span class="nc" id="L26">				.toList();</span>
+	}
+
+	private ServicoCommand toDTOComTempoMedio(Servico servico) {
+
+<span class="nc" id="L31">		Double media = tempoExecucaoServicoGateway</span>
+<span class="nc" id="L32">				.calcularTempoMedio(servico.getId());</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">		Integer tempoMedio = media != null</span>
+<span class="nc" id="L35">				? (int) Math.round(media)</span>
+<span class="nc" id="L36">				: 0;</span>
+
+<span class="nc" id="L38">		return new ServicoCommand(</span>
+<span class="nc" id="L39">				servico.getCodigo(),</span>
+<span class="nc" id="L40">				servico.getDescricao(),</span>
+<span class="nc" id="L41">				servico.getValor(),</span>
+				tempoMedio
+		);
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

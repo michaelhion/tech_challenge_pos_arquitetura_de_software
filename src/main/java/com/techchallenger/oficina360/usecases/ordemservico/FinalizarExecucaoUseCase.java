@@ -1,7 +1,6 @@
 package com.techchallenger.oficina360.usecases.ordemservico;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
 import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
@@ -9,8 +8,6 @@ import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
 import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
 
 import java.util.UUID;
-
-import static com.techchallenger.oficina360.mappers.OrdemServicoMapper.toDTO;
 
 public class FinalizarExecucaoUseCase {
 
@@ -30,7 +27,7 @@ public class FinalizarExecucaoUseCase {
 		this.notificarStatusOrdemServicoService = notificarStatusOrdemServicoService;
 	}
 
-	public OrdemServicoDTO finalizarExecucao(UUID id) {
+	public void finalizarExecucao(UUID id) {
 		OrdemServico ordemServico = ordemServicoFinder.obterOuFalhar(id);
 
 		ordemServico.finalizarExecucao();
@@ -39,8 +36,6 @@ public class FinalizarExecucaoUseCase {
 
 		tempoExecucaoService.registrar(ordemServico);
 		notificarStatusOrdemServicoService.notificar(ordemServico);
-		OrdemServico atualizada = ordemServicoGateway.save(ordemServico);
-
-		return toDTO(atualizada);
+		ordemServicoGateway.save(ordemServico);
 	}
 }

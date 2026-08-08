@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.usecases.veiculo;
 
-import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
-import com.techchallenger.oficina360.mappers.VeiculoMapper;
+import com.techchallenger.oficina360.mappers.VeiculoCommandMapper;
+import com.techchallenger.oficina360.usecases.veiculo.commands.VeiculoCommand;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ public class ListarVeiculosUseCase {
 		this.veiculoGateway = veiculoGateway;
 	}
 
-	public List<VeiculoDTO> findAll() {
+	public List<VeiculoCommand> findAll() {
 		return veiculoGateway.findAll()
 				.stream()
-				.map(VeiculoMapper::domainToDTO)
+				.map(VeiculoCommandMapper::domainToCommand)
 				.toList();
 	}
 }

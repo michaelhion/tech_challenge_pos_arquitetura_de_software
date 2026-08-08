@@ -19,9 +19,10 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import static com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueDTOMapper.dtoToCommand;
+import static com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueDTOMapper.reservarDTOToCommand;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -29,18 +30,34 @@ import static org.mockito.Mockito.*;
 class EstoqueControllerTest {
 
 	private static final String FILTRO_DE_OLEO = "FILTRO-DE-OLEO";
+
 	private static final String FILTRO_DE_OLEO_PREMIUM = "FILTRO-DE-OLEO-PREMIUM";
+
+	private static final String NOME_FILTRO_DE_OLEO = "Filtro de óleo";
+
+	private static final BigDecimal VALOR_FILTRO_DE_OLEO = new BigDecimal("45.90");
+
+	private static final int QUANTIDADE_FILTRO_DE_OLEO = 20;
+
+	private static final int RESERVADOS_FILTRO_DE_OLEO = 5;
+
+	private static final int DISPONIVEIS_FILTRO_DE_OLEO = 15;
 
 	@Mock
 	private CriarItemEstoqueUseCase criarItemEstoqueUseCase;
+
 	@Mock
 	private EditarItemEstoqueUseCase editarItemEstoqueUseCase;
+
 	@Mock
 	private BuscarItemEstoqueUseCase buscarItemEstoqueUseCase;
+
 	@Mock
 	private ListarItensEstoqueUseCase listarItensEstoqueUseCase;
+
 	@Mock
 	private ExcluirItemEstoqueUseCase excluirItemEstoqueUseCase;
+
 	@Mock
 	private ReservarEstoqueUseCase reservarEstoqueUseCase;
 
@@ -53,96 +70,92 @@ class EstoqueControllerTest {
 	@BeforeEach
 	void setUp() {
 		estoqueController = new EstoqueController(criarItemEstoqueUseCase, editarItemEstoqueUseCase,
-				buscarItemEstoqueUseCase, listarItensEstoqueUseCase, excluirItemEstoqueUseCase,reservarEstoqueUseCase);
+				buscarItemEstoqueUseCase, listarItensEstoqueUseCase, excluirItemEstoqueUseCase, reservarEstoqueUseCase);
 
 		estoqueId = UUID.fromString("2b3ded6d-2e43-4f2f-8ea3-26714b1398f8");
 
-		estoqueDTO = new EstoqueDTO(
-				estoqueId,
-				FILTRO_DE_OLEO,
-				"Filtro de óleo",
-				BigDecimal.valueOf(45.90),
-				20,
-				5,
-				15
-		);
+		estoqueDTO = new EstoqueDTO(FILTRO_DE_OLEO, NOME_FILTRO_DE_OLEO, VALOR_FILTRO_DE_OLEO,
+				QUANTIDADE_FILTRO_DE_OLEO, RESERVADOS_FILTRO_DE_OLEO,DISPONIVEIS_FILTRO_DE_OLEO);
 	}
 
 	@Test
-	void deveBuscarPorIdComSucesso() {
-		when(buscarItemEstoqueUseCase.findByCodigo(estoqueDTO.codigo()))
-				.thenReturn(Optional.of(estoqueDTO));
+	void deveBuscarPorCodigoComSucesso() {
+		var commandRetornado = dtoToCommand(estoqueDTO);
 
-		ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(estoqueDTO.codigo());
+		when(buscarItemEstoqueUseCase.findByCodigo(FILTRO_DE_OLEO)).thenReturn(commandRetornado);
+
+		ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(FILTRO_DE_OLEO);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertEquals("Filtro de óleo", response.getBody().nome());
-		assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
-		assertEquals(20, response.getBody().quantidade());
-		assertEquals(5, response.getBody().reservados());
-		assertEquals(15, response.getBody().disponiveis());
 
-		verify(buscarItemEstoqueUseCase, times(1)).findByCodigo(estoqueDTO.codigo());
+		assertNotNull(response.getBody());
+
+		assertEstoque(response.getBody(), estoqueId, FILTRO_DE_OLEO, NOME_FILTRO_DE_OLEO, VALOR_FILTRO_DE_OLEO,
+				QUANTIDADE_FILTRO_DE_OLEO, RESERVADOS_FILTRO_DE_OLEO, DISPONIVEIS_FILTRO_DE_OLEO);
+
+		verify(buscarItemEstoqueUseCase, times(1)).findByCodigo(FILTRO_DE_OLEO);
+
+		verifyNoMoreInteractions(buscarItemEstoqueUseCase);
 	}
 
 	@Test
-	void deveRetornarNotFoundQuandoNaoEncontrarPorId() {
-		when(buscarItemEstoqueUseCase.findByCodigo(estoqueDTO.codigo()))
-				.thenReturn(Optional.empty());
+	void devePropagarExcecaoQuandoNaoEncontrarPorCodigo() {
+		RuntimeException excecaoEsperada = new RuntimeException("Item de estoque não encontrado.");
 
-		ResponseEntity<EstoqueDTO> response = estoqueController.buscarPorId(estoqueDTO.codigo());
+		when(buscarItemEstoqueUseCase.findByCodigo(FILTRO_DE_OLEO)).thenThrow(excecaoEsperada);
 
-		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-		assertNull(response.getBody());
+		RuntimeException excecaoObtida = assertThrows(RuntimeException.class,
+				() -> estoqueController.buscarPorId(FILTRO_DE_OLEO));
 
-		verify(buscarItemEstoqueUseCase, times(1)).findByCodigo(estoqueDTO.codigo());
+		assertAll(() -> assertEquals(excecaoEsperada, excecaoObtida),
+				() -> assertEquals("Item de estoque não encontrado.", excecaoObtida.getMessage()));
+
+		verify(buscarItemEstoqueUseCase, times(1)).findByCodigo(FILTRO_DE_OLEO);
+
+		verifyNoMoreInteractions(buscarItemEstoqueUseCase);
 	}
 
 	@Test
 	void deveSalvarComSucesso() {
-		when(criarItemEstoqueUseCase.save(estoqueDTO))
-				.thenReturn(estoqueDTO);
+		var commandEsperado = dtoToCommand(estoqueDTO);
+
+		when(criarItemEstoqueUseCase.save(commandEsperado)).thenReturn(commandEsperado);
 
 		ResponseEntity<EstoqueDTO> response = estoqueController.salvar(estoqueDTO);
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertEquals("Filtro de óleo", response.getBody().nome());
-		assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
-		assertEquals(20, response.getBody().quantidade());
-		assertEquals(5, response.getBody().reservados());
-		assertEquals(15, response.getBody().disponiveis());
 
-		verify(criarItemEstoqueUseCase, times(1)).save(estoqueDTO);
+		assertNotNull(response.getBody());
+
+		assertEstoque(response.getBody(), estoqueId, FILTRO_DE_OLEO, NOME_FILTRO_DE_OLEO, VALOR_FILTRO_DE_OLEO,
+				QUANTIDADE_FILTRO_DE_OLEO, RESERVADOS_FILTRO_DE_OLEO, DISPONIVEIS_FILTRO_DE_OLEO);
+
+		verify(criarItemEstoqueUseCase, times(1)).save(commandEsperado);
+
+		verifyNoMoreInteractions(criarItemEstoqueUseCase);
 	}
 
 	@Test
 	void deveEditarComSucesso() {
-		EstoqueDTO estoqueAtualizado = new EstoqueDTO(
-				estoqueId,
-				FILTRO_DE_OLEO_PREMIUM,
-				"Filtro de óleo premium",
-				BigDecimal.valueOf(60.00),
-				30,
-				10,
-				20
-		);
+		EstoqueDTO estoqueAtualizado = new EstoqueDTO(FILTRO_DE_OLEO_PREMIUM, "Filtro de óleo premium",
+				new BigDecimal("60.00"), 30, 10,0);
 
-		when(editarItemEstoqueUseCase.edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado))
-				.thenReturn(estoqueAtualizado);
+		var commandEsperado = dtoToCommand(estoqueAtualizado);
 
-		ResponseEntity<EstoqueDTO> response = estoqueController.editar(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
+		when(editarItemEstoqueUseCase.edit(FILTRO_DE_OLEO, commandEsperado)).thenReturn(commandEsperado);
+
+		ResponseEntity<EstoqueDTO> response = estoqueController.editar(FILTRO_DE_OLEO, estoqueAtualizado);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertEquals("Filtro de óleo premium", response.getBody().nome());
-		assertEquals(BigDecimal.valueOf(60.00), response.getBody().valor());
-		assertEquals(30, response.getBody().quantidade());
-		assertEquals(10, response.getBody().reservados());
-		assertEquals(20, response.getBody().disponiveis());
 
-		verify(editarItemEstoqueUseCase, times(1)).edit(FILTRO_DE_OLEO_PREMIUM, estoqueAtualizado);
+		assertNotNull(response.getBody());
+
+		assertEstoque(response.getBody(), estoqueId, FILTRO_DE_OLEO_PREMIUM, "Filtro de óleo premium",
+				new BigDecimal("60.00"), 30, 10, 20);
+
+		verify(editarItemEstoqueUseCase, times(1)).edit(FILTRO_DE_OLEO, commandEsperado);
+
+		verifyNoMoreInteractions(editarItemEstoqueUseCase);
 	}
 
 	@Test
@@ -151,89 +164,94 @@ class EstoqueControllerTest {
 
 		ResponseEntity<Void> response = estoqueController.deletar(FILTRO_DE_OLEO);
 
-		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-		assertNull(response.getBody());
+		assertAll(() -> assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode()),
+				() -> assertNull(response.getBody()));
 
 		verify(excluirItemEstoqueUseCase, times(1)).delete(FILTRO_DE_OLEO);
+
+		verifyNoMoreInteractions(excluirItemEstoqueUseCase);
 	}
 
 	@Test
 	void deveListarEstoquesComSucesso() {
-		EstoqueDTO segundoItem = new EstoqueDTO(
-				estoqueId,
-				"PASTILHA-DE-FREIO",
-				"Pastilha de freio",
-				BigDecimal.valueOf(120.00),
-				10,
-				2,
-				8
-		);
+		UUID segundoEstoqueId = UUID.randomUUID();
 
-		when(listarItensEstoqueUseCase.findAll())
-				.thenReturn(List.of(estoqueDTO, segundoItem));
+		EstoqueDTO segundoItem = new EstoqueDTO("PASTILHA-DE-FREIO", "Pastilha de freio",
+				new BigDecimal("120.00"), 10, 2,0);
+
+		var primeiroItemCommand = dtoToCommand(estoqueDTO);
+
+		var segundoItemCommand = dtoToCommand(segundoItem);
+
+		when(listarItensEstoqueUseCase.findAll()).thenReturn(List.of(primeiroItemCommand, segundoItemCommand));
 
 		ResponseEntity<List<EstoqueDTO>> response = estoqueController.listarEstoques();
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
+
 		assertNotNull(response.getBody());
+
 		assertEquals(2, response.getBody().size());
 
-		assertEquals("Filtro de óleo", response.getBody().get(0).nome());
-		assertEquals(BigDecimal.valueOf(45.90), response.getBody().get(0).valor());
-		assertEquals(20, response.getBody().get(0).quantidade());
-		assertEquals(5, response.getBody().get(0).reservados());
-		assertEquals(15, response.getBody().get(0).disponiveis());
+		assertEstoque(response.getBody().get(0), estoqueId, FILTRO_DE_OLEO, NOME_FILTRO_DE_OLEO, VALOR_FILTRO_DE_OLEO,
+				QUANTIDADE_FILTRO_DE_OLEO, RESERVADOS_FILTRO_DE_OLEO, DISPONIVEIS_FILTRO_DE_OLEO);
 
-		assertEquals("Pastilha de freio", response.getBody().get(1).nome());
-		assertEquals(BigDecimal.valueOf(120.00), response.getBody().get(1).valor());
-		assertEquals(10, response.getBody().get(1).quantidade());
-		assertEquals(2, response.getBody().get(1).reservados());
-		assertEquals(8, response.getBody().get(1).disponiveis());
+		assertEstoque(response.getBody().get(1), segundoEstoqueId, "PASTILHA-DE-FREIO", "Pastilha de freio",
+				new BigDecimal("120.00"), 10, 2, 8);
 
 		verify(listarItensEstoqueUseCase, times(1)).findAll();
+
+		verifyNoMoreInteractions(listarItensEstoqueUseCase);
 	}
 
 	@Test
 	void deveRetornarListaVaziaQuandoNaoExistiremEstoques() {
-		when(listarItensEstoqueUseCase.findAll())
-				.thenReturn(List.of());
+		when(listarItensEstoqueUseCase.findAll()).thenReturn(List.of());
 
 		ResponseEntity<List<EstoqueDTO>> response = estoqueController.listarEstoques();
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertTrue(response.getBody().isEmpty());
+		assertAll(() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(response.getBody()),
+				() -> assertTrue(response.getBody().isEmpty()));
 
 		verify(listarItensEstoqueUseCase, times(1)).findAll();
+
+		verifyNoMoreInteractions(listarItensEstoqueUseCase);
 	}
 
 	@Test
 	void deveReservarComSucesso() {
 		ReservaEstoqueDTO reservaDTO = new ReservaEstoqueDTO(3);
 
-		EstoqueDTO estoqueReservado = new EstoqueDTO(
-				estoqueId,
-				FILTRO_DE_OLEO,
-				"Filtro de óleo",
-				BigDecimal.valueOf(45.90),
-				20,
-				8,
-				12
-		);
+		var reservaCommandEsperado = reservarDTOToCommand(reservaDTO);
 
-		when(reservarEstoqueUseCase.reservar(FILTRO_DE_OLEO, reservaDTO))
-				.thenReturn(estoqueReservado);
+		EstoqueDTO estoqueReservado = new EstoqueDTO(FILTRO_DE_OLEO, NOME_FILTRO_DE_OLEO,
+				VALOR_FILTRO_DE_OLEO, QUANTIDADE_FILTRO_DE_OLEO, 8,0);
+
+		var estoqueReservadoCommand = dtoToCommand(estoqueReservado);
+
+		when(reservarEstoqueUseCase.reservar(FILTRO_DE_OLEO, reservaCommandEsperado)).thenReturn(
+				estoqueReservadoCommand);
 
 		ResponseEntity<EstoqueDTO> response = estoqueController.reservar(FILTRO_DE_OLEO, reservaDTO);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNotNull(response.getBody());
-		assertEquals("Filtro de óleo", response.getBody().nome());
-		assertEquals(BigDecimal.valueOf(45.90), response.getBody().valor());
-		assertEquals(20, response.getBody().quantidade());
-		assertEquals(8, response.getBody().reservados());
-		assertEquals(12, response.getBody().disponiveis());
 
-		verify(reservarEstoqueUseCase, times(1)).reservar(FILTRO_DE_OLEO, reservaDTO);
+		assertNotNull(response.getBody());
+
+		assertEstoque(response.getBody(), estoqueId, FILTRO_DE_OLEO, NOME_FILTRO_DE_OLEO, VALOR_FILTRO_DE_OLEO,
+				QUANTIDADE_FILTRO_DE_OLEO, 8, 12);
+
+		verify(reservarEstoqueUseCase, times(1)).reservar(FILTRO_DE_OLEO, reservaCommandEsperado);
+
+		verifyNoMoreInteractions(reservarEstoqueUseCase);
+	}
+
+	private void assertEstoque(EstoqueDTO resultado, UUID idEsperado, String codigoEsperado, String nomeEsperado,
+			BigDecimal valorEsperado, int quantidadeEsperada, int reservadosEsperados, int disponiveisEsperados) {
+		assertAll(() -> assertEquals(codigoEsperado, resultado.codigo()),
+				() -> assertEquals(nomeEsperado, resultado.nome()),
+				() -> assertEquals(0, valorEsperado.compareTo(resultado.valor())),
+				() -> assertEquals(quantidadeEsperada, resultado.quantidade()),
+				() -> assertEquals(reservadosEsperados, resultado.reservados()));
 	}
 }

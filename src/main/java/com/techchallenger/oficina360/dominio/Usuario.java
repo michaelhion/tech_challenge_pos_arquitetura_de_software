@@ -49,6 +49,13 @@ public class Usuario {
         this.documento = documento;
     }
 
+    public Usuario(String email, String senha, String role, String documento) {
+        this.email = email;
+        this.senha = senha;
+        this.role = role;
+        this.documento = documento;
+    }
+
     public Usuario() {
     }
 

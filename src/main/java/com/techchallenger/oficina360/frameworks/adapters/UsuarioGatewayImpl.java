@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.adapters;
 
 import com.techchallenger.oficina360.dominio.Usuario;
-import com.techchallenger.oficina360.frameworks.mappers.usuario.UsuarioMapper;
+import com.techchallenger.oficina360.frameworks.mappers.usuario.UsuarioDTOMapper;
 import com.techchallenger.oficina360.frameworks.persistence.entities.UsuarioEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.UsuarioRepository;
 import com.techchallenger.oficina360.gateways.UsuarioGateway;
@@ -16,9 +16,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UsuarioGatewayImpl implements UsuarioGateway {
 
-	private final UsuarioMapper mapper;
+	private final UsuarioDTOMapper mapper;
 	private final UsuarioRepository repository;
-	private final UsuarioMapper usuarioMapper;
+	private final UsuarioDTOMapper usuarioDTOMapper;
 
 	@Override
 	public Optional<Usuario> findByEmail(String email) {
@@ -41,9 +41,9 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 
 	@Override
 	public List<Usuario> saveAll(List<Usuario> usuarios) {
-		List<UsuarioEntity> usuarioEntityList = usuarios.stream().map(UsuarioMapper::toEntity).toList();
+		List<UsuarioEntity> usuarioEntityList = usuarios.stream().map(UsuarioDTOMapper::toEntity).toList();
 		List<UsuarioEntity> usuarioEntitiesSaved = repository.saveAll(usuarioEntityList);
-		return usuarioEntitiesSaved.stream().map(usuarioMapper::toDomain).toList();
+		return usuarioEntitiesSaved.stream().map(usuarioDTOMapper::toDomain).toList();
 	}
 
 	@Override

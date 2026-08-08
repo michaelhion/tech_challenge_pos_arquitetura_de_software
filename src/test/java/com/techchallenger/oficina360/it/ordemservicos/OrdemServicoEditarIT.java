@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.it.ordemservicos;
 
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
@@ -46,7 +46,7 @@ class OrdemServicoEditarIT extends BaseIT {
 	}
 
 
-	private UUID criarOrdemServico(CriarOrdemServicoDTO os) throws Exception {
+	private UUID criarOrdemServico(CriarOrdemServicoRequestDTO os) throws Exception {
 		String response = mockMvc.perform(autenticado(
 						post("/ordem-servico/salvar").contentType(MediaType.APPLICATION_JSON)
 								.content(json(os)), tokenAdmin())).andExpect(status().isCreated()).andReturn()

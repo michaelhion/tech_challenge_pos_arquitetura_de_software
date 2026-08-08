@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AprovarOrcamentoUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.ordemservico</a> &gt; <span class="el_source">AprovarOrcamentoUseCase.java</span></div><h1>AprovarOrcamentoUseCase.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.ordemservico;
+
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
+import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
+import com.techchallenger.oficina360.usecases.ordemservico.command.AprovacaoOrdemServicoCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoRespCommand;
+import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
+
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.mappers.OrdemServicoCommandMapper.domainToCommand;
+
+public class AprovarOrcamentoUseCase {
+
+	private final OrdemServicoGateway ordemServicoGateway;
+	private final OrdemServicoFinder ordemServicoFinder;
+	private final MovimentacaoEstoqueService movimentacaoEstoqueService;
+
+	public AprovarOrcamentoUseCase(OrdemServicoGateway ordemServicoGateway, OrdemServicoFinder ordemServicoFinder,
+<span class="fc" id="L21">			MovimentacaoEstoqueService movimentacaoEstoqueService) {</span>
+<span class="fc" id="L22">		this.ordemServicoGateway = ordemServicoGateway;</span>
+<span class="fc" id="L23">		this.ordemServicoFinder = ordemServicoFinder;</span>
+<span class="fc" id="L24">		this.movimentacaoEstoqueService = movimentacaoEstoqueService;</span>
+<span class="fc" id="L25">	}</span>
+
+	public OrdemServicoRespCommand aprovar(UUID id, AprovacaoOrdemServicoCommand command) {
+<span class="nc" id="L28">		OrdemServico ordemServico = ordemServicoFinder.obterOuFalhar(id);</span>
+
+<span class="nc" id="L30">		Boolean aprovado = command.aprovado();</span>
+
+<span class="nc" id="L32">		ordemServico.registrarAprovacao(aprovado);</span>
+
+<span class="nc" id="L34">		registrarObservacao(ordemServico, command.observacao());</span>
+
+<span class="nc bnc" id="L36" title="All 2 branches missed.">		if (Boolean.FALSE.equals(aprovado)) {</span>
+<span class="nc" id="L37">			movimentacaoEstoqueService.liberarReservas(ordemServico.getItensEstoque());</span>
+		}
+
+<span class="nc" id="L40">		OrdemServico atualizada = ordemServicoGateway.save(ordemServico);</span>
+
+<span class="nc" id="L42">		return domainToCommand(atualizada);</span>
+	}
+
+	private void registrarObservacao(OrdemServico ordemServico, String observacao) {
+<span class="nc bnc" id="L46" title="All 4 branches missed.">		if (observacao != null &amp;&amp; !observacao.isBlank()) {</span>
+<span class="nc" id="L47">			ordemServico.setObservacaoCliente(observacao.trim());</span>
+		}
+<span class="nc" id="L49">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

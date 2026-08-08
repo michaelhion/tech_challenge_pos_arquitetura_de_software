@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServico.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.dominio</a> &gt; <span class="el_source">OrdemServico.java</span></div><h1>OrdemServico.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.dominio;
+
+import com.techchallenger.oficina360.dominio.shared.exception.DecisaoOrcamentoObrigatoriaException;
+import com.techchallenger.oficina360.dominio.shared.exception.DiagnosticoSemServicoException;
+import com.techchallenger.oficina360.dominio.shared.exception.InicioExecucaoNaoRegistradoException;
+import com.techchallenger.oficina360.dominio.shared.exception.ItemEstoqueInvalidoException;
+import com.techchallenger.oficina360.dominio.shared.exception.TransicaoStatusInvalidaException;
+import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.*;
+import static com.techchallenger.oficina360.dominio.shared.utils.CollectionUtils.ehNulaOuVazia;
+import static com.techchallenger.oficina360.dominio.shared.utils.CollectionUtils.possuiElementoNulo;
+
+public class OrdemServico {
+
+	private UUID id;
+
+	private String documentoCliente;
+
+	private String placaVeiculo;
+
+	private LocalDateTime dtHoraAbertura;
+
+	private LocalDateTime dtHoraFechamento;
+
+	private String descricaoProblema;
+
+	private OrdemDeServicoStatus ordemDeServicoStatus;
+
+	private String observacaoCliente;
+
+<span class="fc" id="L39">	private List&lt;OrdemServicoServico&gt; servicos = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L41">	private List&lt;OrdemServicoItemEstoque&gt; itensEstoque = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L43">	private BigDecimal valorServicos = BigDecimal.ZERO;</span>
+
+<span class="fc" id="L45">	private BigDecimal valorPecasInsumos = BigDecimal.ZERO;</span>
+
+<span class="fc" id="L47">	private BigDecimal valorOs = BigDecimal.ZERO;</span>
+
+	private LocalDateTime dtHoraInicioExecucao;
+
+	private LocalDateTime dtHoraFimExecucao;
+
+	public void iniciarDiagnostico() {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.RECEBIDA) {</span>
+<span class="fc" id="L55">			throw new TransicaoStatusInvalidaException(</span>
+					OS_ENTITY_A_ORDEM_DE_SERVICO_NAO_PERMITE_INICIO_DE_DIAGNOSTICO_NO_STATUS_ATUAL);
+		}
+<span class="fc" id="L58">		this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_DIAGNOSTICO;</span>
+<span class="fc" id="L59">	}</span>
+
+	public void adicionarServicos(List&lt;OrdemServicoServico&gt; servicos) {
+<span class="fc" id="L62">		validarDiagnosticoEmAndamento();</span>
+<span class="fc" id="L63">		validarServicosOuFalhar(servicos);</span>
+<span class="fc" id="L64">		this.servicos.addAll(servicos);</span>
+<span class="fc" id="L65">		recalcularValores();</span>
+<span class="fc" id="L66">	}</span>
+
+	public void adicionarItensEstoque(List&lt;OrdemServicoItemEstoque&gt; itensEstoque) {
+<span class="fc bfc" id="L69" title="All 4 branches covered.">		if (ehNulaOuVazia(itensEstoque) || possuiElementoNulo(itensEstoque)) {</span>
+<span class="fc" id="L70">			throw new ItemEstoqueInvalidoException(OS_ENTITY_ITEM_DE_ESTOQUE_DA_ORDEM_DE_SERVICO_E_OBRIGATORIO);</span>
+		}
+<span class="fc" id="L72">		validarDiagnosticoEmAndamento();</span>
+<span class="fc" id="L73">		this.itensEstoque.addAll(itensEstoque);</span>
+<span class="fc" id="L74">		recalcularValores();</span>
+<span class="fc" id="L75">	}</span>
+
+	public void adicionarDiagnostico(List&lt;OrdemServicoServico&gt; servicos, List&lt;OrdemServicoItemEstoque&gt; itensEstoque) {
+<span class="fc" id="L78">		validarDiagnosticoEmAndamento();</span>
+<span class="fc" id="L79">		validarServicosOuFalhar(servicos);</span>
+<span class="fc" id="L80">		validarItensEstoqueSeInformadosOuFalhar(itensEstoque);</span>
+<span class="fc" id="L81">		this.servicos.clear();</span>
+<span class="fc" id="L82">		this.itensEstoque.clear();</span>
+
+<span class="fc" id="L84">		this.servicos.addAll(servicos);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">		if (!ehNulaOuVazia(itensEstoque)) {</span>
+<span class="fc" id="L86">			this.itensEstoque.addAll(itensEstoque);</span>
+		}
+
+<span class="fc" id="L89">		recalcularValores();</span>
+<span class="fc" id="L90">	}</span>
+
+	public void editarOSRecebida(String documentoCliente,String placa,String descricaoProblema){
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if(this.ordemDeServicoStatus != OrdemDeServicoStatus.RECEBIDA){</span>
+<span class="nc" id="L94">			throw new TransicaoStatusInvalidaException( &quot;A ordem de serviço precisa estar com Status RECEBIDA para realizar esta operação.&quot;);</span>
+		}
+<span class="nc" id="L96">		this.documentoCliente = documentoCliente;</span>
+<span class="nc" id="L97">		this.placaVeiculo = placa;</span>
+<span class="nc" id="L98">		this.descricaoProblema = descricaoProblema;</span>
+<span class="nc" id="L99">	}</span>
+
+	private void validarDiagnosticoEmAndamento() {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_DIAGNOSTICO) {</span>
+<span class="fc" id="L103">			throw new TransicaoStatusInvalidaException( &quot;A ordem de serviço precisa estar em diagnóstico para realizar esta operação.&quot;);</span>
+		}
+<span class="fc" id="L105">	}</span>
+
+	private void validarItensEstoqueSeInformadosOuFalhar(List&lt;OrdemServicoItemEstoque&gt; itensEstoque) {
+<span class="fc bfc" id="L108" title="All 2 branches covered.">		if (possuiElementoNulo(itensEstoque)) {</span>
+<span class="fc" id="L109">			throw new ItemEstoqueInvalidoException(&quot;A lista contém um item de estoque inválido.&quot;);</span>
+		}
+<span class="fc" id="L111">	}</span>
+
+	public void finalizarDiagnostico() {
+<span class="fc bfc" id="L114" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_DIAGNOSTICO) {</span>
+<span class="fc" id="L115">			throw new TransicaoStatusInvalidaException(</span>
+					&quot;Ordem de serviço precisa estar em diagnostico para esta operação&quot;);
+		} else {
+<span class="fc" id="L118">			validarServicosOuFalhar(this.servicos);</span>
+<span class="fc" id="L119">			recalcularValores();</span>
+<span class="fc" id="L120">			this.ordemDeServicoStatus = OrdemDeServicoStatus.AGUARDANDO_APROVACAO;</span>
+		}
+<span class="fc" id="L122">	}</span>
+
+	private void validarServicosOuFalhar(List&lt;OrdemServicoServico&gt; servicos) {
+<span class="fc bfc" id="L125" title="All 4 branches covered.">		if (ehNulaOuVazia(servicos) || possuiElementoNulo(servicos)) {</span>
+<span class="fc" id="L126">			throw new DiagnosticoSemServicoException(</span>
+					OS_ENTITY_A_ORDEM_DE_SERVICO_PRECISA_TER_AO_MENOS_UM_SERVICO_DEFINIDO);
+		}
+<span class="fc" id="L129">	}</span>
+
+	public void registrarAprovacao(Boolean aprovado) {
+<span class="fc bfc" id="L132" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.AGUARDANDO_APROVACAO) {</span>
+<span class="fc" id="L133">			throw new TransicaoStatusInvalidaException(OS_ENTITY_A_ORDEM_DE_SERVICO_NAO_ESTA_AGUARDANDO_APROVACAO);</span>
+		}
+<span class="fc bfc" id="L135" title="All 2 branches covered.">		if (aprovado == null) {</span>
+<span class="fc" id="L136">			throw new DecisaoOrcamentoObrigatoriaException(OS_ENTITY_INFORME_SE_O_ORCAMENTO_FOI_APROVADO_OU_REPROVADO);</span>
+		}
+<span class="fc bfc" id="L138" title="All 2 branches covered.">		if (aprovado) {</span>
+<span class="fc" id="L139">			this.ordemDeServicoStatus = OrdemDeServicoStatus.ORCAMENTO_APROVADO;</span>
+		} else {
+<span class="fc" id="L141">			this.ordemDeServicoStatus = OrdemDeServicoStatus.ORCAMENTO_REPROVADO;</span>
+		}
+<span class="fc" id="L143">	}</span>
+
+	public static OrdemServico criar(String documentoCliente,String placaVeiculo,String descricaoProblema) {
+<span class="nc" id="L146">		return new OrdemServico(</span>
+				null,
+				documentoCliente,
+				placaVeiculo,
+<span class="nc" id="L150">				LocalDateTime.now(),</span>
+				null,
+				descricaoProblema,
+				OrdemDeServicoStatus.RECEBIDA,
+				null,
+				new ArrayList&lt;&gt;(),
+				new ArrayList&lt;&gt;(),
+				null,
+				null
+		);
+	}
+
+	public void iniciarExecucao() {
+<span class="fc bfc" id="L163" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.ORCAMENTO_APROVADO) {</span>
+<span class="fc" id="L164">			throw new TransicaoStatusInvalidaException(</span>
+					OS_ENTITY_A_EXECUCAO_SO_PODE_SER_INICIADA_APOS_APROVACAO_DO_ORCAMENTO);
+		}
+
+<span class="fc" id="L168">		this.dtHoraInicioExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));</span>
+<span class="fc" id="L169">		this.dtHoraFimExecucao = null;</span>
+<span class="fc" id="L170">		this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_EXECUCAO;</span>
+<span class="fc" id="L171">	}</span>
+
+	public void finalizarExecucao() {
+<span class="fc bfc" id="L174" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_EXECUCAO) {</span>
+<span class="fc" id="L175">			throw new TransicaoStatusInvalidaException(</span>
+					OS_ENTITY_A_EXECUCAO_SO_PODE_SER_FINALIZADA_QUANDO_ESTIVER_EM_EXECUCAO);
+		}
+
+<span class="fc bfc" id="L179" title="All 2 branches covered.">		if (this.dtHoraInicioExecucao == null) {</span>
+<span class="fc" id="L180">			throw new InicioExecucaoNaoRegistradoException(</span>
+					OS_ENTITY_A_EXECUCAO_NAO_POSSUI_DATA_HORA_DE_INICIO_REGISTRADA);
+		}
+
+<span class="fc" id="L184">		this.dtHoraFimExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));</span>
+<span class="fc" id="L185">		this.ordemDeServicoStatus = OrdemDeServicoStatus.FINALIZADA;</span>
+<span class="fc" id="L186">	}</span>
+
+	public void entregar() {
+<span class="fc bfc" id="L189" title="All 2 branches covered.">		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.FINALIZADA) {</span>
+<span class="fc" id="L190">			throw new TransicaoStatusInvalidaException(</span>
+					OS_ENTITY_A_ORDEM_DE_SERVICO_SO_PODE_SER_ENTREGUE_APOS_FINALIZACAO);
+		}
+
+<span class="fc" id="L194">		this.dtHoraFechamento = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));</span>
+<span class="fc" id="L195">		this.ordemDeServicoStatus = OrdemDeServicoStatus.ENTREGUE;</span>
+<span class="fc" id="L196">	}</span>
+
+	private void recalcularValores() {
+<span class="fc" id="L199">		this.valorServicos = calcularValorServicos();</span>
+<span class="fc" id="L200">		this.valorPecasInsumos = calcularValorPecasInsumos();</span>
+<span class="fc" id="L201">		this.valorOs = this.valorServicos.add(this.valorPecasInsumos);</span>
+<span class="fc" id="L202">	}</span>
+
+	private BigDecimal calcularValorServicos() {
+<span class="fc bfc" id="L205" title="All 2 branches covered.">		if (ehNulaOuVazia(this.servicos)) {</span>
+<span class="fc" id="L206">			return BigDecimal.ZERO;</span>
+		}
+
+<span class="fc" id="L209">		return this.servicos.stream()</span>
+<span class="fc" id="L210">				.map(OrdemServicoServico::getValorTotal)</span>
+<span class="fc" id="L211">				.reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+	}
+
+	private BigDecimal calcularValorPecasInsumos() {
+<span class="pc bpc" id="L215" title="1 of 4 branches missed.">		if (ehNulaOuVazia(this.itensEstoque) || possuiElementoNulo(this.itensEstoque)) {</span>
+<span class="fc" id="L216">			return BigDecimal.ZERO;</span>
+		}
+
+<span class="fc" id="L219">		return this.itensEstoque.stream()</span>
+<span class="fc" id="L220">				.map(OrdemServicoItemEstoque::getValorTotal)</span>
+<span class="fc" id="L221">				.reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+	}
+
+	public UUID getId() {
+<span class="fc" id="L225">		return id;</span>
+	}
+
+	public String getDocumentoCliente() {
+<span class="fc" id="L229">		return documentoCliente;</span>
+	}
+
+	public String getPlacaVeiculo() {
+<span class="fc" id="L233">		return placaVeiculo;</span>
+	}
+
+	public LocalDateTime getDtHoraAbertura() {
+<span class="fc" id="L237">		return dtHoraAbertura;</span>
+	}
+
+	public LocalDateTime getDtHoraFechamento() {
+<span class="fc" id="L241">		return dtHoraFechamento;</span>
+	}
+
+	public String getDescricaoProblema() {
+<span class="fc" id="L245">		return descricaoProblema;</span>
+	}
+
+	public OrdemDeServicoStatus getOrdemDeServicoStatus() {
+<span class="fc" id="L249">		return ordemDeServicoStatus;</span>
+	}
+
+	public String getObservacaoCliente() {
+<span class="nc" id="L253">		return observacaoCliente;</span>
+	}
+	public List&lt;OrdemServicoServico&gt; getServicos() {
+<span class="fc" id="L256">		 return List.copyOf(servicos);</span>
+	}
+
+	public List&lt;OrdemServicoItemEstoque&gt; getItensEstoque() {
+<span class="fc" id="L260">		return List.copyOf(itensEstoque);</span>
+	}
+
+	public BigDecimal getValorServicos() {
+<span class="fc" id="L264">		return valorServicos;</span>
+	}
+
+	public BigDecimal getValorPecasInsumos() {
+<span class="fc" id="L268">		return valorPecasInsumos;</span>
+	}
+
+	public BigDecimal getValorOs() {
+<span class="fc" id="L272">		return valorOs;</span>
+	}
+
+	public LocalDateTime getDtHoraInicioExecucao() {
+<span class="fc" id="L276">		return dtHoraInicioExecucao;</span>
+	}
+
+	public LocalDateTime getDtHoraFimExecucao() {
+<span class="fc" id="L280">		return dtHoraFimExecucao;</span>
+	}
+
+	public OrdemServico(UUID id, String documentoCliente, String placaVeiculo, LocalDateTime dtHoraAbertura,
+			LocalDateTime dtHoraFechamento, String descricaoProblema,
+			OrdemDeServicoStatus ordemDeServicoStatus, String observacaoCliente,
+			List&lt;OrdemServicoServico&gt; servicos, List&lt;OrdemServicoItemEstoque&gt; itensEstoque,
+<span class="fc" id="L287">			LocalDateTime dtHoraInicioExecucao, LocalDateTime dtHoraFimExecucao) {</span>
+<span class="fc" id="L288">		this.id = id;</span>
+<span class="fc" id="L289">		this.documentoCliente = documentoCliente;</span>
+<span class="fc" id="L290">		this.placaVeiculo = placaVeiculo;</span>
+<span class="fc" id="L291">		this.dtHoraAbertura = dtHoraAbertura;</span>
+<span class="fc" id="L292">		this.dtHoraFechamento = dtHoraFechamento;</span>
+<span class="fc" id="L293">		this.descricaoProblema = descricaoProblema;</span>
+<span class="fc" id="L294">		this.ordemDeServicoStatus = ordemDeServicoStatus;</span>
+<span class="fc" id="L295">		this.observacaoCliente = observacaoCliente;</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">		this.servicos = servicos != null</span>
+<span class="fc" id="L297">				? new ArrayList&lt;&gt;(servicos)</span>
+<span class="pc" id="L298">				: new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">		this.itensEstoque = itensEstoque != null</span>
+<span class="fc" id="L300">				? new ArrayList&lt;&gt;(itensEstoque)</span>
+<span class="pc" id="L301">				: new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L302">		this.dtHoraInicioExecucao = dtHoraInicioExecucao;</span>
+<span class="fc" id="L303">		this.dtHoraFimExecucao = dtHoraFimExecucao;</span>
+<span class="fc" id="L304">		recalcularValores();</span>
+<span class="fc" id="L305">	}</span>
+
+	public OrdemServico(String documentoCliente, String placaVeiculo, String descricaoProblema,
+<span class="fc" id="L308">			LocalDateTime dtHoraAbertura, OrdemDeServicoStatus ordemDeServicoStatus) {</span>
+<span class="fc" id="L309">		this.documentoCliente = documentoCliente;</span>
+<span class="fc" id="L310">		this.placaVeiculo = placaVeiculo;</span>
+<span class="fc" id="L311">		this.descricaoProblema = descricaoProblema;</span>
+<span class="fc" id="L312">		this.dtHoraAbertura = dtHoraAbertura;</span>
+<span class="fc" id="L313">		this.ordemDeServicoStatus = ordemDeServicoStatus;</span>
+<span class="fc" id="L314">	}</span>
+
+	public void setObservacaoCliente(String observacao) {
+<span class="nc" id="L317">		this.observacaoCliente = observacao;</span>
+<span class="nc" id="L318">	}</span>
+
+	public void setDescricaoProblema(String descricaoProblema) {
+<span class="nc" id="L321">		this.descricaoProblema = descricaoProblema;</span>
+<span class="nc" id="L322">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

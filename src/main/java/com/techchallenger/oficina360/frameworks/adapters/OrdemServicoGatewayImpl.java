@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.frameworks.adapters;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
-import com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoMapper;
+import com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper;
 import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.OrdemServicosRepository;
 import com.techchallenger.oficina360.frameworks.persistence.specifications.OrdemServicoSpecification;
@@ -29,7 +29,7 @@ import java.util.UUID;
 public class OrdemServicoGatewayImpl implements OrdemServicoGateway {
 
     private final OrdemServicosRepository repository;
-    private final OrdemServicoMapper mapper;
+    private final OrdemServicoDTOMapper mapper;
 
     @Override
     public Optional<OrdemServico> findFirstByPlacaVeiculoAndOrdemDeServicoStatusIn(String placaVeiculo, Collection<OrdemDeServicoStatus> status) {

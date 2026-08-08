@@ -1,22 +1,21 @@
 package com.techchallenger.oficina360.usecases.ordemservico;
 
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
-import com.techchallenger.oficina360.mappers.OrdemServicoMapper;
+import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoRespCommand;
 
-import java.util.Optional;
 import java.util.UUID;
+
+import static com.techchallenger.oficina360.mappers.OrdemServicoCommandMapper.domainToCommand;
 
 public class BuscarOrdemServicoPorIdUseCase {
 
-	private final OrdemServicoGateway gateway;
+	private final OrdemServicoFinder ordemServicoFinder;
 
-	public BuscarOrdemServicoPorIdUseCase(OrdemServicoGateway ordemServicoGateway){
-		gateway = ordemServicoGateway;
+	public BuscarOrdemServicoPorIdUseCase(OrdemServicoFinder ordemServicoFinder) {
+		this.ordemServicoFinder = ordemServicoFinder;
 	}
 
-	public Optional<OrdemServicoDTO> findById(UUID id) {
-		return gateway.findById(id)
-				.map(OrdemServicoMapper::toDTO);
+	public OrdemServicoRespCommand findById(UUID id) {
+		return domainToCommand(ordemServicoFinder.obterOuFalhar(id));
 	}
 }

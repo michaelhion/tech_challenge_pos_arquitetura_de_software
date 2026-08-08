@@ -1,10 +1,10 @@
 package com.techchallenger.oficina360.usecases.servicos;
 
-import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
-import com.techchallenger.oficina360.mappers.ServicoMapper;
+import com.techchallenger.oficina360.usecases.servicos.commands.ServicoCommand;
+import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 
-import java.util.Optional;
+import static com.techchallenger.oficina360.mappers.ServicoCommandMapper.domainToCommand;
 
 public class BuscarServicoPorCodigoUseCase {
 
@@ -14,8 +14,7 @@ public class BuscarServicoPorCodigoUseCase {
 		this.servicoGateway = servicoGateway;
 	}
 
-	public Optional<ServicoDTO> findByCodigo(String codigo) {
-		return servicoGateway.findByCodigo(codigo)
-				.map(ServicoMapper::domainToDTO);
+	public ServicoCommand findByCodigo(String codigo) {
+		return domainToCommand(servicoGateway.findByCodigo(codigo).orElseThrow(()-> new RecursoNaoEncontradoException("Serviço não encontrado")));
 	}
 }

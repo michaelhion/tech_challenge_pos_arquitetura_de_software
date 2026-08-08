@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.adapters;
 
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.frameworks.mappers.servico.ServicoMapper;
+import com.techchallenger.oficina360.frameworks.mappers.servico.ServicoDTOMapper;
 import com.techchallenger.oficina360.frameworks.persistence.entities.ServicoEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.ServicoRepository;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ServicoGatewayImpl implements ServicoGateway {
 
-    private final ServicoMapper mapper;
+    private final ServicoDTOMapper mapper;
     private final ServicoRepository repository;
 
     @Override

@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 import static com.techchallenger.oficina360.constants.Roles.CLIENTE;
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.aprovacaoDTOToCommand;
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.commandToDTO;
 
 @RestController
 @RequestMapping("/ordem-servico/clientes")
@@ -32,20 +34,19 @@ public class OrdemServicoClienteController implements OrdemServicoClienteApi {
 	@GetMapping("/listar/{id}")
 	@Override
 	public ResponseEntity<OrdemServicoDTO> buscarPorId(@PathVariable UUID id) {
-		return buscarOrdemServicoPorIdUseCase.findById(id).map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+		OrdemServicoDTO dto =  commandToDTO(buscarOrdemServicoPorIdUseCase.findById(id));
+		return ResponseEntity.ok(dto);
 	}
 
 	@PreAuthorize("hasRole('" + CLIENTE + "') and @autorizacaoClienteUseCase.podeAcessarOrdemServico(#id)")
 	@PatchMapping("/aprovacao/{id}")
 	@Override
-	public ResponseEntity<OrdemServicoDTO> aprovar(@PathVariable UUID id,
-			@Valid @RequestBody AprovacaoOrdemServicoDTO aprovacaoDTO
+	public ResponseEntity<Void> aprovar(@PathVariable UUID id,@Valid @RequestBody AprovacaoOrdemServicoDTO aprovacaoDTO
 
 	) {
-		OrdemServicoDTO ordemServicoAtualizada = aprovar.aprovar(id, aprovacaoDTO);
+		aprovar.aprovar(id, aprovacaoDTOToCommand(aprovacaoDTO));
 
-		return ResponseEntity.ok(ordemServicoAtualizada);
+		return ResponseEntity.accepted().build();
 	}
 
 }

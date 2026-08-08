@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CadastrarVeiculoUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.veiculo</a> &gt; <span class="el_source">CadastrarVeiculoUseCase.java</span></div><h1>CadastrarVeiculoUseCase.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.veiculo;
+
+import com.techchallenger.oficina360.dominio.Veiculo;
+import com.techchallenger.oficina360.gateways.VeiculoGateway;
+import com.techchallenger.oficina360.usecases.finders.ClienteFinder;
+import com.techchallenger.oficina360.usecases.shared.exception.VeiculosJaCadastradoException;
+import com.techchallenger.oficina360.usecases.veiculo.commands.VeiculoCommand;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.VEICULO_SERV_VEICULO_CADASTRADO;
+import static com.techchallenger.oficina360.mappers.VeiculoCommandMapper.commandToDomain;
+import static com.techchallenger.oficina360.mappers.VeiculoCommandMapper.domainToCommand;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarPlaca;
+
+public class CadastrarVeiculoUseCase {
+
+	private final VeiculoGateway veiculoGateway;
+	private final ClienteFinder clienteFinder;
+
+<span class="fc" id="L20">	public CadastrarVeiculoUseCase(VeiculoGateway veiculoGateway, ClienteFinder clienteFinder) {</span>
+<span class="fc" id="L21">		this.veiculoGateway = veiculoGateway;</span>
+<span class="fc" id="L22">		this.clienteFinder = clienteFinder;</span>
+<span class="fc" id="L23">	}</span>
+
+	public VeiculoCommand save(VeiculoCommand command) {
+<span class="nc" id="L26">		String placaNormalizada = normalizarPlaca(command.placa());</span>
+<span class="nc" id="L27">		String documentoClienteNormalizado = normalizarDocumento(command.clienteDocumento());</span>
+
+<span class="nc" id="L29">		clienteFinder.buscarPorDocumentoOuFalhar(documentoClienteNormalizado);</span>
+<span class="nc" id="L30">		validarPlacaDisponivelParaCadastro(placaNormalizada);</span>
+
+<span class="nc" id="L32">		Veiculo veiculo = commandToDomain(command);</span>
+
+<span class="nc" id="L34">		return domainToCommand(veiculoGateway.save(veiculo));</span>
+	}
+
+	private void validarPlacaDisponivelParaCadastro(String placa) {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">		if (veiculoGateway.existsByPlaca(placa)) {</span>
+<span class="nc" id="L39">			throw new VeiculosJaCadastradoException(VEICULO_SERV_VEICULO_CADASTRADO);</span>
+		}
+<span class="nc" id="L41">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

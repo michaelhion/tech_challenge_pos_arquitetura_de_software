@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CriarItemEstoqueUseCase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.estoque</a> &gt; <span class="el_source">CriarItemEstoqueUseCase.java</span></div><h1>CriarItemEstoqueUseCase.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.estoque;
+
+import com.techchallenger.oficina360.dominio.Estoque;
+import com.techchallenger.oficina360.gateways.EstoqueGateway;
+import com.techchallenger.oficina360.usecases.finders.EstoqueFinder;
+import com.techchallenger.oficina360.usecases.ordemservico.command.EstoqueCommand;
+import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
+
+import java.util.Optional;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA;
+import static com.techchallenger.oficina360.mappers.EstoqueCommandMapper.commandToDomain;
+import static com.techchallenger.oficina360.mappers.EstoqueCommandMapper.domaintoCommand;
+
+public class CriarItemEstoqueUseCase {
+
+	private final EstoqueFinder estoqueFinder;
+	private final EstoqueGateway estoqueGateway;
+
+<span class="fc" id="L20">	public CriarItemEstoqueUseCase(EstoqueFinder estoqueFinder, EstoqueGateway estoqueGateway) {</span>
+<span class="fc" id="L21">		this.estoqueFinder = estoqueFinder;</span>
+<span class="fc" id="L22">		this.estoqueGateway = estoqueGateway;</span>
+<span class="fc" id="L23">	}</span>
+
+	public EstoqueCommand save(EstoqueCommand command) {
+<span class="nc" id="L26">		Optional&lt;Estoque&gt; obter = estoqueFinder.obter(command.codigo());</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">		if(obter.isPresent()){</span>
+<span class="nc" id="L28">			throw new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA);</span>
+		}
+<span class="nc" id="L30">		Estoque estoqueSaved = estoqueGateway.save(commandToDomain(command));</span>
+<span class="nc" id="L31">		return domaintoCommand(estoqueSaved);</span>
+	}
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

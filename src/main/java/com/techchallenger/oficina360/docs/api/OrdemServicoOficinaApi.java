@@ -1,8 +1,10 @@
 package com.techchallenger.oficina360.docs.api;
 
 import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
 import com.techchallenger.oficina360.usecases.ordemservico.query.OrdemServicoOrdenacao;
@@ -92,7 +94,7 @@ public interface OrdemServicoOficinaApi {
                     description = RESPONSE_ORDEM_SERVICO_CADASTRADA,
                     content = @Content(
                             mediaType = MEDIA_TYPE_JSON,
-                            schema = @Schema(implementation = CriarOrdemServicoDTO.class)
+                            schema = @Schema(implementation = CriarOrdemServicoResponseDTO.class)
                     )
             ),
             @ApiResponse(
@@ -101,15 +103,15 @@ public interface OrdemServicoOficinaApi {
                     content = @Content
             )
     })
-    ResponseEntity<CriarOrdemServicoDTO> salvar(
+    ResponseEntity<CriarOrdemServicoResponseDTO> salvar(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = REQUEST_BODY_SALVAR,
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = CriarOrdemServicoDTO.class)
+                            schema = @Schema(implementation = CriarOrdemServicoRequestDTO.class)
                     )
             )
-            CriarOrdemServicoDTO criarOrdemServicoDTO
+            CriarOrdemServicoRequestDTO criarOrdemServicoRequestDTO
     );
 
     @Operation(
@@ -200,7 +202,7 @@ public interface OrdemServicoOficinaApi {
                     description = RESPONSE_ORDEM_SERVICO_DIAGNOSTICADA,
                     content = @Content(
                             mediaType = MEDIA_TYPE_JSON,
-                            schema = @Schema(implementation = OrdemServicoDTO.class)
+                            schema = @Schema(implementation = OrdemServicoDetailDTO.class)
                     )
             ),
             @ApiResponse(
@@ -219,7 +221,7 @@ public interface OrdemServicoOficinaApi {
                     content = @Content
             )
     })
-    ResponseEntity<OrdemServicoDTO> diagnosticar(
+    ResponseEntity<OrdemServicoDetailDTO> diagnosticar(
             @Parameter(
                     description = PARAM_ID_DESCRIPTION,
                     example = EXAMPLE_UUID,

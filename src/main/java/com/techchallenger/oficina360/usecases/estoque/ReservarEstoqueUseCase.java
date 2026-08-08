@@ -1,11 +1,12 @@
 package com.techchallenger.oficina360.usecases.estoque;
 
 import com.techchallenger.oficina360.dominio.Estoque;
-import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
-import com.techchallenger.oficina360.mappers.EstoqueMapper;
 import com.techchallenger.oficina360.usecases.finders.EstoqueFinder;
+import com.techchallenger.oficina360.usecases.ordemservico.command.EstoqueCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.ReservaEstoqueCommand;
+
+import static com.techchallenger.oficina360.mappers.EstoqueCommandMapper.domaintoCommand;
 
 public class ReservarEstoqueUseCase {
 
@@ -17,13 +18,13 @@ public class ReservarEstoqueUseCase {
 		this.estoqueGateway = estoqueGateway;
 	}
 
-	public EstoqueDTO reservar(String codigo, ReservaEstoqueDTO reservaDTO) {
+	public EstoqueCommand reservar(String codigo, ReservaEstoqueCommand command) {
 		Estoque estoque = estoqueFinder.obterOuFalhar(codigo);
 
-		estoque.reservar(reservaDTO.quantidade());
+		estoque.reservar(command.quantidade());
 
 		Estoque estoqueAtualizado = estoqueGateway.save(estoque);
 
-		return EstoqueMapper.domaintoDTO(estoqueAtualizado);
+		return domaintoCommand(estoqueAtualizado);
 	}
 }

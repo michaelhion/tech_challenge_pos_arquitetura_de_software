@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.usecases.estoque;
 
-import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
-import com.techchallenger.oficina360.mappers.EstoqueMapper;
+import com.techchallenger.oficina360.mappers.EstoqueCommandMapper;
+import com.techchallenger.oficina360.usecases.ordemservico.command.EstoqueCommand;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ public class ListarItensEstoqueUseCase {
 		this.estoqueGateway = estoqueGateway;
 	}
 
-	public List<EstoqueDTO> findAll() {
+	public List<EstoqueCommand> findAll() {
 		return estoqueGateway.findAll()
 				.stream()
-				.map(EstoqueMapper::domaintoDTO)
+				.map(EstoqueCommandMapper::domaintoCommand)
 				.toList();
 	}
 }

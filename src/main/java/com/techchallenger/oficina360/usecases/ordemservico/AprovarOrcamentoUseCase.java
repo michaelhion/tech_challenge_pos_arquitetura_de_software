@@ -1,15 +1,15 @@
 package com.techchallenger.oficina360.usecases.ordemservico;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
+import com.techchallenger.oficina360.usecases.ordemservico.command.AprovacaoOrdemServicoCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoRespCommand;
 import com.techchallenger.oficina360.usecases.servicos.MovimentacaoEstoqueService;
 
 import java.util.UUID;
 
-import static com.techchallenger.oficina360.mappers.OrdemServicoMapper.toDTO;
+import static com.techchallenger.oficina360.mappers.OrdemServicoCommandMapper.domainToCommand;
 
 public class AprovarOrcamentoUseCase {
 
@@ -24,14 +24,14 @@ public class AprovarOrcamentoUseCase {
 		this.movimentacaoEstoqueService = movimentacaoEstoqueService;
 	}
 
-	public OrdemServicoDTO aprovar(UUID id, AprovacaoOrdemServicoDTO aprovacaoDTO) {
+	public OrdemServicoRespCommand aprovar(UUID id, AprovacaoOrdemServicoCommand command) {
 		OrdemServico ordemServico = ordemServicoFinder.obterOuFalhar(id);
 
-		Boolean aprovado = aprovacaoDTO.aprovado();
+		Boolean aprovado = command.aprovado();
 
 		ordemServico.registrarAprovacao(aprovado);
 
-		registrarObservacao(ordemServico, aprovacaoDTO.observacao());
+		registrarObservacao(ordemServico, command.observacao());
 
 		if (Boolean.FALSE.equals(aprovado)) {
 			movimentacaoEstoqueService.liberarReservas(ordemServico.getItensEstoque());
@@ -39,7 +39,7 @@ public class AprovarOrcamentoUseCase {
 
 		OrdemServico atualizada = ordemServicoGateway.save(ordemServico);
 
-		return toDTO(atualizada);
+		return domainToCommand(atualizada);
 	}
 
 	private void registrarObservacao(OrdemServico ordemServico, String observacao) {

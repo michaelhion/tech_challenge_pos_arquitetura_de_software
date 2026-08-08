@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoOficinaController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.web.controllers</a> &gt; <span class="el_source">OrdemServicoOficinaController.java</span></div><h1>OrdemServicoOficinaController.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.web.controllers;
+
+import com.techchallenger.oficina360.docs.api.OrdemServicoOficinaApi;
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
+import com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper;
+import com.techchallenger.oficina360.usecases.ordemservico.AbrirOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.ConsultarStatusOsUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.DeletarOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.DiagnosticarOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.EditarOrdemServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.FinalizarExecucaoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.IniciarExecucaoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.ListarOrdensServicoUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.output.OrdemServicoResumoOutput;
+import com.techchallenger.oficina360.usecases.ordemservico.query.ListarOrdensServicoQuery;
+import com.techchallenger.oficina360.usecases.ordemservico.query.OrdemServicoOrdenacao;
+import com.techchallenger.oficina360.usecases.shared.paginacao.DirecaoOrdenacao;
+import com.techchallenger.oficina360.usecases.shared.paginacao.ResultadoPaginado;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.*;
+
+@RestController
+@RequestMapping(&quot;/ordem-servico&quot;)
+@RequiredArgsConstructor
+@PreAuthorize(&quot;hasAnyRole('MECANICO','ADMIN')&quot;)
+public class OrdemServicoOficinaController implements OrdemServicoOficinaApi {
+
+	private final AbrirOrdemServicoUseCase abrirOrdemServicoUseCase;
+	private final DiagnosticarOrdemServicoUseCase diagnosticar;
+	private final IniciarExecucaoUseCase iniciar;
+	private final FinalizarExecucaoUseCase finalizar;
+	private final ListarOrdensServicoUseCase listarOrdensServicoUseCase;
+	private final BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
+	private final EditarOrdemServicoUseCase editarOrdemServicoUseCase;
+	private final DeletarOrdemServicoUseCase deletarOrdemServicoUseCase;
+	private final ConsultarStatusOsUseCase consultarStatusOsUseCase;
+
+	@GetMapping(&quot;/listar&quot;)
+	public ResponseEntity&lt;Page&lt;OrdemServicoDTO&gt;&gt; listarOrdensServico(@ModelAttribute OrdemServicoFiltroDTO filtro,
+			@RequestParam(defaultValue = &quot;0&quot;) int page, @RequestParam(defaultValue = &quot;10&quot;) int size,
+			@RequestParam(defaultValue = &quot;DATA_ABERTURA&quot;) OrdemServicoOrdenacao ordenarPor,
+			@RequestParam(defaultValue = &quot;ASC&quot;) DirecaoOrdenacao direcao) {
+<span class="fc" id="L63">		ListarOrdensServicoQuery query = new ListarOrdensServicoQuery(filtro.status(), filtro.documentoCliente(),</span>
+<span class="fc" id="L64">				filtro.placa(), filtro.aberturaInicial(), filtro.aberturaFinal(), filtro.valorMinimo(),</span>
+<span class="fc" id="L65">				filtro.valorMaximo(), page, size, ordenarPor, direcao);</span>
+
+<span class="fc" id="L67">		ResultadoPaginado&lt;OrdemServicoResumoOutput&gt; output = listarOrdensServicoUseCase.executar(query);</span>
+
+<span class="fc" id="L69">		return ResponseEntity.ok(toPage(output));</span>
+	}
+
+	private Page&lt;OrdemServicoDTO&gt; toPage(ResultadoPaginado&lt;OrdemServicoResumoOutput&gt; output) {
+<span class="fc" id="L73">		Pageable pageable = PageRequest.of(output.pagina(), output.tamanho());</span>
+<span class="fc" id="L74">		return new PageImpl&lt;&gt;(OrdemServicoDTOMapper.outputListToDTOList(output.conteudo()), pageable,</span>
+<span class="fc" id="L75">				output.totalElementos());</span>
+	}
+
+	@Override
+	@GetMapping(&quot;/listar/{id}&quot;)
+	public ResponseEntity&lt;OrdemServicoDTO&gt; buscarPorId(@PathVariable UUID id) {
+<span class="fc" id="L81">		OrdemServicoDTO ordemServicoDTO = commandToDTO(buscarOrdemServicoPorIdUseCase.findById(id));</span>
+<span class="fc" id="L82">		return ResponseEntity.ok(ordemServicoDTO);</span>
+	}
+
+	@Override
+	@PostMapping(&quot;/salvar&quot;)
+	public ResponseEntity&lt;CriarOrdemServicoResponseDTO&gt; salvar(@Valid @RequestBody CriarOrdemServicoRequestDTO criarOrdemServicoRequestDTO) {
+<span class="fc" id="L88">		CriarOrdemServicoResponseDTO ordemServicoSalva = criarOsRespCommandToDTO(abrirOrdemServicoUseCase.abrirOrdemServico(criarOsToCommand(</span>
+				criarOrdemServicoRequestDTO)));
+<span class="fc" id="L90">		return ResponseEntity.status(HttpStatus.CREATED).body(ordemServicoSalva);</span>
+	}
+
+	@Override
+	@PutMapping(&quot;/editar/{id}&quot;)
+	public ResponseEntity&lt;OrdemServicoDTO&gt; editar(@PathVariable UUID id,
+			@Valid @RequestBody OrdemServicoDTO ordemServicoDTO) {
+<span class="fc" id="L97">		OrdemServico ordemServico = editarOrdemServicoUseCase.edit(id, toCommand(ordemServicoDTO));</span>
+<span class="fc" id="L98">		return ResponseEntity.ok(domainToDTO(ordemServico));</span>
+	}
+
+	@Override
+	@DeleteMapping(&quot;/deletar/{id}&quot;)
+	public ResponseEntity&lt;Void&gt; deletar(@PathVariable UUID id) {
+<span class="fc" id="L104">		deletarOrdemServicoUseCase.deleteById(id);</span>
+<span class="fc" id="L105">		return ResponseEntity.noContent().build();</span>
+	}
+
+	@Override
+	@PatchMapping(&quot;/{id}/diagnostico&quot;)
+	public ResponseEntity&lt;OrdemServicoDetailDTO&gt; diagnosticar(@PathVariable UUID id,
+			@Valid @RequestBody DiagnosticoDTO diagnosticoDTO) {
+<span class="fc" id="L112">		OrdemServicoDetailDTO ordemServicoDiagnosticada = commandDadosFinanceirosToDTO(diagnosticar.diagnosticar(id, diagnosticoDTOTOCommand(diagnosticoDTO)));</span>
+
+<span class="fc" id="L114">		return ResponseEntity.ok(ordemServicoDiagnosticada);</span>
+	}
+
+	@Override
+	@PatchMapping(&quot;/execucao/iniciar/{id}&quot;)
+	public ResponseEntity&lt;OrdemServicoDTO&gt; iniciarExecucao(@PathVariable UUID id) {
+<span class="fc" id="L120">		iniciar.iniciarExecucao(id);</span>
+
+<span class="fc" id="L122">		return ResponseEntity.accepted().build();</span>
+	}
+
+	@Override
+	@PatchMapping(&quot;/execucao/finalizar/{id}&quot;)
+	public ResponseEntity&lt;OrdemServicoDTO&gt; finalizarExecucao(@PathVariable UUID id) {
+<span class="fc" id="L128">		finalizar.finalizarExecucao(id);</span>
+
+<span class="fc" id="L130">		return ResponseEntity.accepted().build();</span>
+	}
+
+	@Override
+	@GetMapping(&quot;/status/{id}&quot;)
+	public ResponseEntity&lt;ConsultarStatusDTO&gt; consultarStatus(@PathVariable UUID id) {
+<span class="fc" id="L136">		ConsultarStatusDTO dto = new ConsultarStatusDTO(consultarStatusOsUseCase.executar(id));</span>
+<span class="fc" id="L137">		return ResponseEntity.ok(dto);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

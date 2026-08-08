@@ -17,190 +17,190 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Optional;
 
+import static com.techchallenger.oficina360.frameworks.mappers.veiculo.VeiculoDTOMapper.dtoToCommand;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VeiculosControllerTest {
 
-    @Mock
-    private CadastrarVeiculoUseCase cadastrarVeiculoUseCase;
+	private static final String PLACA = "ABC1D23";
 
-    @Mock
-    private AtualizarVeiculoUseCase atualizarVeiculoUseCase;
+	private static final String MARCA = "Volkswagen";
 
-    @Mock
-    private BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
+	private static final String MODELO = "Gol";
 
-    @Mock
-    private ListarVeiculosUseCase listarVeiculosUseCase;
+	private static final Integer ANO = 2020;
 
-    @Mock
-    private ExcluirVeiculoUseCase excluirVeiculoUseCase;
+	private static final String DOCUMENTO_CLIENTE = "12345678901";
 
-    @InjectMocks
-    private VeiculosController veiculosController;
+	private static final String PLACA_ATUALIZADA = "DEF2G34";
 
-    private VeiculoDTO veiculoDTO;
+	private static final String PLACA_INEXISTENTE = "ZZZ9Z99";
 
-    @BeforeEach
-    void setUp() {
+	@Mock
+	private CadastrarVeiculoUseCase cadastrarVeiculoUseCase;
 
-        veiculoDTO = new VeiculoDTO(
-                "ABC1D23",
-                "Volkswagen",
-                "Gol",
-                2020,
-                "12345678901"
-        );
-    }
+	@Mock
+	private AtualizarVeiculoUseCase atualizarVeiculoUseCase;
 
-    @Test
-    void deveBuscarVeiculoPorPlacaComSucesso() {
-        when(buscarVeiculoPorPlacaUseCase.findByPlaca("ABC1D23"))
-                .thenReturn(Optional.of(veiculoDTO));
+	@Mock
+	private BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
 
-        ResponseEntity<VeiculoDTO> response =
-                veiculosController.buscarPorPlaca("ABC1D23");
+	@Mock
+	private ListarVeiculosUseCase listarVeiculosUseCase;
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("ABC1D23", response.getBody().placa());
-        assertEquals("Volkswagen", response.getBody().marca());
-        assertEquals("Gol", response.getBody().modelo());
-        assertEquals(2020, response.getBody().ano());
-        assertEquals("12345678901", response.getBody().clienteDocumento());
+	@Mock
+	private ExcluirVeiculoUseCase excluirVeiculoUseCase;
 
-        verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca("ABC1D23");
-    }
+	@InjectMocks
+	private VeiculosController veiculosController;
 
-    @Test
-    void deveRetornarNotFoundQuandoBuscarVeiculoPorPlacaInexistente() {
-        when(buscarVeiculoPorPlacaUseCase.findByPlaca("ZZZ9Z99"))
-                .thenReturn(Optional.empty());
+	private VeiculoDTO veiculoDTO;
 
-        ResponseEntity<VeiculoDTO> response =
-                veiculosController.buscarPorPlaca("ZZZ9Z99");
+	@BeforeEach
+	void setUp() {
+		veiculoDTO = new VeiculoDTO(PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
+	}
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+	@Test
+	void deveBuscarVeiculoPorPlacaComSucesso() {
+		var commandRetornado = dtoToCommand(veiculoDTO);
 
-        verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca("ZZZ9Z99");
-    }
+		when(buscarVeiculoPorPlacaUseCase.findByPlaca(PLACA)).thenReturn(commandRetornado);
 
-    @Test
-    void deveSalvarVeiculoComSucesso() {
-        when(cadastrarVeiculoUseCase.save(veiculoDTO))
-                .thenReturn(veiculoDTO);
+		ResponseEntity<VeiculoDTO> response = veiculosController.buscarPorPlaca(PLACA);
 
-        ResponseEntity<VeiculoDTO> response =
-                veiculosController.salvar(veiculoDTO);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("ABC1D23", response.getBody().placa());
-        assertEquals("Volkswagen", response.getBody().marca());
-        assertEquals("Gol", response.getBody().modelo());
-        assertEquals(2020, response.getBody().ano());
-        assertEquals("12345678901", response.getBody().clienteDocumento());
+		assertNotNull(response.getBody());
 
-        verify(cadastrarVeiculoUseCase, times(1)).save(veiculoDTO);
-    }
+		assertVeiculo(response.getBody(), PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
 
-    @Test
-    void deveEditarVeiculoComSucesso() {
-        String placaAtual = "ABC1D23";
+		verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca(PLACA);
 
-        VeiculoDTO veiculoAtualizado = new VeiculoDTO(
-                "DEF2G34",
-                "Toyota",
-                "Corolla",
-                2022,
-                "12345678901"
-        );
+		verifyNoMoreInteractions(buscarVeiculoPorPlacaUseCase);
+	}
 
-        when(atualizarVeiculoUseCase.edit(placaAtual, veiculoAtualizado))
-                .thenReturn(veiculoAtualizado);
+	@Test
+	void devePropagarExcecaoQuandoVeiculoNaoExistir() {
+		RuntimeException excecaoEsperada = new RuntimeException("Veículo não encontrado.");
 
-        ResponseEntity<VeiculoDTO> response =
-                veiculosController.editar(placaAtual, veiculoAtualizado);
+		when(buscarVeiculoPorPlacaUseCase.findByPlaca(PLACA_INEXISTENTE)).thenThrow(excecaoEsperada);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("DEF2G34", response.getBody().placa());
-        assertEquals("Toyota", response.getBody().marca());
-        assertEquals("Corolla", response.getBody().modelo());
-        assertEquals(2022, response.getBody().ano());
-        assertEquals("12345678901", response.getBody().clienteDocumento());
+		RuntimeException excecaoObtida = assertThrows(RuntimeException.class,
+				() -> veiculosController.buscarPorPlaca(PLACA_INEXISTENTE));
 
-        verify(atualizarVeiculoUseCase, times(1)).edit(placaAtual, veiculoAtualizado);
-    }
+		assertAll(() -> assertEquals(excecaoEsperada, excecaoObtida),
+				() -> assertEquals("Veículo não encontrado.", excecaoObtida.getMessage()));
 
-    @Test
-    void deveDeletarVeiculoPorPlacaComSucesso() {
-        String placa = "ABC1D23";
+		verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca(PLACA_INEXISTENTE);
 
-        doNothing().when(excluirVeiculoUseCase).delete(placa);
+		verifyNoMoreInteractions(buscarVeiculoPorPlacaUseCase);
+	}
 
-        ResponseEntity<Void> response =
-                veiculosController.deletar(placa);
+	@Test
+	void deveSalvarVeiculoComSucesso() {
+		var commandEsperado = dtoToCommand(veiculoDTO);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
+		when(cadastrarVeiculoUseCase.save(commandEsperado)).thenReturn(commandEsperado);
 
-        verify(excluirVeiculoUseCase, times(1)).delete(placa);
-    }
+		ResponseEntity<VeiculoDTO> response = veiculosController.salvar(veiculoDTO);
 
-    @Test
-    void deveListarVeiculosComSucesso() {
-        VeiculoDTO veiculoDTO2 = new VeiculoDTO(
-                "DEF2G34",
-                "Toyota",
-                "Corolla",
-                2022,
-                "98765432100"
-        );
+		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        when(listarVeiculosUseCase.findAll())
-                .thenReturn(List.of(veiculoDTO, veiculoDTO2));
+		assertNotNull(response.getBody());
 
-        ResponseEntity<List<VeiculoDTO>> response =
-                veiculosController.listarVeiculos();
+		assertVeiculo(response.getBody(), PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
+		verify(cadastrarVeiculoUseCase, times(1)).save(commandEsperado);
 
-        assertEquals("ABC1D23", response.getBody().get(0).placa());
-        assertEquals("Volkswagen", response.getBody().get(0).marca());
-        assertEquals("Gol", response.getBody().get(0).modelo());
-        assertEquals(2020, response.getBody().get(0).ano());
-        assertEquals("12345678901", response.getBody().get(0).clienteDocumento());
+		verifyNoMoreInteractions(cadastrarVeiculoUseCase);
+	}
 
-        assertEquals("DEF2G34", response.getBody().get(1).placa());
-        assertEquals("Toyota", response.getBody().get(1).marca());
-        assertEquals("Corolla", response.getBody().get(1).modelo());
-        assertEquals(2022, response.getBody().get(1).ano());
-        assertEquals("98765432100", response.getBody().get(1).clienteDocumento());
+	@Test
+	void deveEditarVeiculoComSucesso() {
+		VeiculoDTO veiculoAtualizado = new VeiculoDTO(PLACA_ATUALIZADA, "Toyota", "Corolla", 2022, DOCUMENTO_CLIENTE);
 
-        verify(listarVeiculosUseCase, times(1)).findAll();
-    }
+		var commandEsperado = dtoToCommand(veiculoAtualizado);
 
-    @Test
-    void deveRetornarListaVaziaQuandoNaoExistiremVeiculos() {
-        when(listarVeiculosUseCase.findAll())
-                .thenReturn(List.of());
+		when(atualizarVeiculoUseCase.edit(PLACA, commandEsperado)).thenReturn(commandEsperado);
 
-        ResponseEntity<List<VeiculoDTO>> response =
-                veiculosController.listarVeiculos();
+		ResponseEntity<VeiculoDTO> response = veiculosController.editar(PLACA, veiculoAtualizado);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isEmpty());
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(listarVeiculosUseCase, times(1)).findAll();
-    }
+		assertNotNull(response.getBody());
+
+		assertVeiculo(response.getBody(), PLACA_ATUALIZADA, "Toyota", "Corolla", 2022, DOCUMENTO_CLIENTE);
+
+		verify(atualizarVeiculoUseCase, times(1)).edit(PLACA, commandEsperado);
+
+		verifyNoMoreInteractions(atualizarVeiculoUseCase);
+	}
+
+	@Test
+	void deveDeletarVeiculoPorPlacaComSucesso() {
+		doNothing().when(excluirVeiculoUseCase).delete(PLACA);
+
+		ResponseEntity<Void> response = veiculosController.deletar(PLACA);
+
+		assertAll(() -> assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode()),
+				() -> assertNull(response.getBody()));
+
+		verify(excluirVeiculoUseCase, times(1)).delete(PLACA);
+
+		verifyNoMoreInteractions(excluirVeiculoUseCase);
+	}
+
+	@Test
+	void deveListarVeiculosComSucesso() {
+		VeiculoDTO segundoVeiculoDTO = new VeiculoDTO(PLACA_ATUALIZADA, "Toyota", "Corolla", 2022, "98765432100");
+
+		var primeiroVeiculoCommand = dtoToCommand(veiculoDTO);
+
+		var segundoVeiculoCommand = dtoToCommand(segundoVeiculoDTO);
+
+		when(listarVeiculosUseCase.findAll()).thenReturn(List.of(primeiroVeiculoCommand, segundoVeiculoCommand));
+
+		ResponseEntity<List<VeiculoDTO>> response = veiculosController.listarVeiculos();
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		assertNotNull(response.getBody());
+
+		assertEquals(2, response.getBody().size());
+
+		assertVeiculo(response.getBody().get(0), PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
+
+		assertVeiculo(response.getBody().get(1), PLACA_ATUALIZADA, "Toyota", "Corolla", 2022, "98765432100");
+
+		verify(listarVeiculosUseCase, times(1)).findAll();
+
+		verifyNoMoreInteractions(listarVeiculosUseCase);
+	}
+
+	@Test
+	void deveRetornarListaVaziaQuandoNaoExistiremVeiculos() {
+		when(listarVeiculosUseCase.findAll()).thenReturn(List.of());
+
+		ResponseEntity<List<VeiculoDTO>> response = veiculosController.listarVeiculos();
+
+		assertAll(() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(response.getBody()),
+				() -> assertTrue(response.getBody().isEmpty()));
+
+		verify(listarVeiculosUseCase, times(1)).findAll();
+
+		verifyNoMoreInteractions(listarVeiculosUseCase);
+	}
+
+	private void assertVeiculo(VeiculoDTO resultado, String placaEsperada, String marcaEsperada, String modeloEsperado,
+			Integer anoEsperado, String documentoClienteEsperado) {
+		assertAll(() -> assertEquals(placaEsperada, resultado.placa()),
+				() -> assertEquals(marcaEsperada, resultado.marca()),
+				() -> assertEquals(modeloEsperado, resultado.modelo()),
+				() -> assertEquals(anoEsperado, resultado.ano()),
+				() -> assertEquals(documentoClienteEsperado, resultado.clienteDocumento()));
+	}
 }
-

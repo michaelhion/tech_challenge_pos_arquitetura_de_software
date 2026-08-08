@@ -16,18 +16,17 @@ public class UsuarioServiceConfig {
 
 	@Bean
 	@Transactional
-	public AutenticarUsuarioUseCase autenticarUsuarioUseCase(UsuarioGateway usuarioGateway,
-			TokenGateway tokenGateway, AuthenticationGateway authenticationGateway) {
-		return new AutenticarUsuarioUseCase(usuarioGateway,tokenGateway,authenticationGateway);
+	public AutenticarUsuarioUseCase autenticarUsuarioUseCase(TokenGateway tokenGateway,
+			AuthenticationGateway authenticationGateway) {
+		return new AutenticarUsuarioUseCase(tokenGateway, authenticationGateway);
 
 	}
 
 	@Bean
 	@Transactional
-	public CriarUsuarioUseCase criarUsuarioUseCase(UsuarioGateway usuarioGateway,
-			ClienteGateway clienteGateway,
+	public CriarUsuarioUseCase criarUsuarioUseCase(UsuarioGateway usuarioGateway, ClienteGateway clienteGateway,
 			PasswordEncoderGateway passwordEncoderGateway) {
-		return new CriarUsuarioUseCase(usuarioGateway,clienteGateway,passwordEncoderGateway);
+		return new CriarUsuarioUseCase(usuarioGateway, clienteGateway, passwordEncoderGateway);
 
 	}
 

@@ -28,7 +28,7 @@ public interface OrdemServicoClienteApi {
     );
 
     @PatchMapping("/aprovacao/{id}")
-    ResponseEntity<OrdemServicoDTO> aprovar(
+    ResponseEntity<Void> aprovar(
             @Parameter(
                     description = PARAM_ID_DESCRIPTION,
                     example = EXAMPLE_UUID,

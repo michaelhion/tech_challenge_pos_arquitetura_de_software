@@ -1,12 +1,15 @@
 package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.OrdemServicoOficinaApi;
+import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
-import com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoMapper;
+import com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper;
 import com.techchallenger.oficina360.usecases.ordemservico.AbrirOrdemServicoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.ConsultarStatusOsUseCase;
@@ -27,11 +30,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.*;
 
 @RestController
 @RequestMapping("/ordem-servico")
@@ -65,30 +71,31 @@ public class OrdemServicoOficinaController implements OrdemServicoOficinaApi {
 
 	private Page<OrdemServicoDTO> toPage(ResultadoPaginado<OrdemServicoResumoOutput> output) {
 		Pageable pageable = PageRequest.of(output.pagina(), output.tamanho());
-		return new PageImpl<>(OrdemServicoMapper.outputListToDTOList(output.conteudo()), pageable,
+		return new PageImpl<>(OrdemServicoDTOMapper.outputListToDTOList(output.conteudo()), pageable,
 				output.totalElementos());
 	}
 
 	@Override
 	@GetMapping("/listar/{id}")
 	public ResponseEntity<OrdemServicoDTO> buscarPorId(@PathVariable UUID id) {
-		return buscarOrdemServicoPorIdUseCase.findById(id).map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+		OrdemServicoDTO ordemServicoDTO = commandToDTO(buscarOrdemServicoPorIdUseCase.findById(id));
+		return ResponseEntity.ok(ordemServicoDTO);
 	}
 
 	@Override
 	@PostMapping("/salvar")
-	public ResponseEntity<CriarOrdemServicoDTO> salvar(@Valid @RequestBody CriarOrdemServicoDTO criarOrdemServicoDTO) {
-		CriarOrdemServicoDTO ordemServicoSalva = abrirOrdemServicoUseCase.abrirOrdemServico(criarOrdemServicoDTO);
-		return ResponseEntity.status(201).body(ordemServicoSalva);
+	public ResponseEntity<CriarOrdemServicoResponseDTO> salvar(@Valid @RequestBody CriarOrdemServicoRequestDTO criarOrdemServicoRequestDTO) {
+		CriarOrdemServicoResponseDTO ordemServicoSalva = criarOsRespCommandToDTO(abrirOrdemServicoUseCase.abrirOrdemServico(criarOsToCommand(
+				criarOrdemServicoRequestDTO)));
+		return ResponseEntity.status(HttpStatus.CREATED).body(ordemServicoSalva);
 	}
 
 	@Override
 	@PutMapping("/editar/{id}")
 	public ResponseEntity<OrdemServicoDTO> editar(@PathVariable UUID id,
 			@Valid @RequestBody OrdemServicoDTO ordemServicoDTO) {
-		OrdemServicoDTO ordemServicoAtualizada = editarOrdemServicoUseCase.edit(id, ordemServicoDTO);
-		return ResponseEntity.ok(ordemServicoAtualizada);
+		OrdemServico ordemServico = editarOrdemServicoUseCase.edit(id, toCommand(ordemServicoDTO));
+		return ResponseEntity.ok(domainToDTO(ordemServico));
 	}
 
 	@Override
@@ -100,9 +107,9 @@ public class OrdemServicoOficinaController implements OrdemServicoOficinaApi {
 
 	@Override
 	@PatchMapping("/{id}/diagnostico")
-	public ResponseEntity<OrdemServicoDTO> diagnosticar(@PathVariable UUID id,
+	public ResponseEntity<OrdemServicoDetailDTO> diagnosticar(@PathVariable UUID id,
 			@Valid @RequestBody DiagnosticoDTO diagnosticoDTO) {
-		OrdemServicoDTO ordemServicoDiagnosticada = diagnosticar.diagnosticar(id, diagnosticoDTO);
+		OrdemServicoDetailDTO ordemServicoDiagnosticada = commandDadosFinanceirosToDTO(diagnosticar.diagnosticar(id, diagnosticoDTOTOCommand(diagnosticoDTO)));
 
 		return ResponseEntity.ok(ordemServicoDiagnosticada);
 	}

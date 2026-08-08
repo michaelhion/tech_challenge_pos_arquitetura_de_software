@@ -2,6 +2,7 @@ package com.techchallenger.oficina360.it.ordemservicos;
 
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.UUID;
 
@@ -38,6 +40,9 @@ class OrdemServicoIT extends BaseIT {
 	private static final String OS_COM_STATUS_REPROVADA = "0b49c552-8ba0-4c0b-bcec-42db82526af9";
 	private static final String OS_COM_STATUS_EM_EXECUCAO = "4baecc4b-57d2-419b-b080-ae6615a44052";
 	private static final String OS_COM_STATUS_FINALIZADA = "8c7d79a6-370d-4007-a772-a8e22420fbfb";
+
+	@MockitoBean
+	private NotificacaoEmailGateway notificacaoEmailGateway;
 
 	@Autowired
 	private OrdemServicoGateway ordemServicoGateway;
@@ -94,8 +99,7 @@ class OrdemServicoIT extends BaseIT {
 		mockMvc.perform(patch((ORDEM_SERVICO_CLIENTE_BASE_PATH + "/aprovacao/%s").formatted(id))
 						.header("Authorization", "Bearer " + tokenCliente2())
 						.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(aprovacaoOrdemServicoDTOValido())))
-				.andExpect(status().isOk())
-				.andExpect( jsonPath("$.ordemDeServicoStatus").value("ORCAMENTO_APROVADO"))
+				.andExpect(status().isAccepted())
 				.andDo(print());
 
 		mockMvc.perform(patch(ORDEM_SERVICO_BASE_PATH + "/execucao/iniciar/%s".formatted(id))
@@ -142,7 +146,7 @@ class OrdemServicoIT extends BaseIT {
 		mockMvc.perform(patch((ORDEM_SERVICO_CLIENTE_BASE_PATH + "/aprovacao/%s").formatted(OS_COM_STATUS_AGUARDANDO_APROVACAO))
 						.header("Authorization", "Bearer " + tokenCliente())
 						.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(aprovacaoOrdemServicoDTOValido())))
-				.andExpect(status().isOk())
+				.andExpect(status().isAccepted())
 				.andDo(print());
 	}
 

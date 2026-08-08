@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdemServicoServicoMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.mappers.ordemservico</a> &gt; <span class="el_source">OrdemServicoServicoMapper.java</span></div><h1>OrdemServicoServicoMapper.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.mappers.ordemservico;
+
+import com.techchallenger.oficina360.dominio.OrdemServicoServico;
+import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoServicoEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class OrdemServicoServicoMapper {
+
+	public OrdemServicoServico toDomain(OrdemServicoServicoEntity entity) {
+
+<span class="nc" id="L16">		return new OrdemServicoServico(</span>
+<span class="nc" id="L17">				entity.getId(),</span>
+<span class="nc" id="L18">				entity.getServicoId(),</span>
+<span class="nc" id="L19">				entity.getDescricao(),</span>
+<span class="nc" id="L20">				entity.getValor()</span>
+		);
+	}
+
+	public OrdemServicoServicoEntity toEntity(OrdemServicoServico domain) {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">		if (domain == null) {</span>
+<span class="nc" id="L26">			return null;</span>
+		}
+
+<span class="nc" id="L29">		return OrdemServicoServicoEntity.builder()</span>
+<span class="nc" id="L30">				.id(domain.getId())</span>
+<span class="nc" id="L31">				.servicoId(domain.getServicoId())</span>
+<span class="nc" id="L32">				.descricao(domain.getDescricao())</span>
+<span class="nc" id="L33">				.valor(domain.getValor())</span>
+<span class="nc" id="L34">				.build();</span>
+	}
+
+	public List&lt;OrdemServicoServico&gt; toDomainList(List&lt;OrdemServicoServicoEntity&gt; entities) {
+
+<span class="nc bnc" id="L39" title="All 2 branches missed.">		if (entities == null) {</span>
+<span class="nc" id="L40">			return List.of();</span>
+		}
+
+<span class="nc" id="L43">		return entities.stream().map(this::toDomain).toList();</span>
+	}
+
+	public List&lt;OrdemServicoServicoEntity&gt; toEntityList(List&lt;OrdemServicoServico&gt; entities) {
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">		if (entities == null) {</span>
+<span class="nc" id="L49">			return List.of();</span>
+		}
+
+<span class="nc" id="L52">		return entities.stream().map(this::toEntity).toList();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

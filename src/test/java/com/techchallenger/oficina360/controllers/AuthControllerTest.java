@@ -6,6 +6,8 @@ import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.AuthController;
 import com.techchallenger.oficina360.usecases.auth.AutenticarUsuarioUseCase;
 import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.command.CriarUsuarioCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.UsuarioCommand;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,76 +24,52 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
-    @Mock
-    private AutenticarUsuarioUseCase autenticarUsuarioUseCase;
+	@Mock
+	private AutenticarUsuarioUseCase autenticarUsuarioUseCase;
 
-    @Mock
-    private CriarUsuarioUseCase criarUsuarioUseCase;
+	@Mock
+	private CriarUsuarioUseCase criarUsuarioUseCase;
 
-    @InjectMocks
-    private AuthController authController;
+	@InjectMocks
+	private AuthController authController;
 
+	@Test
+	void deveAutenticarUsuarioERetornarTokenJwt() {
 
-    @Test
-    void deveAutenticarUsuarioERetornarTokenJwt() {
+		LoginRequestDTO request = new LoginRequestDTO("admin@oficina360.com", "123456");
 
-        LoginRequestDTO request =
-                new LoginRequestDTO(
-                        "admin@oficina360.com",
-                        "123456"
-                );
+		UsuarioCommand command = new UsuarioCommand("admin@oficina360.com", "123456");
 
-        when(autenticarUsuarioUseCase.executar(request))
-                .thenReturn("token-jwt-gerado");
+		when(autenticarUsuarioUseCase.executar(command)).thenReturn("token-jwt-gerado");
 
-        ResponseEntity<LoginResponseDTO> response =
-                authController.login(request);
+		ResponseEntity<LoginResponseDTO> response = authController.login(request);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        assertNotNull(response.getBody());
+		assertNotNull(response.getBody());
 
-        assertEquals(
-                "token-jwt-gerado",
-                response.getBody().token()
-        );
+		assertEquals("token-jwt-gerado", response.getBody().token());
 
-        assertEquals(
-                "Bearer",
-                response.getBody().tipo()
-        );
+		assertEquals("Bearer", response.getBody().tipo());
 
-        verify(autenticarUsuarioUseCase)
-                .executar(request);
-    }
+		verify(autenticarUsuarioUseCase).executar(command);
+	}
 
+	@Test
+	void deveCriarUsuarioComSucesso() {
 
-    @Test
-    void deveCriarUsuarioComSucesso() {
+		CriarUsuarioCommand command = new CriarUsuarioCommand("Novo Usuario", "novo.usuario@oficina360.com",
+				"123456", "ADMIN");
+		CriarUsuarioRequestDTO dto = new CriarUsuarioRequestDTO("Novo Usuario", "novo.usuario@oficina360.com",
+				"123456", "ADMIN");
 
-        CriarUsuarioRequestDTO request =
-                new CriarUsuarioRequestDTO(
-                        "Novo Usuario",
-                        "novo.usuario@oficina360.com",
-                        "123456",
-                        "ADMIN"
-                );
+		ResponseEntity<String> response = authController.criarUsuario(dto);
 
-        ResponseEntity<String> response =
-                authController.criarUsuario(request);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        assertEquals(
-                HttpStatus.OK,
-                response.getStatusCode()
-        );
+		assertEquals("Usuário criado com sucesso!", response.getBody());
 
-        assertEquals(
-                "Usuário criado com sucesso!",
-                response.getBody()
-        );
-
-        verify(criarUsuarioUseCase)
-                .executar(request);
-    }
+		verify(criarUsuarioUseCase).executar(command);
+	}
 
 }

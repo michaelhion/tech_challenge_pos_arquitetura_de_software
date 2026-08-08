@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.adapters;
 
 import com.techchallenger.oficina360.dominio.Cliente;
-import com.techchallenger.oficina360.frameworks.mappers.cliente.ClienteMapper;
+import com.techchallenger.oficina360.frameworks.mappers.cliente.ClienteDTOMapper;
 import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.ClienteRepository;
 import com.techchallenger.oficina360.gateways.ClienteGateway;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ClienteGatewayImpl implements ClienteGateway {
 
-    private final ClienteMapper mapper;
+    private final ClienteDTOMapper mapper;
     private final ClienteRepository repository;
 
     @Override

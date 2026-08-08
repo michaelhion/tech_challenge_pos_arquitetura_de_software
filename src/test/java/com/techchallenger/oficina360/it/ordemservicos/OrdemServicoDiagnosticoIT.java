@@ -2,9 +2,10 @@ package com.techchallenger.oficina360.it.ordemservicos;
 
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoDTO;
+import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
+import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.math.BigDecimal;
@@ -42,6 +44,9 @@ public class OrdemServicoDiagnosticoIT extends BaseIT {
 
 	@Autowired
 	private OrdemServicoGateway ordemServicoGateway;
+
+	@MockitoBean
+	private NotificacaoEmailGateway notificacaoEmailGateway;
 
 	private UUID extrairIdDoResponse(ResultActions resultActions) throws Exception {
 		UUID id = UUID.fromString(JsonPath.read(resultActions.andReturn().getResponse().getContentAsString(), "$.id"));
@@ -149,7 +154,7 @@ public class OrdemServicoDiagnosticoIT extends BaseIT {
 				.content(json(diagnosticoDTO)));
 	}
 
-	private ResultActions criarOrdemServico(CriarOrdemServicoDTO os) throws Exception {
+	private ResultActions criarOrdemServico(CriarOrdemServicoRequestDTO os) throws Exception {
 		return mockMvc.perform(autenticado(
 				post("/ordem-servico/salvar").contentType(MediaType.APPLICATION_JSON)
 						.content(json(os)), tokenAdmin()));

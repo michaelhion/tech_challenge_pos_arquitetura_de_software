@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioServiceConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.frameworks.config</a> &gt; <span class="el_source">UsuarioServiceConfig.java</span></div><h1>UsuarioServiceConfig.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.frameworks.config;
+
+import com.techchallenger.oficina360.gateways.AuthenticationGateway;
+import com.techchallenger.oficina360.gateways.ClienteGateway;
+import com.techchallenger.oficina360.gateways.PasswordEncoderGateway;
+import com.techchallenger.oficina360.gateways.TokenGateway;
+import com.techchallenger.oficina360.gateways.UsuarioGateway;
+import com.techchallenger.oficina360.usecases.auth.AutenticarUsuarioUseCase;
+import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
+import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+<span class="fc" id="L15">public class UsuarioServiceConfig {</span>
+
+	@Bean
+	@Transactional
+	public AutenticarUsuarioUseCase autenticarUsuarioUseCase(TokenGateway tokenGateway,
+			AuthenticationGateway authenticationGateway) {
+<span class="fc" id="L21">		return new AutenticarUsuarioUseCase(tokenGateway, authenticationGateway);</span>
+
+	}
+
+	@Bean
+	@Transactional
+	public CriarUsuarioUseCase criarUsuarioUseCase(UsuarioGateway usuarioGateway, ClienteGateway clienteGateway,
+			PasswordEncoderGateway passwordEncoderGateway) {
+<span class="fc" id="L29">		return new CriarUsuarioUseCase(usuarioGateway, clienteGateway, passwordEncoderGateway);</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

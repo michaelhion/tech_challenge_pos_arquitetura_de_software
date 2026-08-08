@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TempoExecucaoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">oficina360</a> &gt; <a href="index.source.html" class="el_package">com.techchallenger.oficina360.usecases.services</a> &gt; <span class="el_source">TempoExecucaoService.java</span></div><h1>TempoExecucaoService.java</h1><pre class="source lang-java linenums">package com.techchallenger.oficina360.usecases.services;
+
+import com.techchallenger.oficina360.dominio.OrdemServico;
+import com.techchallenger.oficina360.dominio.OrdemServicoServico;
+import com.techchallenger.oficina360.dominio.TempoExecucaoServico;
+import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AMERICA_SAO_PAULO;
+
+public class TempoExecucaoService {
+
+	private final TempoExecucaoServicoGateway tempoExecucaoServicoGateway;
+
+<span class="fc" id="L18">	public TempoExecucaoService(TempoExecucaoServicoGateway tempoExecucaoServicoGateway) {</span>
+<span class="fc" id="L19">		this.tempoExecucaoServicoGateway = tempoExecucaoServicoGateway;</span>
+<span class="fc" id="L20">	}</span>
+
+	public void registrar(OrdemServico ordemServico) {
+
+<span class="nc" id="L24">		int tempoTotal = (int) Duration</span>
+<span class="nc" id="L25">				.between(ordemServico.getDtHoraInicioExecucao(), ordemServico.getDtHoraFimExecucao())</span>
+<span class="nc" id="L26">				.toMinutes();</span>
+
+<span class="nc" id="L28">		int quantidadeServicos = ordemServico.getServicos().size();</span>
+
+<span class="nc bnc" id="L30" title="All 2 branches missed.">		int tempoPorServico = quantidadeServicos &gt; 0</span>
+<span class="nc" id="L31">				? tempoTotal / quantidadeServicos</span>
+<span class="nc" id="L32">				: tempoTotal;</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">		for (OrdemServicoServico oss : ordemServico.getServicos()) {</span>
+<span class="nc" id="L35">			tempoExecucaoServicoGateway.save(buildTempoExecucaoServico(oss, tempoPorServico));</span>
+<span class="nc" id="L36">		}</span>
+<span class="nc" id="L37">	}</span>
+
+	private TempoExecucaoServico buildTempoExecucaoServico(OrdemServicoServico oss, int tempoPorServico) {
+<span class="nc" id="L40">		return new TempoExecucaoServico(</span>
+<span class="nc" id="L41">				oss.getServicoId(),</span>
+<span class="nc" id="L42">				tempoPorServico,</span>
+<span class="nc" id="L43">				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

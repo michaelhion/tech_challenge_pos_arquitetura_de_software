@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.adapters;
 
 import com.techchallenger.oficina360.dominio.Veiculo;
-import com.techchallenger.oficina360.frameworks.mappers.veiculo.VeiculoMapper;
+import com.techchallenger.oficina360.frameworks.mappers.veiculo.VeiculoDTOMapper;
 import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
 import com.techchallenger.oficina360.frameworks.persistence.repositories.VeiculoRepository;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
@@ -16,14 +16,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VeiculoGatewayImpl implements VeiculoGateway {
 
-    private final VeiculoMapper veiculoMapper;
+    private final VeiculoDTOMapper veiculoDTOMapper;
     private final VeiculoRepository repository;
 
     @Override
     public Optional<Veiculo> findByPlaca(String placa){
         return repository
                 .findByPlaca(placa)
-                .map(veiculoMapper::toDomain);
+                .map(veiculoDTOMapper::toDomain);
     }
 
     @Override
@@ -43,22 +43,22 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
 
     @Override
     public Veiculo save(Veiculo veiculo){
-        VeiculoEntity entity = veiculoMapper.toEntity(veiculo);
+        VeiculoEntity entity = veiculoDTOMapper.toEntity(veiculo);
         VeiculoEntity persisted = repository.save(entity);
-        return veiculoMapper.toDomain(persisted);
+        return veiculoDTOMapper.toDomain(persisted);
     }
 
     @Override
     public List<Veiculo> findAll(){
         return repository.findAll()
                 .stream()
-                .map(veiculoMapper::toDomain)
+                .map(veiculoDTOMapper::toDomain)
                 .toList();
     }
 
     @Override
     public Optional<Veiculo> findById(UUID id){
         return repository.findById(id)
-                .map(veiculoMapper::toDomain);
+                .map(veiculoDTOMapper::toDomain);
     }
 }

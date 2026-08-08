@@ -20,13 +20,16 @@ import java.util.List;
 <span class="fc" id="L20">    }</span>
 
     public boolean isAtiva() {
-<span class="nc" id="L23">        return ativa;</span>
+<span class="fc" id="L23">        return ativa;</span>
     }
 
+<span class="fc" id="L26">    private static final List&lt;OrdemDeServicoStatus&gt; ATIVOS =</span>
+<span class="fc" id="L27">            Arrays.stream(values())</span>
+<span class="fc" id="L28">                    .filter(OrdemDeServicoStatus::isAtiva)</span>
+<span class="fc" id="L29">                    .toList();</span>
+
     public static List&lt;OrdemDeServicoStatus&gt; ativos() {
-<span class="nc" id="L27">        return Arrays.stream(values())</span>
-<span class="nc" id="L28">                .filter(OrdemDeServicoStatus::isAtiva)</span>
-<span class="nc" id="L29">                .toList();</span>
+<span class="nc" id="L32">        return ATIVOS;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

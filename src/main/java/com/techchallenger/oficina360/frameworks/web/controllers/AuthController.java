@@ -6,6 +6,8 @@ import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
 import com.techchallenger.oficina360.usecases.auth.AutenticarUsuarioUseCase;
 import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.command.CriarUsuarioCommand;
+import com.techchallenger.oficina360.usecases.ordemservico.command.UsuarioCommand;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,25 +24,23 @@ import static com.techchallenger.oficina360.constants.Roles.ADMIN;
 @RequestMapping("/auth")
 public class AuthController implements AuthApi {
 
-    private final AutenticarUsuarioUseCase autenticarUsuarioUseCase;
-    private final CriarUsuarioUseCase criarUsuarioUseCase;
+	private final AutenticarUsuarioUseCase autenticarUsuarioUseCase;
+	private final CriarUsuarioUseCase criarUsuarioUseCase;
 
-    @Override
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(
-            @Valid @RequestBody LoginRequestDTO loginRequestDTO
-    ) {
-        String token = autenticarUsuarioUseCase.executar(loginRequestDTO);
+	@Override
+	@PostMapping("/login")
+	public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
+		UsuarioCommand command = new UsuarioCommand(loginRequestDTO.email(), loginRequestDTO.senha());
+		String token = autenticarUsuarioUseCase.executar(command);
 
-        return ResponseEntity.ok(new LoginResponseDTO(token, "Bearer"));
-    }
+		return ResponseEntity.ok(new LoginResponseDTO(token, "Bearer"));
+	}
 
-
-
-    @PostMapping("/criar-usuario")
-    @PreAuthorize("hasRole('" + ADMIN + "')")
-    public ResponseEntity<String> criarUsuario(@Valid @RequestBody CriarUsuarioRequestDTO criarUsuarioRequestDTO) {
-        criarUsuarioUseCase.executar(criarUsuarioRequestDTO);
-        return ResponseEntity.ok("Usuário criado com sucesso!");
-    }
+	@PostMapping("/criar-usuario")
+	@PreAuthorize("hasRole('" + ADMIN + "')")
+	public ResponseEntity<String> criarUsuario(@Valid @RequestBody CriarUsuarioRequestDTO dto) {
+		CriarUsuarioCommand command = new CriarUsuarioCommand(dto.email(), dto.senha(), dto.documento(), dto.role());
+		criarUsuarioUseCase.executar(command);
+		return ResponseEntity.ok("Usuário criado com sucesso!");
+	}
 }

@@ -1,11 +1,13 @@
 package com.techchallenger.oficina360.controllers;
 
+import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
 import com.techchallenger.oficina360.frameworks.web.controllers.OrdemServicoClienteController;
 import com.techchallenger.oficina360.usecases.ordemservico.AprovarOrcamentoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
+import com.techchallenger.oficina360.usecases.ordemservico.command.OrdemServicoRespCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,135 +16,117 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.aprovacaoDTOToCommand;
+import static com.techchallenger.oficina360.frameworks.mappers.ordemservico.OrdemServicoDTOMapper.commandToDTO;
+import static com.techchallenger.oficina360.mappers.OrdemServicoCommandMapper.domainToCommand;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrdemServicoClienteControllerTest {
 
-    @Mock
-    private AprovarOrcamentoUseCase aprovarOrcamentoUseCase;
+	private static final String DOCUMENTO_CLIENTE = "12345678901";
 
-    @Mock
-    private BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
+	private static final String PLACA_VEICULO = "ABC1D23";
 
-    @Mock
-    private OrdemServicoClienteController ordemServicoClienteController;
+	private static final String DESCRICAO_PROBLEMA = "Veículo apresenta ruído ao frear " + "e vibração no volante.";
 
-    private UUID ordemServicoId;
+	@Mock
+	private AprovarOrcamentoUseCase aprovarOrcamentoUseCase;
 
+	@Mock
+	private BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
 
-    @BeforeEach
-    void setUp() {
-        ordemServicoClienteController = new OrdemServicoClienteController(aprovarOrcamentoUseCase,buscarOrdemServicoPorIdUseCase);
+	private OrdemServicoClienteController controller;
 
-        ordemServicoId = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
-    }
+	private UUID ordemServicoId;
 
+	@BeforeEach
+	void setUp() {
+		controller = new OrdemServicoClienteController(aprovarOrcamentoUseCase, buscarOrdemServicoPorIdUseCase);
 
-    @Test
-    void deveAprovarOrdemServicoComSucesso() {
-        AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(true, null);
+		ordemServicoId = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
+	}
 
-        OrdemServicoDTO ordemServicoAprovada = new OrdemServicoDTO(
-                ordemServicoId,
-                "12345678901",
-                "ABC1D23",
-                "Veículo apresenta ruído ao frear e vibração no volante.",
-                OrdemDeServicoStatus.ORCAMENTO_APROVADO,
-                null
-        );
+	@Test
+	void deveAprovarOrdemServicoComSucesso() {
+		AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(true, null);
 
-        when(aprovarOrcamentoUseCase.aprovar(ordemServicoId, aprovacaoDTO))
-                .thenReturn(ordemServicoAprovada);
+		var commandEsperado = aprovacaoDTOToCommand(aprovacaoDTO);
 
-        ResponseEntity<OrdemServicoDTO> response =
-                ordemServicoClienteController.aprovar(ordemServicoId, aprovacaoDTO);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(ordemServicoId, response.getBody().id());
-        assertEquals("12345678901", response.getBody().documentoCliente());
-        assertEquals("ABC1D23", response.getBody().placaVeiculo());
-        assertEquals(OrdemDeServicoStatus.ORCAMENTO_APROVADO, response.getBody().ordemDeServicoStatus());
+		ResponseEntity<Void> response = controller.aprovar(ordemServicoId, aprovacaoDTO);
 
-        verify(aprovarOrcamentoUseCase, times(1))
-                .aprovar(ordemServicoId, aprovacaoDTO);
-    }
+		assertAll(() -> assertNotNull(response), () -> assertEquals(HttpStatus.ACCEPTED, response.getStatusCode()),
+				() -> assertFalse(response.hasBody()), () -> assertNull(response.getBody()));
 
-    @Test
-    void deveReprovarOrdemServicoComSucesso() {
-        AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(false, "muito caro");
+		verify(aprovarOrcamentoUseCase, times(1)).aprovar(ordemServicoId, commandEsperado);
 
-        OrdemServicoDTO ordemServicoReprovada = new OrdemServicoDTO(
-                ordemServicoId,
-                "12345678901",
-                "ABC1D23",
-                "Veículo apresenta ruído ao frear e vibração no volante.",
-                OrdemDeServicoStatus.ORCAMENTO_REPROVADO,
-                null
-        );
+		verifyNoMoreInteractions(aprovarOrcamentoUseCase);
+	}
 
-        when(aprovarOrcamentoUseCase.aprovar(ordemServicoId, aprovacaoDTO))
-                .thenReturn(ordemServicoReprovada);
+	@Test
+	void deveReprovarOrdemServicoComSucesso() {
+		AprovacaoOrdemServicoDTO aprovacaoDTO = new AprovacaoOrdemServicoDTO(false, "Orçamento acima do esperado.");
 
-        ResponseEntity<OrdemServicoDTO> response =
-                ordemServicoClienteController.aprovar(ordemServicoId, aprovacaoDTO);
+		var commandEsperado = aprovacaoDTOToCommand(aprovacaoDTO);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(ordemServicoId, response.getBody().id());
-        assertEquals("12345678901", response.getBody().documentoCliente());
-        assertEquals("ABC1D23", response.getBody().placaVeiculo());
-        assertEquals(OrdemDeServicoStatus.ORCAMENTO_REPROVADO, response.getBody().ordemDeServicoStatus());
+		ResponseEntity<Void> response = controller.aprovar(ordemServicoId, aprovacaoDTO);
 
-        verify(aprovarOrcamentoUseCase, times(1))
-                .aprovar(ordemServicoId, aprovacaoDTO);
-    }
+		assertAll(() -> assertNotNull(response), () -> assertEquals(HttpStatus.ACCEPTED, response.getStatusCode()),
+				() -> assertFalse(response.hasBody()), () -> assertNull(response.getBody()));
 
-    @Test
-    void deveBuscarOrdemServicoPorIdComSucesso() {
+		verify(aprovarOrcamentoUseCase, times(1)).aprovar(ordemServicoId, commandEsperado);
 
-        OrdemServicoDTO ordemServicoDTO =
-                new OrdemServicoDTO(
-                        ordemServicoId,
-                        "12345678901",
-                        "ABC1D23",
-                        "Problema no freio",
-                        OrdemDeServicoStatus.RECEBIDA,
-                        null
-                );
+		verifyNoMoreInteractions(aprovarOrcamentoUseCase);
+	}
 
-        when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId))
-                .thenReturn(Optional.of(ordemServicoDTO));
+	@Test
+	void deveBuscarOrdemServicoPorIdComSucesso() {
+		OrdemServico ordemServico = criarOrdemServicoRecebida();
 
-        ResponseEntity<OrdemServicoDTO> response = ordemServicoClienteController
-                        .buscarPorId(ordemServicoId);
+		OrdemServicoRespCommand command = domainToCommand(ordemServico);
 
-        assertEquals(HttpStatus.OK,response.getStatusCode());
+		OrdemServicoDTO dtoEsperado = commandToDTO(command);
 
-        assertNotNull(response.getBody());
+		when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId)).thenReturn(command);
 
-        assertEquals(ordemServicoId,response.getBody().id());
+		ResponseEntity<OrdemServicoDTO> response = controller.buscarPorId(ordemServicoId);
 
-        verify(buscarOrdemServicoPorIdUseCase)
-                .findById(ordemServicoId);
-    }
+		assertAll(() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(response.getBody()),
+				() -> assertEquals(dtoEsperado.documentoCliente(), response.getBody().documentoCliente()),
+				() -> assertEquals(dtoEsperado.placaVeiculo(), response.getBody().placaVeiculo()),
+				() -> assertEquals(dtoEsperado.descricaoProblema(), response.getBody().descricaoProblema()),
+				() -> assertEquals(dtoEsperado.ordemDeServicoStatus(), response.getBody().ordemDeServicoStatus()));
 
-    @Test
-    void deveRetornar404QuandoOrdemServicoNaoExistir() {
+		verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
 
-        when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId))
-                .thenReturn(Optional.empty());
+		verifyNoMoreInteractions(buscarOrdemServicoPorIdUseCase);
+	}
 
-        ResponseEntity<OrdemServicoDTO> response = ordemServicoClienteController
-                        .buscarPorId(ordemServicoId);
+	@Test
+	void devePropagarExcecaoQuandoOrdemServicoNaoExistir() {
+		RuntimeException excecaoEsperada = new RuntimeException("Ordem de serviço não encontrada.");
 
-        assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
+		when(buscarOrdemServicoPorIdUseCase.findById(ordemServicoId)).thenThrow(excecaoEsperada);
 
-        verify(buscarOrdemServicoPorIdUseCase).findById(ordemServicoId);
-    }
+		RuntimeException excecaoObtida = assertThrows(RuntimeException.class,
+				() -> controller.buscarPorId(ordemServicoId));
+
+		assertAll(() -> assertEquals(excecaoEsperada, excecaoObtida),
+				() -> assertEquals("Ordem de serviço não encontrada.", excecaoObtida.getMessage()));
+
+		verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
+
+		verifyNoMoreInteractions(buscarOrdemServicoPorIdUseCase);
+	}
+
+	private OrdemServico criarOrdemServicoRecebida() {
+		return new OrdemServico(ordemServicoId, DOCUMENTO_CLIENTE, PLACA_VEICULO, LocalDateTime.of(2026, 7, 25, 10, 0),
+				null, DESCRICAO_PROBLEMA, OrdemDeServicoStatus.RECEBIDA, null, new ArrayList<>(), new ArrayList<>(),
+				null, null);
+	}
 }

@@ -23,6 +23,20 @@ public class Cliente {
         this.telefone = telefone;
     }
 
+    public Cliente(String documento, String nome, String email, String telefone) {
+        this.documento = documento;
+        this.nome = nome;
+        this.email = email;
+        this.telefone = telefone;
+    }
+
+    public void editar(String documento, String nome, String email, String telefone) {
+        this.documento = documento;
+        this.nome = nome;
+        this.email = email;
+        this.telefone = telefone;
+    }
+
     public Cliente() {
     }
 

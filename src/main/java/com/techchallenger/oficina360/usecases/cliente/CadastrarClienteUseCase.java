@@ -1,12 +1,11 @@
 package com.techchallenger.oficina360.usecases.cliente;
 
-import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.gateways.ClienteGateway;
-import com.techchallenger.oficina360.mappers.ClienteMapper;
+import com.techchallenger.oficina360.usecases.ordemservico.command.ClienteCommand;
 import com.techchallenger.oficina360.usecases.shared.exception.ClienteJaCadastradoException;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.CLIENTE_JA_CADASTRADO;
-import static com.techchallenger.oficina360.mappers.ClienteMapper.domainToDTO;
+import static com.techchallenger.oficina360.mappers.ClienteCommandMapper.domainToCommand;
 import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
 
 public class CadastrarClienteUseCase {
@@ -17,10 +16,10 @@ public class CadastrarClienteUseCase {
 		this.clienteGateway = clienteGateway;
 	}
 
-	public ClienteDTO save(ClienteDTO clienteDTO) {
-		if (clienteGateway.existsByDocumento(normalizarDocumento(clienteDTO.documento()))) {
+	public ClienteCommand save(ClienteCommand command) {
+		if (clienteGateway.existsByDocumento(normalizarDocumento(command.documento()))) {
 			throw new ClienteJaCadastradoException(CLIENTE_JA_CADASTRADO);
 		}
-		return domainToDTO(clienteGateway.save(ClienteMapper.toDomain(clienteDTO)));
+		return domainToCommand(clienteGateway.save(domainToCommand(command)));
 	}
 }
