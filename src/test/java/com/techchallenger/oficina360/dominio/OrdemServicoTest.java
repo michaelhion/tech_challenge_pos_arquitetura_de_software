@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,8 @@ class OrdemServicoTest {
 	private static final LocalDateTime DATA_ABERTURA = LocalDateTime.of(2026, 7, 19, 11, 0);
 
 	private OrdemServico os;
+
+	private static final ZoneId ZONA_SAO_PAULO = ZoneId.of("America/Sao_Paulo");
 
 	@BeforeEach
 	void setup() {
@@ -440,11 +443,11 @@ class OrdemServicoTest {
 		void deveIniciarExecucaoComOrcamentoAprovado() {
 			OrdemServico ordem = criarOrdemServico(ORCAMENTO_APROVADO);
 
-			LocalDateTime antes = LocalDateTime.now();
+			LocalDateTime antes = LocalDateTime.now(ZONA_SAO_PAULO);
 
 			ordem.iniciarExecucao();
 
-			LocalDateTime depois = LocalDateTime.now();
+			LocalDateTime depois = LocalDateTime.now(ZONA_SAO_PAULO);
 
 			assertAll(() -> assertEquals(EM_EXECUCAO, ordem.getOrdemDeServicoStatus()),
 					() -> assertNotNull(ordem.getDtHoraInicioExecucao()),
@@ -504,11 +507,11 @@ class OrdemServicoTest {
 		void deveEntregarOrdemFinalizada() {
 			OrdemServico ordem = criarOrdemServico(FINALIZADA);
 
-			LocalDateTime antes = LocalDateTime.now();
+			LocalDateTime antes = LocalDateTime.now(ZONA_SAO_PAULO);
 
 			ordem.entregar();
 
-			LocalDateTime depois = LocalDateTime.now();
+			LocalDateTime depois = LocalDateTime.now(ZONA_SAO_PAULO);
 
 			assertAll(() -> assertEquals(ENTREGUE, ordem.getOrdemDeServicoStatus()),
 					() -> assertNotNull(ordem.getDtHoraFechamento()),
