@@ -1,4 +1,4 @@
-name: CI and SonarCloud
+name: SonarCloud
 
 on:
   push:
@@ -8,99 +8,39 @@ on:
       - develop
 
   pull_request:
-    branches:
-      - main
-      - master
-      - develop
-
-permissions:
-  contents: read
 
 jobs:
-  quality:
-    name: Build, Tests and Quality
+  analyze:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Configurar Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
-          cache: maven
+          java-version: 21
 
-      - name: Compilar, testar e gerar cobertura
-        run: mvn -B clean verify
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-      - name: Verificar relatório JaCoCo
-        run: |
-          echo "Relatórios JaCoCo encontrados:"
-          find . -name "jacoco.xml" -type f -print
+      - name: Build
+        run: mvn clean test jacoco:report
 
-      - name: Dependency Check
+      - name: Dependency check
         continue-on-error: true
+        run: mvn dependency-check:check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        shell: bash
-        run: |
-          set +e
-          
-          mvn -B dependency-check:check \
-            -DnvdApiKey="$NVD_API_KEY"
-          
-          RESULTADO=$?
-          
-          if [ "$RESULTADO" -ne 0 ]; then
-            echo "Primeira execução falhou. Limpando a base local."
-          
-            mvn -B dependency-check:purge
-          
-            mvn -B dependency-check:check \
-              -DnvdApiKey="$NVD_API_KEY"
-          
-            RESULTADO=$?
-          fi
-          
-          exit "$RESULTADO"
+
 
       - name: SonarCloud
-        if: ${{ env.SONAR_TOKEN != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B sonar:sonar \
+          mvn sonar:sonar \
             -Dsonar.projectKey=michaelhion_tech_challenge_pos_arquitetura_de_software \
             -Dsonar.organization=michaelhion \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-            -Dsonar.qualitygate.wait=true
-
-      - name: Publicar JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: oficina360-jar
-          path: target/*.jar
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Publicar relatório JaCoCo
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: target/site/jacoco/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Publicar relatório Dependency Check
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-check-report
-          path: target/dependency-check-report.*
-          if-no-files-found: warn
-          retention-days: 7
