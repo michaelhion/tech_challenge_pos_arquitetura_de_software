@@ -46,8 +46,27 @@ jobs:
         continue-on-error: true
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        shell: bash
         run: |
-          mvn -B dependency-check:check
+          set +e
+          
+          mvn -B dependency-check:check \
+            -DnvdApiKey="$NVD_API_KEY"
+          
+          RESULTADO=$?
+          
+          if [ "$RESULTADO" -ne 0 ]; then
+            echo "Primeira execução falhou. Limpando a base local."
+          
+            mvn -B dependency-check:purge
+          
+            mvn -B dependency-check:check \
+              -DnvdApiKey="$NVD_API_KEY"
+          
+            RESULTADO=$?
+          fi
+          
+          exit "$RESULTADO"
 
       - name: SonarCloud
         if: ${{ env.SONAR_TOKEN != '' }}

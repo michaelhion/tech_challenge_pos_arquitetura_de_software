@@ -25,8 +25,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrdemServicoFactoryTest {
 
-	private static final ZoneId ZONA_SAO_PAULO = ZoneId.of("America/Sao_Paulo");
-
 	private static final String DOCUMENTO_CLIENTE = "12345678901";
 
 	private static final String PLACA_VEICULO = "ABC1D23";
