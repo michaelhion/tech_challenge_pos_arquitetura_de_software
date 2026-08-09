@@ -12,14 +12,27 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.AGUARDANDO_APROVACAO;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.EM_DIAGNOSTICO;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.EM_EXECUCAO;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.ENTREGUE;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.FINALIZADA;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.ORCAMENTO_APROVADO;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.ORCAMENTO_REPROVADO;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.RECEBIDA;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,13 +40,48 @@ class OrdemServicoTest {
 
 	private static final LocalDateTime DATA_ABERTURA = LocalDateTime.of(2026, 7, 19, 11, 0);
 
-	private OrdemServico os;
+	private static final LocalDateTime DATA_INICIO_EXECUCAO = LocalDateTime.of(2026, 7, 19, 12, 0);
 
-	private static final ZoneId ZONA_SAO_PAULO = ZoneId.of("America/Sao_Paulo");
+	private static final LocalDateTime DATA_FIM_EXECUCAO = LocalDateTime.of(2026, 7, 19, 14, 30);
+
+	private static final LocalDateTime DATA_FECHAMENTO = LocalDateTime.of(2026, 7, 19, 15, 0);
+
+	private OrdemServico ordemServico;
 
 	@BeforeEach
-	void setup() {
-		os = criarOrdemServico(RECEBIDA);
+	void setUp() {
+		ordemServico = criarOrdemServico(RECEBIDA);
+	}
+
+	private OrdemServico criarOrdemServico(OrdemDeServicoStatus status) {
+		return criarOrdemServico(status, List.of(), List.of(), null, null);
+	}
+
+	private OrdemServico criarOrdemServico(OrdemDeServicoStatus status, LocalDateTime inicioExecucao,
+			LocalDateTime fimExecucao) {
+		return criarOrdemServico(status, List.of(), List.of(), inicioExecucao, fimExecucao);
+	}
+
+	private OrdemServico criarOrdemServico(OrdemDeServicoStatus status, List<OrdemServicoServico> servicos,
+			List<OrdemServicoItemEstoque> itensEstoque, LocalDateTime inicioExecucao, LocalDateTime fimExecucao) {
+		return new OrdemServico(UUID.randomUUID(), "12345678910", "ABC1D23", DATA_ABERTURA, null, "Barulho ao frear",
+				status, null, servicos, itensEstoque, inicioExecucao, fimExecucao);
+	}
+
+	private OrdemServicoServico criarServico(BigDecimal valor) {
+		return new OrdemServicoServico(UUID.randomUUID(), "Serviço de teste", valor);
+	}
+
+	private OrdemServicoItemEstoque criarItemEstoqueComValor(BigDecimal valorTotal) {
+		OrdemServicoItemEstoque itemEstoque = mock(OrdemServicoItemEstoque.class);
+
+		when(itemEstoque.getValorTotal()).thenReturn(valorTotal);
+
+		return itemEstoque;
+	}
+
+	private OrdemServicoItemEstoque criarItemEstoqueSemValor() {
+		return mock(OrdemServicoItemEstoque.class);
 	}
 
 	@Nested
@@ -41,9 +89,9 @@ class OrdemServicoTest {
 
 		@Test
 		void deveIniciarDiagnosticoQuandoOrdemEstiverRecebida() {
-			assertDoesNotThrow(os::iniciarDiagnostico);
+			assertDoesNotThrow(ordemServico::iniciarDiagnostico);
 
-			assertEquals(EM_DIAGNOSTICO, os.getOrdemDeServicoStatus());
+			assertEquals(EM_DIAGNOSTICO, ordemServico.getOrdemDeServicoStatus());
 		}
 
 		@Test
@@ -70,73 +118,82 @@ class OrdemServicoTest {
 
 		@Test
 		void deveAdicionarServicosNaOrdemEmDiagnostico() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			os.adicionarServicos(List.of(servico));
+			ordemServico.adicionarServicos(List.of(servico));
 
-			assertAll(() -> assertEquals(1, os.getServicos().size()),
-					() -> assertEquals(servico, os.getServicos().getFirst()),
-					() -> assertEquals(new BigDecimal("10"), os.getValorServicos()),
-					() -> assertEquals(BigDecimal.ZERO, os.getValorPecasInsumos()),
-					() -> assertEquals(new BigDecimal("10"), os.getValorOs()));
+			assertAll(() -> assertEquals(1, ordemServico.getServicos().size()),
+					() -> assertEquals(servico, ordemServico.getServicos().getFirst()),
+					() -> assertEquals(new BigDecimal("10"), ordemServico.getValorServicos()),
+					() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("10"), ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveFalharAoAdicionarListaDeServicosVazia() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertThrows(DiagnosticoSemServicoException.class, () -> os.adicionarServicos(List.of()));
+			List<OrdemServicoServico> servicos = List.of();
 
-			assertTrue(os.getServicos().isEmpty());
-			assertEquals(BigDecimal.ZERO, os.getValorOs());
+			assertThrows(DiagnosticoSemServicoException.class, () -> ordemServico.adicionarServicos(servicos));
+
+			assertTrue(ordemServico.getServicos().isEmpty());
+
+			assertEquals(BigDecimal.ZERO, ordemServico.getValorOs());
 		}
 
 		@Test
 		void deveFalharAoAdicionarListaDeServicosNula() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertThrows(DiagnosticoSemServicoException.class, () -> os.adicionarServicos(null));
+			assertThrows(DiagnosticoSemServicoException.class, () -> ordemServico.adicionarServicos(null));
 
-			assertTrue(os.getServicos().isEmpty());
-			assertEquals(BigDecimal.ZERO, os.getValorOs());
+			assertTrue(ordemServico.getServicos().isEmpty());
+
+			assertEquals(BigDecimal.ZERO, ordemServico.getValorOs());
 		}
 
 		@Test
 		void deveFalharQuandoListaDeServicosContiverElementoNulo() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			List<OrdemServicoServico> servicos = Arrays.asList(criarServico(BigDecimal.TEN), null);
-			assertThrows(DiagnosticoSemServicoException.class, () -> os.adicionarServicos(servicos));
+			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			assertTrue(os.getServicos().isEmpty());
-			assertEquals(BigDecimal.ZERO, os.getValorOs());
+			List<OrdemServicoServico> servicos = Arrays.asList(servico, null);
+
+			assertThrows(DiagnosticoSemServicoException.class, () -> ordemServico.adicionarServicos(servicos));
+
+			assertTrue(ordemServico.getServicos().isEmpty());
+
+			assertEquals(BigDecimal.ZERO, ordemServico.getValorOs());
 		}
 
 		@Test
 		void deveSomarValoresAoAdicionarMaisDeUmServico() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			OrdemServicoServico primeiro = criarServico(new BigDecimal("50.25"));
+			OrdemServicoServico primeiroServico = criarServico(new BigDecimal("50.25"));
 
-			OrdemServicoServico segundo = criarServico(new BigDecimal("30.75"));
+			OrdemServicoServico segundoServico = criarServico(new BigDecimal("30.75"));
 
-			os.adicionarServicos(List.of(primeiro, segundo));
+			ordemServico.adicionarServicos(List.of(primeiroServico, segundoServico));
 
-			assertAll(() -> assertEquals(2, os.getServicos().size()),
-					() -> assertEquals(new BigDecimal("81.00"), os.getValorServicos()),
-					() -> assertEquals(new BigDecimal("81.00"), os.getValorOs()));
+			assertAll(() -> assertEquals(2, ordemServico.getServicos().size()),
+					() -> assertEquals(new BigDecimal("81.00"), ordemServico.getValorServicos()),
+					() -> assertEquals(new BigDecimal("81.00"), ordemServico.getValorOs()));
 		}
 
 		@Test
 		void naoDevePermitirAlterarServicosForaDoDiagnostico() {
 			OrdemServico ordem = criarOrdemServico(FINALIZADA);
+
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
 			List<OrdemServicoServico> servicos = List.of(servico);
 
-			assertThrows( TransicaoStatusInvalidaException.class, () -> ordem.adicionarServicos(servicos) );
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.adicionarServicos(servicos));
 
 			assertTrue(ordem.getServicos().isEmpty());
 		}
@@ -147,105 +204,110 @@ class OrdemServicoTest {
 
 		@Test
 		void deveAdicionarItensDeEstoqueValidos() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			OrdemServicoItemEstoque item = criarItemEstoque(new BigDecimal("45.90"));
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueComValor(new BigDecimal("45.90"));
 
-			os.adicionarItensEstoque(List.of(item));
+			ordemServico.adicionarItensEstoque(List.of(itemEstoque));
 
-			assertAll(() -> assertEquals(1, os.getItensEstoque().size()),
-					() -> assertEquals(item, os.getItensEstoque().getFirst()),
-					() -> assertEquals(new BigDecimal("45.90"), os.getValorPecasInsumos()),
-					() -> assertEquals(new BigDecimal("45.90"), os.getValorOs()));
+			assertAll(() -> assertEquals(1, ordemServico.getItensEstoque().size()),
+					() -> assertEquals(itemEstoque, ordemServico.getItensEstoque().getFirst()),
+					() -> assertEquals(new BigDecimal("45.90"), ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("45.90"), ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveFalharAoAdicionarListaDeEstoqueNula() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarItensEstoque(null));
+			assertThrows(ItemEstoqueInvalidoException.class, () -> ordemServico.adicionarItensEstoque(null));
 
-			assertTrue(os.getItensEstoque().isEmpty());
+			assertTrue(ordemServico.getItensEstoque().isEmpty());
 		}
 
 		@Test
 		void deveFalharAoAdicionarListaDeEstoqueVazia() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarItensEstoque(List.of()));
+			List<OrdemServicoItemEstoque> itensEstoque = List.of();
 
-			assertTrue(os.getItensEstoque().isEmpty());
+			assertThrows(ItemEstoqueInvalidoException.class, () -> ordemServico.adicionarItensEstoque(itensEstoque));
+
+			assertTrue(ordemServico.getItensEstoque().isEmpty());
 		}
 
 		@Test
 		void deveFalharQuandoListaDeEstoqueContiverElementoNulo() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			List<OrdemServicoItemEstoque> itens = Arrays.asList(criarItemEstoque(BigDecimal.TEN), null);
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueSemValor();
 
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarItensEstoque(itens));
+			List<OrdemServicoItemEstoque> itensEstoque = Arrays.asList(itemEstoque, null);
 
-			assertTrue(os.getItensEstoque().isEmpty());
+			assertThrows(ItemEstoqueInvalidoException.class, () -> ordemServico.adicionarItensEstoque(itensEstoque));
+
+			assertTrue(ordemServico.getItensEstoque().isEmpty());
 		}
 
 		@Test
 		void naoDevePermitirAlterarEstoqueForaDoDiagnostico() {
 			OrdemServico ordem = criarOrdemServico(FINALIZADA);
-			OrdemServicoItemEstoque item = criarItemEstoque(BigDecimal.TEN);
-			List<OrdemServicoItemEstoque> itemEstoques = List.of(item);
-			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.adicionarItensEstoque(itemEstoques));
+
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueSemValor();
+
+			List<OrdemServicoItemEstoque> itensEstoque = List.of(itemEstoque);
+
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.adicionarItensEstoque(itensEstoque));
 
 			assertTrue(ordem.getItensEstoque().isEmpty());
 		}
 
 		@Test
 		void deveFalharQuandoEstoqueInformadoContiverElementoNulo() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			OrdemServicoItemEstoque item = criarItemEstoque(BigDecimal.ONE);
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueSemValor();
 
-			List<OrdemServicoItemEstoque> itens = Arrays.asList(item, null);
+			List<OrdemServicoItemEstoque> itensEstoque = Arrays.asList(itemEstoque, null);
+
 			List<OrdemServicoServico> servicos = List.of(servico);
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarDiagnostico(servicos, itens));
 
-			assertAll(
-					() -> assertTrue(os.getServicos().isEmpty()),
-					() -> assertTrue(os.getItensEstoque().isEmpty()),
-					() -> assertEquals(BigDecimal.ZERO, os.getValorOs()));
+			assertThrows(ItemEstoqueInvalidoException.class,
+					() -> ordemServico.adicionarDiagnostico(servicos, itensEstoque));
+
+			assertAll(() -> assertTrue(ordemServico.getServicos().isEmpty()),
+					() -> assertTrue(ordemServico.getItensEstoque().isEmpty()),
+					() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorOs()));
 		}
 
 		@Test
-		void devePreservarDiagnosticoAtualQuandoNovoDiagnosticoForInvalido() {
-			os.iniciarDiagnostico();
+		void deveManterDiagnosticoAtualQuandoNovoDiagnosticoContiverItemInvalido() {
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servicoAtual = criarServico(new BigDecimal("100.00"));
 
-			OrdemServicoItemEstoque itemAtual = criarItemEstoque(new BigDecimal("50.00"));
+			OrdemServicoItemEstoque itemEstoqueAtual = criarItemEstoqueComValor(new BigDecimal("50.00"));
 
-			os.adicionarDiagnostico(List.of(servicoAtual),List.of(itemAtual));
+			ordemServico.adicionarDiagnostico(List.of(servicoAtual), List.of(itemEstoqueAtual));
 
 			OrdemServicoServico novoServico = criarServico(new BigDecimal("200.00"));
 
-			OrdemServicoItemEstoque novoItem = criarItemEstoque(new BigDecimal("80.00"));
+			OrdemServicoItemEstoque novoItemEstoque = criarItemEstoqueSemValor();
 
-			List<OrdemServicoItemEstoque> novosItensInvalidos = Arrays.asList(novoItem, null);
-			List<OrdemServicoServico> novoServicos = List.of(novoServico);
-			assertThrows(
-					ItemEstoqueInvalidoException.class,
-					() -> os.adicionarDiagnostico(
-							novoServicos,
-							novosItensInvalidos)
-			);
+			List<OrdemServicoItemEstoque> novosItensInvalidos = Arrays.asList(novoItemEstoque, null);
 
-			assertAll(
-					() -> assertEquals(List.of(servicoAtual),os.getServicos()),
-					() -> assertEquals(List.of(itemAtual),os.getItensEstoque()),
-					() -> assertEquals(new BigDecimal("100.00"),os.getValorServicos()),
-					() -> assertEquals(new BigDecimal("50.00"),os.getValorPecasInsumos()),
-					() -> assertEquals(new BigDecimal("150.00"),os.getValorOs())
-			);
+			List<OrdemServicoServico> novosServicos = List.of(novoServico);
+
+			assertThrows(ItemEstoqueInvalidoException.class,
+					() -> ordemServico.adicionarDiagnostico(novosServicos, novosItensInvalidos));
+
+			assertAll(() -> assertEquals(List.of(servicoAtual), ordemServico.getServicos()),
+					() -> assertEquals(List.of(itemEstoqueAtual), ordemServico.getItensEstoque()),
+					() -> assertEquals(new BigDecimal("100.00"), ordemServico.getValorServicos()),
+					() -> assertEquals(new BigDecimal("50.00"), ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("150.00"), ordemServico.getValorOs()));
 		}
 	}
 
@@ -254,116 +316,143 @@ class OrdemServicoTest {
 
 		@Test
 		void deveAdicionarDiagnosticoComServicosEEstoque() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(new BigDecimal("100.00"));
 
-			OrdemServicoItemEstoque item = criarItemEstoque(new BigDecimal("40.00"));
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueComValor(new BigDecimal("40.00"));
 
-			os.adicionarDiagnostico(List.of(servico), List.of(item));
+			ordemServico.adicionarDiagnostico(List.of(servico), List.of(itemEstoque));
 
-			assertAll(() -> assertEquals(1, os.getServicos().size()),
-					() -> assertEquals(1, os.getItensEstoque().size()),
-					() -> assertEquals(new BigDecimal("100.00"), os.getValorServicos()),
-					() -> assertEquals(new BigDecimal("40.00"), os.getValorPecasInsumos()),
-					() -> assertEquals(new BigDecimal("140.00"), os.getValorOs()));
+			assertAll(() -> assertEquals(1, ordemServico.getServicos().size()),
+					() -> assertEquals(1, ordemServico.getItensEstoque().size()),
+					() -> assertEquals(new BigDecimal("100.00"), ordemServico.getValorServicos()),
+					() -> assertEquals(new BigDecimal("40.00"), ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("140.00"), ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveAdicionarDiagnosticoSemEstoque() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(new BigDecimal("100.00"));
 
-			assertDoesNotThrow(() -> os.adicionarDiagnostico(List.of(servico), null));
+			List<OrdemServicoServico> servicos = List.of(servico);
 
-			assertAll(() -> assertEquals(1, os.getServicos().size()), () -> assertTrue(os.getItensEstoque().isEmpty()),
-					() -> assertEquals(new BigDecimal("100.00"), os.getValorOs()));
+			assertDoesNotThrow(() -> ordemServico.adicionarDiagnostico(servicos, null));
+
+			assertAll(() -> assertEquals(1, ordemServico.getServicos().size()),
+					() -> assertTrue(ordemServico.getItensEstoque().isEmpty()),
+					() -> assertEquals(new BigDecimal("100.00"), ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveAdicionarDiagnosticoComListaDeEstoqueVazia() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(new BigDecimal("100.00"));
 
-			assertDoesNotThrow(() -> os.adicionarDiagnostico(List.of(servico), List.of()));
+			List<OrdemServicoServico> servicos = List.of(servico);
 
-			assertTrue(os.getItensEstoque().isEmpty());
-			assertEquals(new BigDecimal("100.00"), os.getValorOs());
+			List<OrdemServicoItemEstoque> itensEstoque = List.of();
+
+			assertDoesNotThrow(() -> ordemServico.adicionarDiagnostico(servicos, itensEstoque));
+
+			assertTrue(ordemServico.getItensEstoque().isEmpty());
+
+			assertEquals(new BigDecimal("100.00"), ordemServico.getValorOs());
 		}
 
 		@Test
-		void deveFalharQuandoEstoqueOpcionalForInformadoComElementoInvalido() {
-			os.iniciarDiagnostico();
+		void deveFalharQuandoEstoqueOpcionalContiverElementoInvalido() {
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			List<OrdemServicoItemEstoque> itens = Arrays.asList(criarItemEstoque(BigDecimal.ONE), null);
-			List<OrdemServicoServico> servicos = List.of(servico);
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarDiagnostico(servicos, itens));
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueSemValor();
 
-			assertAll(() -> assertTrue(os.getServicos().isEmpty()), () -> assertTrue(os.getItensEstoque().isEmpty()),
-					() -> assertEquals(BigDecimal.ZERO, os.getValorOs()));
+			List<OrdemServicoItemEstoque> itensEstoque = Arrays.asList(itemEstoque, null);
+
+			List<OrdemServicoServico> servicos = List.of(servico);
+
+			assertThrows(ItemEstoqueInvalidoException.class,
+					() -> ordemServico.adicionarDiagnostico(servicos, itensEstoque));
+
+			assertAll(() -> assertTrue(ordemServico.getServicos().isEmpty()),
+					() -> assertTrue(ordemServico.getItensEstoque().isEmpty()),
+					() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveFalharAoAdicionarDiagnosticoSemServico() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertThrows(DiagnosticoSemServicoException.class, () -> os.adicionarDiagnostico(List.of(), null));
+			List<OrdemServicoServico> servicos = List.of();
 
-			assertTrue(os.getServicos().isEmpty());
+			assertThrows(DiagnosticoSemServicoException.class, () -> ordemServico.adicionarDiagnostico(servicos, null));
+
+			assertTrue(ordemServico.getServicos().isEmpty());
 		}
 
 		@Test
 		void deveFalharAoAdicionarDiagnosticoForaDoStatusCorreto() {
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
-			List<OrdemServicoServico> servicos = List.of(servico);
-			assertThrows(TransicaoStatusInvalidaException.class, () -> os.adicionarDiagnostico(servicos, null));
 
-			assertTrue(os.getServicos().isEmpty());
+			List<OrdemServicoServico> servicos = List.of(servico);
+
+			assertThrows(TransicaoStatusInvalidaException.class,
+					() -> ordemServico.adicionarDiagnostico(servicos, null));
+
+			assertTrue(ordemServico.getServicos().isEmpty());
 		}
 
 		@Test
 		void deveSubstituirDiagnosticoExistente() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servicoAnterior = criarServico(new BigDecimal("50.00"));
 
-			OrdemServicoItemEstoque itemAnterior = criarItemEstoque(new BigDecimal("20.00"));
+			OrdemServicoItemEstoque itemEstoqueAnterior = criarItemEstoqueComValor(new BigDecimal("20.00"));
 
-			os.adicionarDiagnostico(List.of(servicoAnterior), List.of(itemAnterior));
+			ordemServico.adicionarDiagnostico(List.of(servicoAnterior), List.of(itemEstoqueAnterior));
 
 			OrdemServicoServico novoServico = criarServico(new BigDecimal("150.00"));
 
-			os.adicionarDiagnostico(List.of(novoServico), null);
+			ordemServico.adicionarDiagnostico(List.of(novoServico), null);
 
-			assertAll(() -> assertEquals(List.of(novoServico), os.getServicos()),
-					() -> assertTrue(os.getItensEstoque().isEmpty()),
-					() -> assertEquals(new BigDecimal("150.00"), os.getValorServicos()),
-					() -> assertEquals(BigDecimal.ZERO, os.getValorPecasInsumos()),
-					() -> assertEquals(new BigDecimal("150.00"), os.getValorOs()));
+			assertAll(() -> assertEquals(List.of(novoServico), ordemServico.getServicos()),
+					() -> assertTrue(ordemServico.getItensEstoque().isEmpty()),
+					() -> assertEquals(new BigDecimal("150.00"), ordemServico.getValorServicos()),
+					() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("150.00"), ordemServico.getValorOs()));
 		}
 
 		@Test
-		void naoDeveApagarDiagnosticoAtualQuandoNovoDiagnosticoForInvalido() {
-			os.iniciarDiagnostico();
+		void deveManterDiagnosticoAtualQuandoSubstituicaoForInvalida() {
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servicoAtual = criarServico(new BigDecimal("100.00"));
 
-			OrdemServicoItemEstoque itemAtual = criarItemEstoque(new BigDecimal("50.00"));
+			OrdemServicoItemEstoque itemEstoqueAtual = criarItemEstoqueComValor(new BigDecimal("50.00"));
 
-			os.adicionarDiagnostico(List.of(servicoAtual), List.of(itemAtual));
+			ordemServico.adicionarDiagnostico(List.of(servicoAtual), List.of(itemEstoqueAtual));
 
-			List<OrdemServicoItemEstoque> itensInvalidos = Arrays.asList(itemAtual, null);
-			List<OrdemServicoServico> servicoServicos = List.of(criarServico(new BigDecimal("999.00")));
+			OrdemServicoServico novoServico = criarServico(new BigDecimal("999.00"));
+
+			OrdemServicoItemEstoque novoItemEstoque = criarItemEstoqueSemValor();
+
+			List<OrdemServicoItemEstoque> itensInvalidos = Arrays.asList(novoItemEstoque, null);
+
+			List<OrdemServicoServico> novosServicos = List.of(novoServico);
+
 			assertThrows(ItemEstoqueInvalidoException.class,
-					() -> os.adicionarDiagnostico(servicoServicos, itensInvalidos));
+					() -> ordemServico.adicionarDiagnostico(novosServicos, itensInvalidos));
 
-			assertAll(() -> assertEquals(List.of(servicoAtual), os.getServicos()),
-					() -> assertEquals(List.of(itemAtual), os.getItensEstoque()),
-					() -> assertEquals(new BigDecimal("150.00"), os.getValorOs()));
+			assertAll(() -> assertEquals(List.of(servicoAtual), ordemServico.getServicos()),
+					() -> assertEquals(List.of(itemEstoqueAtual), ordemServico.getItensEstoque()),
+					() -> assertEquals(new BigDecimal("100.00"), ordemServico.getValorServicos()),
+					() -> assertEquals(new BigDecimal("50.00"), ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("150.00"), ordemServico.getValorOs()));
 		}
 	}
 
@@ -372,31 +461,33 @@ class OrdemServicoTest {
 
 		@Test
 		void deveFinalizarDiagnosticoComServicoDefinido() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			os.adicionarDiagnostico(List.of(criarServico(new BigDecimal("120.00"))), null);
+			OrdemServicoServico servico = criarServico(new BigDecimal("120.00"));
 
-			os.finalizarDiagnostico();
+			ordemServico.adicionarDiagnostico(List.of(servico), null);
 
-			assertEquals(AGUARDANDO_APROVACAO, os.getOrdemDeServicoStatus());
+			ordemServico.finalizarDiagnostico();
 
-			assertEquals(new BigDecimal("120.00"), os.getValorOs());
+			assertEquals(AGUARDANDO_APROVACAO, ordemServico.getOrdemDeServicoStatus());
+
+			assertEquals(new BigDecimal("120.00"), ordemServico.getValorOs());
 		}
 
 		@Test
 		void deveFalharAoFinalizarDiagnosticoSemServico() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertThrows(DiagnosticoSemServicoException.class, os::finalizarDiagnostico);
+			assertThrows(DiagnosticoSemServicoException.class, ordemServico::finalizarDiagnostico);
 
-			assertEquals(EM_DIAGNOSTICO, os.getOrdemDeServicoStatus());
+			assertEquals(EM_DIAGNOSTICO, ordemServico.getOrdemDeServicoStatus());
 		}
 
 		@Test
 		void deveFalharAoFinalizarDiagnosticoForaDoStatusCorreto() {
-			assertThrows(TransicaoStatusInvalidaException.class, os::finalizarDiagnostico);
+			assertThrows(TransicaoStatusInvalidaException.class, ordemServico::finalizarDiagnostico);
 
-			assertEquals(RECEBIDA, os.getOrdemDeServicoStatus());
+			assertEquals(RECEBIDA, ordemServico.getOrdemDeServicoStatus());
 		}
 	}
 
@@ -432,9 +523,9 @@ class OrdemServicoTest {
 
 		@Test
 		void deveFalharAoRegistrarAprovacaoForaDoStatusCorreto() {
-			assertThrows(TransicaoStatusInvalidaException.class, () -> os.registrarAprovacao(true));
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordemServico.registrarAprovacao(true));
 
-			assertEquals(RECEBIDA, os.getOrdemDeServicoStatus());
+			assertEquals(RECEBIDA, ordemServico.getOrdemDeServicoStatus());
 		}
 	}
 
@@ -445,24 +536,18 @@ class OrdemServicoTest {
 		void deveIniciarExecucaoComOrcamentoAprovado() {
 			OrdemServico ordem = criarOrdemServico(ORCAMENTO_APROVADO);
 
-			LocalDateTime antes = LocalDateTime.now(ZONA_SAO_PAULO);
-
-			ordem.iniciarExecucao();
-
-			LocalDateTime depois = LocalDateTime.now(ZONA_SAO_PAULO);
+			ordem.iniciarExecucao(DATA_INICIO_EXECUCAO);
 
 			assertAll(() -> assertEquals(EM_EXECUCAO, ordem.getOrdemDeServicoStatus()),
-					() -> assertNotNull(ordem.getDtHoraInicioExecucao()),
-					() -> assertNull(ordem.getDtHoraFimExecucao()),
-					() -> assertFalse(ordem.getDtHoraInicioExecucao().isBefore(antes)),
-					() -> assertFalse(ordem.getDtHoraInicioExecucao().isAfter(depois)));
+					() -> assertEquals(DATA_INICIO_EXECUCAO, ordem.getDtHoraInicioExecucao()),
+					() -> assertNull(ordem.getDtHoraFimExecucao()));
 		}
 
 		@Test
 		void deveFalharAoIniciarExecucaoSemOrcamentoAprovado() {
 			OrdemServico ordem = criarOrdemServico(AGUARDANDO_APROVACAO);
 
-			assertThrows(TransicaoStatusInvalidaException.class, ordem::iniciarExecucao);
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.iniciarExecucao(DATA_INICIO_EXECUCAO));
 
 			assertAll(() -> assertEquals(AGUARDANDO_APROVACAO, ordem.getOrdemDeServicoStatus()),
 					() -> assertNull(ordem.getDtHoraInicioExecucao()));
@@ -472,12 +557,13 @@ class OrdemServicoTest {
 		void deveFinalizarExecucaoIniciada() {
 			OrdemServico ordem = criarOrdemServico(ORCAMENTO_APROVADO);
 
-			ordem.iniciarExecucao();
-			ordem.finalizarExecucao();
+			ordem.iniciarExecucao(DATA_INICIO_EXECUCAO);
+
+			ordem.finalizarExecucao(DATA_FIM_EXECUCAO);
 
 			assertAll(() -> assertEquals(FINALIZADA, ordem.getOrdemDeServicoStatus()),
-					() -> assertNotNull(ordem.getDtHoraInicioExecucao()),
-					() -> assertNotNull(ordem.getDtHoraFimExecucao()),
+					() -> assertEquals(DATA_INICIO_EXECUCAO, ordem.getDtHoraInicioExecucao()),
+					() -> assertEquals(DATA_FIM_EXECUCAO, ordem.getDtHoraFimExecucao()),
 					() -> assertFalse(ordem.getDtHoraFimExecucao().isBefore(ordem.getDtHoraInicioExecucao())));
 		}
 
@@ -485,7 +571,7 @@ class OrdemServicoTest {
 		void deveFalharAoFinalizarExecucaoForaDoStatusCorreto() {
 			OrdemServico ordem = criarOrdemServico(ORCAMENTO_APROVADO);
 
-			assertThrows(TransicaoStatusInvalidaException.class, ordem::finalizarExecucao);
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.finalizarExecucao(DATA_FIM_EXECUCAO));
 
 			assertEquals(ORCAMENTO_APROVADO, ordem.getOrdemDeServicoStatus());
 		}
@@ -494,7 +580,7 @@ class OrdemServicoTest {
 		void deveFalharQuandoExecucaoNaoPossuirDataDeInicio() {
 			OrdemServico ordem = criarOrdemServico(EM_EXECUCAO, null, null);
 
-			assertThrows(InicioExecucaoNaoRegistradoException.class, ordem::finalizarExecucao);
+			assertThrows(InicioExecucaoNaoRegistradoException.class, () -> ordem.finalizarExecucao(DATA_FIM_EXECUCAO));
 
 			assertEquals(EM_EXECUCAO, ordem.getOrdemDeServicoStatus());
 
@@ -509,23 +595,17 @@ class OrdemServicoTest {
 		void deveEntregarOrdemFinalizada() {
 			OrdemServico ordem = criarOrdemServico(FINALIZADA);
 
-			LocalDateTime antes = LocalDateTime.now(ZONA_SAO_PAULO);
-
-			ordem.entregar();
-
-			LocalDateTime depois = LocalDateTime.now(ZONA_SAO_PAULO);
+			ordem.entregar(DATA_FECHAMENTO);
 
 			assertAll(() -> assertEquals(ENTREGUE, ordem.getOrdemDeServicoStatus()),
-					() -> assertNotNull(ordem.getDtHoraFechamento()),
-					() -> assertFalse(ordem.getDtHoraFechamento().isBefore(antes)),
-					() -> assertFalse(ordem.getDtHoraFechamento().isAfter(depois)));
+					() -> assertEquals(DATA_FECHAMENTO, ordem.getDtHoraFechamento()));
 		}
 
 		@Test
 		void deveFalharAoEntregarOrdemNaoFinalizada() {
 			OrdemServico ordem = criarOrdemServico(EM_EXECUCAO);
 
-			assertThrows(TransicaoStatusInvalidaException.class, ordem::entregar);
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.entregar(DATA_FECHAMENTO));
 
 			assertAll(() -> assertEquals(EM_EXECUCAO, ordem.getOrdemDeServicoStatus()),
 					() -> assertNull(ordem.getDtHoraFechamento()));
@@ -537,35 +617,35 @@ class OrdemServicoTest {
 
 		@Test
 		void deveCalcularTotalDeServicosEEstoque() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			List<OrdemServicoServico> servicos = List.of(criarServico(new BigDecimal("100.00")),
 					criarServico(new BigDecimal("75.50")));
 
-			List<OrdemServicoItemEstoque> itens = List.of(criarItemEstoque(new BigDecimal("20.25")),
-					criarItemEstoque(new BigDecimal("4.25")));
+			List<OrdemServicoItemEstoque> itensEstoque = List.of(criarItemEstoqueComValor(new BigDecimal("20.25")),
+					criarItemEstoqueComValor(new BigDecimal("4.25")));
 
-			os.adicionarDiagnostico(servicos, itens);
+			ordemServico.adicionarDiagnostico(servicos, itensEstoque);
 
-			assertAll(() -> assertEquals(new BigDecimal("175.50"), os.getValorServicos()),
-					() -> assertEquals(new BigDecimal("24.50"), os.getValorPecasInsumos()),
-					() -> assertEquals(new BigDecimal("200.00"), os.getValorOs()));
+			assertAll(() -> assertEquals(new BigDecimal("175.50"), ordemServico.getValorServicos()),
+					() -> assertEquals(new BigDecimal("24.50"), ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(new BigDecimal("200.00"), ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveCalcularZeroQuandoNaoExistiremItens() {
-			assertAll(() -> assertEquals(BigDecimal.ZERO, os.getValorServicos()),
-					() -> assertEquals(BigDecimal.ZERO, os.getValorPecasInsumos()),
-					() -> assertEquals(BigDecimal.ZERO, os.getValorOs()));
+			assertAll(() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorServicos()),
+					() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorPecasInsumos()),
+					() -> assertEquals(BigDecimal.ZERO, ordemServico.getValorOs()));
 		}
 
 		@Test
 		void deveRecalcularValoresAoReconstituirOrdem() {
 			OrdemServicoServico servico = criarServico(new BigDecimal("80.00"));
 
-			OrdemServicoItemEstoque item = criarItemEstoque(new BigDecimal("20.00"));
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueComValor(new BigDecimal("20.00"));
 
-			OrdemServico ordem = criarOrdemServico(EM_DIAGNOSTICO, List.of(servico), List.of(item), null, null);
+			OrdemServico ordem = criarOrdemServico(EM_DIAGNOSTICO, List.of(servico), List.of(itemEstoque), null, null);
 
 			assertAll(() -> assertEquals(new BigDecimal("80.00"), ordem.getValorServicos()),
 					() -> assertEquals(new BigDecimal("20.00"), ordem.getValorPecasInsumos()),
@@ -578,48 +658,48 @@ class OrdemServicoTest {
 
 		@Test
 		void naoDevePermitirAlterarListaDeServicosPeloGetter() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			os.adicionarServicos(List.of(servico));
+			ordemServico.adicionarServicos(List.of(servico));
 
-			List<OrdemServicoServico> servicos = os.getServicos();
+			List<OrdemServicoServico> servicos = ordemServico.getServicos();
 
 			assertThrows(UnsupportedOperationException.class, servicos::clear);
 
-			assertEquals(1, os.getServicos().size());
+			assertEquals(1, ordemServico.getServicos().size());
 		}
 
 		@Test
 		void naoDevePermitirAlterarListaDeEstoquePeloGetter() {
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			OrdemServicoItemEstoque item = criarItemEstoque(BigDecimal.TEN);
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueComValor(BigDecimal.TEN);
 
-			os.adicionarItensEstoque(List.of(item));
+			ordemServico.adicionarItensEstoque(List.of(itemEstoque));
 
-			List<OrdemServicoItemEstoque> itens = os.getItensEstoque();
+			List<OrdemServicoItemEstoque> itensEstoque = ordemServico.getItensEstoque();
 
-			assertThrows(UnsupportedOperationException.class, itens::clear);
+			assertThrows(UnsupportedOperationException.class, itensEstoque::clear);
 
-			assertEquals(1, os.getItensEstoque().size());
+			assertEquals(1, ordemServico.getItensEstoque().size());
 		}
 
 		@Test
 		void construtorDeveFazerCopiaDefensivaDasColecoes() {
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			OrdemServicoItemEstoque item = criarItemEstoque(BigDecimal.ONE);
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueComValor(BigDecimal.ONE);
 
 			List<OrdemServicoServico> servicos = new ArrayList<>(List.of(servico));
 
-			List<OrdemServicoItemEstoque> itens = new ArrayList<>(List.of(item));
+			List<OrdemServicoItemEstoque> itensEstoque = new ArrayList<>(List.of(itemEstoque));
 
-			OrdemServico ordem = criarOrdemServico(EM_DIAGNOSTICO, servicos, itens, null, null);
+			OrdemServico ordem = criarOrdemServico(EM_DIAGNOSTICO, servicos, itensEstoque, null, null);
 
 			servicos.clear();
-			itens.clear();
+			itensEstoque.clear();
 
 			assertAll(() -> assertEquals(1, ordem.getServicos().size()),
 					() -> assertEquals(1, ordem.getItensEstoque().size()),
@@ -634,65 +714,39 @@ class OrdemServicoTest {
 		void deveExecutarCicloCompletoDaOrdemDeServico() {
 			OrdemServicoServico servico = criarServico(new BigDecimal("150.00"));
 
-			OrdemServicoItemEstoque item = criarItemEstoque(new BigDecimal("50.00"));
+			OrdemServicoItemEstoque itemEstoque = criarItemEstoqueComValor(new BigDecimal("50.00"));
 
-			assertEquals(RECEBIDA, os.getOrdemDeServicoStatus());
+			assertEquals(RECEBIDA, ordemServico.getOrdemDeServicoStatus());
 
-			os.iniciarDiagnostico();
+			ordemServico.iniciarDiagnostico();
 
-			assertEquals(EM_DIAGNOSTICO, os.getOrdemDeServicoStatus());
+			assertEquals(EM_DIAGNOSTICO, ordemServico.getOrdemDeServicoStatus());
 
-			os.adicionarDiagnostico(List.of(servico), List.of(item));
+			ordemServico.adicionarDiagnostico(List.of(servico), List.of(itemEstoque));
 
-			os.finalizarDiagnostico();
+			ordemServico.finalizarDiagnostico();
 
-			assertEquals(AGUARDANDO_APROVACAO, os.getOrdemDeServicoStatus());
+			assertEquals(AGUARDANDO_APROVACAO, ordemServico.getOrdemDeServicoStatus());
 
-			os.registrarAprovacao(true);
+			ordemServico.registrarAprovacao(true);
 
-			assertEquals(ORCAMENTO_APROVADO, os.getOrdemDeServicoStatus());
+			assertEquals(ORCAMENTO_APROVADO, ordemServico.getOrdemDeServicoStatus());
 
-			os.iniciarExecucao();
+			ordemServico.iniciarExecucao(DATA_INICIO_EXECUCAO);
 
-			assertEquals(EM_EXECUCAO, os.getOrdemDeServicoStatus());
+			assertEquals(EM_EXECUCAO, ordemServico.getOrdemDeServicoStatus());
 
-			os.finalizarExecucao();
+			ordemServico.finalizarExecucao(DATA_FIM_EXECUCAO);
 
-			assertEquals(FINALIZADA, os.getOrdemDeServicoStatus());
+			assertEquals(FINALIZADA, ordemServico.getOrdemDeServicoStatus());
 
-			os.entregar();
+			ordemServico.entregar(DATA_FECHAMENTO);
 
-			assertAll(() -> assertEquals(ENTREGUE, os.getOrdemDeServicoStatus()),
-					() -> assertEquals(new BigDecimal("200.00"), os.getValorOs()),
-					() -> assertNotNull(os.getDtHoraInicioExecucao()), () -> assertNotNull(os.getDtHoraFimExecucao()),
-					() -> assertNotNull(os.getDtHoraFechamento()));
+			assertAll(() -> assertEquals(ENTREGUE, ordemServico.getOrdemDeServicoStatus()),
+					() -> assertEquals(new BigDecimal("200.00"), ordemServico.getValorOs()),
+					() -> assertEquals(DATA_INICIO_EXECUCAO, ordemServico.getDtHoraInicioExecucao()),
+					() -> assertEquals(DATA_FIM_EXECUCAO, ordemServico.getDtHoraFimExecucao()),
+					() -> assertEquals(DATA_FECHAMENTO, ordemServico.getDtHoraFechamento()));
 		}
-	}
-
-	private OrdemServico criarOrdemServico(OrdemDeServicoStatus status) {
-		return criarOrdemServico(status, List.of(), List.of(), null, null);
-	}
-
-	private OrdemServico criarOrdemServico(OrdemDeServicoStatus status, LocalDateTime inicioExecucao,
-			LocalDateTime fimExecucao) {
-		return criarOrdemServico(status, List.of(), List.of(), inicioExecucao, fimExecucao);
-	}
-
-	private OrdemServico criarOrdemServico(OrdemDeServicoStatus status, List<OrdemServicoServico> servicos,
-			List<OrdemServicoItemEstoque> itens, LocalDateTime inicioExecucao, LocalDateTime fimExecucao) {
-		return new OrdemServico(UUID.randomUUID(), "12345678910", "ABC1D23", DATA_ABERTURA, null, "Barulho ao frear",
-				status, null, servicos, itens, inicioExecucao, fimExecucao);
-	}
-
-	private OrdemServicoServico criarServico(BigDecimal valorTotal) {
-		return new OrdemServicoServico(UUID.randomUUID(), "Serviço de teste", valorTotal);
-	}
-
-	private OrdemServicoItemEstoque criarItemEstoque(BigDecimal valorTotal) {
-		OrdemServicoItemEstoque item = mock(OrdemServicoItemEstoque.class);
-
-		when(item.getValorTotal()).thenReturn(valorTotal);
-
-		return item;
 	}
 }

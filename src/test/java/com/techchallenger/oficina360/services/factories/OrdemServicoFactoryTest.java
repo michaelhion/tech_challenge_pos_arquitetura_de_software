@@ -4,10 +4,15 @@ import com.techchallenger.oficina360.dominio.Cliente;
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dominio.Veiculo;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.frameworks.adapters.RelogioSistema;
 import com.techchallenger.oficina360.usecases.factories.OrdemServicoFactory;
 import com.techchallenger.oficina360.usecases.ordemservico.command.CriarOrdemServicoCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,7 +20,9 @@ import java.time.ZoneId;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class OrdemServicoFactoryTest {
 
 	private static final ZoneId ZONA_SAO_PAULO = ZoneId.of("America/Sao_Paulo");
@@ -26,11 +33,17 @@ class OrdemServicoFactoryTest {
 
 	private static final String DESCRICAO_PROBLEMA = "Veículo apresenta ruído ao frear";
 
+	@InjectMocks
 	private OrdemServicoFactory ordemServicoFactory;
+
+	private static final LocalDateTime DATA_HORA_FIXA = LocalDateTime.of(2026, 8, 9, 10, 37);
+
+	@Mock
+	private RelogioSistema relogio;
 
 	@BeforeEach
 	void setUp() {
-		ordemServicoFactory = new OrdemServicoFactory();
+		when(relogio.agora()).thenReturn(DATA_HORA_FIXA);
 	}
 
 	@Test
@@ -41,11 +54,11 @@ class OrdemServicoFactoryTest {
 
 		Veiculo veiculo = criarVeiculo();
 
-		LocalDateTime instanteAnterior = LocalDateTime.now(ZONA_SAO_PAULO);
+		LocalDateTime instanteAnterior = relogio.agora();
 
 		OrdemServico resultado = ordemServicoFactory.criar(command, cliente.getDocumento(), veiculo.getPlaca());
 
-		LocalDateTime instantePosterior = LocalDateTime.now(ZONA_SAO_PAULO);
+		LocalDateTime instantePosterior = relogio.agora();
 
 		assertNotNull(resultado);
 
@@ -69,7 +82,8 @@ class OrdemServicoFactoryTest {
 	}
 
 	private CriarOrdemServicoCommand criarOrdemServicoCommand() {
-		return new CriarOrdemServicoCommand(DOCUMENTO_CLIENTE, PLACA_VEICULO, DESCRICAO_PROBLEMA,OrdemDeServicoStatus.RECEBIDA);
+		return new CriarOrdemServicoCommand(DOCUMENTO_CLIENTE, PLACA_VEICULO, DESCRICAO_PROBLEMA,
+				OrdemDeServicoStatus.RECEBIDA);
 	}
 
 	private Cliente criarCliente() {

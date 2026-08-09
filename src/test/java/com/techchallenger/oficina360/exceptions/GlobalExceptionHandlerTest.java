@@ -1,5 +1,6 @@
 package com.techchallenger.oficina360.exceptions;
 
+import com.techchallenger.oficina360.frameworks.adapters.RelogioSistema;
 import com.techchallenger.oficina360.frameworks.web.exceptions.ConflitoException;
 import com.techchallenger.oficina360.frameworks.web.exceptions.ErroRegraDeNegocioResponse;
 import com.techchallenger.oficina360.frameworks.web.exceptions.ErroResponse;
@@ -8,9 +9,11 @@ import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontr
 import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +26,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.RECEBIDA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,8 +38,18 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
+	private static final LocalDateTime DATA_HORA_FIXA = LocalDateTime.of(2026, 8, 9, 10, 37);
+
 	@InjectMocks
 	private GlobalExceptionHandler globalExceptionHandler;
+
+	@Mock
+	private RelogioSistema relogio;
+
+	@BeforeEach
+	void setup() {
+		when(relogio.agora()).thenReturn(DATA_HORA_FIXA);
+	}
 
 	@Test
 	void deveRetornar404QuandoRecursoNaoEncontrado() {

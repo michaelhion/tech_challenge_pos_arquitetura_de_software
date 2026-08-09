@@ -27,15 +27,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//todo validar porque precisa limpar o contexto pra rodar sem receber 403
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles(value = "test")
 public class OrdemServicoAprovacaoIT extends BaseIT {
-	//todo validar a possibilidade de trocar massa de dados do flyway para jpa em tempo de execução
+
 	private static final String OS_COM_STATUS_AGUARDANDO_APROVACAO = "cc702d41-3acf-464f-ad33-f9ec8c01f57d";
+
 	@Autowired
 	private EstoqueGateway estoqueGateway;
 

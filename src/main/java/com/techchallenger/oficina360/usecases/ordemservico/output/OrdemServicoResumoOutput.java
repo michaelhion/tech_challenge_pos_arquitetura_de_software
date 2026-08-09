@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record OrdemServicoResumoOutput(
-		//todo melhorar retorno
 		UUID id,
 
 		String documentoCliente,

@@ -28,6 +28,8 @@ public class TokenGatewayImpl implements TokenGateway {
 	@Value("${api.security.jwt.expiration-hours:2}")
 	private Long expirationHours;
 
+	private final RelogioSistema relogioSistema;
+
 	@Override
 	public String gerarToken(Usuario usuario) {
 		Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -52,7 +54,7 @@ public class TokenGatewayImpl implements TokenGateway {
 	}
 
 	private Instant dataExpiracao() {
-		return LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))
+		return relogioSistema.agora()
 				.plusHours(expirationHours)
 				.toInstant(ZoneOffset.of("-03:00"));
 	}

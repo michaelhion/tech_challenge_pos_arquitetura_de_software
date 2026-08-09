@@ -1,6 +1,7 @@
 package com.techchallenger.oficina360.frameworks.web.exceptions;
 
 import com.techchallenger.oficina360.dominio.shared.exception.DominioException;
+import com.techchallenger.oficina360.frameworks.adapters.RelogioSistema;
 import com.techchallenger.oficina360.usecases.shared.exception.AplicacaoException;
 import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 import com.techchallenger.oficina360.usecases.shared.exception.RegraDeNegocioException;
@@ -28,7 +29,13 @@ import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AM
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	public static final String CONFLITO = "Conflito";
+	private static final String CONFLITO = "Conflito";
+
+	private final RelogioSistema relogioSistema;
+
+	public GlobalExceptionHandler(RelogioSistema relogioSistema) {
+		this.relogioSistema = relogioSistema;
+	}
 
 	@ExceptionHandler(RecursoNaoEncontradoException.class)
 	public ResponseEntity<ErroResponse> handleRecursoNaoEncontrado(RecursoNaoEncontradoException ex) {
@@ -60,7 +67,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErroRegraDeNegocioResponse> handleRegraDeNegocio(RegraDeNegocioException ex) {
 		ErroRegraDeNegocioResponse erro = new ErroRegraDeNegocioResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 				"Regra de negócio violada", ex.getMessage(), ex.getMensagens(),
-				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));
+				relogioSistema.agora());
 
 		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(erro);
 	}
@@ -128,6 +135,6 @@ public class GlobalExceptionHandler {
 	private ResponseEntity<ErroResponse> erro(HttpStatus status, String erro, String mensagem) {
 
 		return ResponseEntity.status(status).body(new ErroResponse(status.value(), erro, mensagem,
-				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO))));
+				relogioSistema.agora()));
 	}
 }

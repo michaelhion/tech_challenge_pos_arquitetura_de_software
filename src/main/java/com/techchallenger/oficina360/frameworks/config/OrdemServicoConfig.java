@@ -1,8 +1,10 @@
 package com.techchallenger.oficina360.frameworks.config;
 
+import com.techchallenger.oficina360.frameworks.adapters.RelogioSistema;
 import com.techchallenger.oficina360.gateways.ClienteGateway;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
+import com.techchallenger.oficina360.gateways.Relogio;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
 import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;
@@ -24,6 +26,8 @@ import com.techchallenger.oficina360.usecases.validators.OrdemServicoValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Clock;
 
 @Configuration
 public class OrdemServicoConfig {
@@ -83,8 +87,8 @@ public class OrdemServicoConfig {
 
 	@Bean
 	@Transactional
-	TempoExecucaoService tempoExecucaoServic(TempoExecucaoServicoGateway tempoExecucaoServicoGateway) {
-		return new TempoExecucaoService(tempoExecucaoServicoGateway);
+	TempoExecucaoService tempoExecucaoServic(TempoExecucaoServicoGateway tempoExecucaoServicoGateway,RelogioSistema relogioSistema) {
+		return new TempoExecucaoService(tempoExecucaoServicoGateway,relogioSistema);
 	}
 
 	@Bean
@@ -92,9 +96,9 @@ public class OrdemServicoConfig {
 	public FinalizarExecucaoUseCase finalizarExecucaoUseCase(OrdemServicoGateway gateway,
 			TempoExecucaoService tempoExecucaoService, OrdemServicoFinder loader,
 			MovimentacaoEstoqueService movimentacaoEstoqueService,
-			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService,RelogioSistema relogioSistema) {
 		return new FinalizarExecucaoUseCase(gateway, tempoExecucaoService, loader, movimentacaoEstoqueService,
-				notificarStatusOrdemServicoService);
+				notificarStatusOrdemServicoService,relogioSistema);
 	}
 
 	@Bean
@@ -113,8 +117,18 @@ public class OrdemServicoConfig {
 	}
 
 	@Bean
-	public OrdemServicoFactory ordemServicoFactory() {
-		return new OrdemServicoFactory();
+	public ClockConfig clockConfig(){
+		return new ClockConfig();
+	}
+
+	@Bean
+	public RelogioSistema relogioSistema(Clock clockConfig){
+		return new RelogioSistema(clockConfig);
+	}
+
+	@Bean
+	public OrdemServicoFactory ordemServicoFactory(RelogioSistema relogioSistema) {
+		return new OrdemServicoFactory(relogioSistema);
 	}
 
 	@Bean
@@ -125,8 +139,8 @@ public class OrdemServicoConfig {
 	@Bean
 	@Transactional
 	public AbrirOrdemServicoUseCase abrirOrdemServicoUseCase(OrdemServicoGateway ordemServicoGateway,
-			OrdemServicoValidator validator, ClienteFinder clienteFinder, VeiculoFinder veiculoFinder) {
-		return new AbrirOrdemServicoUseCase(ordemServicoGateway, validator, clienteFinder, veiculoFinder);
+			OrdemServicoValidator validator, ClienteFinder clienteFinder, VeiculoFinder veiculoFinder,RelogioSistema relogioSistema) {
+		return new AbrirOrdemServicoUseCase(ordemServicoGateway, validator, clienteFinder, veiculoFinder,relogioSistema);
 
 	}
 
@@ -151,8 +165,8 @@ public class OrdemServicoConfig {
 
 	@Bean
 	@Transactional
-	public IniciarExecucaoUseCase iniciarExecucaoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader) {
-		return new IniciarExecucaoUseCase(gateway, loader);
+	public IniciarExecucaoUseCase iniciarExecucaoUseCase(OrdemServicoGateway gateway, OrdemServicoFinder loader,RelogioSistema relogioSistema) {
+		return new IniciarExecucaoUseCase(gateway, loader,relogioSistema);
 	}
 
 	@Bean

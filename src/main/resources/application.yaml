@@ -53,3 +53,6 @@ api:
       secret: ${JWT_SECRET:oficina360-secret-key-dev}
       issuer: oficina360-api
       expiration-hours: 2
+
+app:
+  timezone: ${TIME_ZONE:America/Sao_Paulo}

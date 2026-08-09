@@ -3,6 +3,7 @@ package com.techchallenger.oficina360.usecases.services;
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dominio.OrdemServicoServico;
 import com.techchallenger.oficina360.dominio.TempoExecucaoServico;
+import com.techchallenger.oficina360.gateways.Relogio;
 import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
 
 import java.time.Duration;
@@ -14,9 +15,11 @@ import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AM
 public class TempoExecucaoService {
 
 	private final TempoExecucaoServicoGateway tempoExecucaoServicoGateway;
+	private final Relogio relogio;
 
-	public TempoExecucaoService(TempoExecucaoServicoGateway tempoExecucaoServicoGateway) {
+	public TempoExecucaoService(TempoExecucaoServicoGateway tempoExecucaoServicoGateway, Relogio relogio) {
 		this.tempoExecucaoServicoGateway = tempoExecucaoServicoGateway;
+		this.relogio = relogio;
 	}
 
 	public void registrar(OrdemServico ordemServico) {
@@ -37,6 +40,6 @@ public class TempoExecucaoService {
 
 	private TempoExecucaoServico buildTempoExecucaoServico(OrdemServicoServico oss, int tempoPorServico) {
 		return new TempoExecucaoServico(oss.getServicoId(), tempoPorServico,
-				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));
+				relogio.agora());
 	}
 }

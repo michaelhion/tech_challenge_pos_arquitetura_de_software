@@ -2,6 +2,7 @@ package com.techchallenger.oficina360.usecases.ordemservico;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
+import com.techchallenger.oficina360.gateways.Relogio;
 import com.techchallenger.oficina360.usecases.finders.OrdemServicoFinder;
 import com.techchallenger.oficina360.usecases.services.NotificarStatusOrdemServicoService;
 import com.techchallenger.oficina360.usecases.services.TempoExecucaoService;
@@ -16,21 +17,23 @@ public class FinalizarExecucaoUseCase {
 	private final OrdemServicoFinder ordemServicoFinder;
 	private final MovimentacaoEstoqueService movimentacaoEstoqueService;
 	private final NotificarStatusOrdemServicoService notificarStatusOrdemServicoService;
+	private final Relogio relogio;
 
 	public FinalizarExecucaoUseCase(OrdemServicoGateway ordemServicoGateway, TempoExecucaoService tempoExecucaoService,
 			OrdemServicoFinder ordemServicoFinder, MovimentacaoEstoqueService movimentacaoEstoqueService,
-			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService) {
+			NotificarStatusOrdemServicoService notificarStatusOrdemServicoService, Relogio relogio) {
 		this.ordemServicoGateway = ordemServicoGateway;
 		this.tempoExecucaoService = tempoExecucaoService;
 		this.ordemServicoFinder = ordemServicoFinder;
 		this.movimentacaoEstoqueService = movimentacaoEstoqueService;
 		this.notificarStatusOrdemServicoService = notificarStatusOrdemServicoService;
+		this.relogio = relogio;
 	}
 
 	public void finalizarExecucao(UUID id) {
 		OrdemServico ordemServico = ordemServicoFinder.obterOuFalhar(id);
 
-		ordemServico.finalizarExecucao();
+		ordemServico.finalizarExecucao(relogio.agora());
 
 		movimentacaoEstoqueService.consumirReservas(ordemServico.getItensEstoque());
 

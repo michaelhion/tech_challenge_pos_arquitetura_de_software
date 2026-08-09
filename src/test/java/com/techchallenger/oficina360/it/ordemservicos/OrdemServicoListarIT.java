@@ -2,6 +2,7 @@ package com.techchallenger.oficina360.it.ordemservicos;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dominio.Usuario;
+import com.techchallenger.oficina360.frameworks.adapters.RelogioSistema;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import com.techchallenger.oficina360.it.BaseIT;
@@ -39,6 +40,9 @@ class OrdemServicoListarIT extends BaseIT {
 	@Autowired
 	private OrdemServicoGateway ordemServicoGateway;
 
+	@Autowired
+	private RelogioSistema relogioSistema;
+
 	@BeforeEach
 	void setup() {
 		Usuario usuarioAdmin = new Usuario(
@@ -59,8 +63,8 @@ class OrdemServicoListarIT extends BaseIT {
 
 		usuarioGateway.saveAll(List.of(usuarioAdmin,usuarioCliente));
 
-		OrdemServico ordemServico1 = OrdemServico.criar(DOCUMENTO_CLIENTE, "ABC1D23", "qualquer coisa");
-		OrdemServico ordemServico2 = OrdemServico.criar("99999999997", "ABC1D24", "qualquer coisa");
+		OrdemServico ordemServico1 = OrdemServico.criar(DOCUMENTO_CLIENTE, "ABC1D23", "qualquer coisa",relogioSistema.agora());
+		OrdemServico ordemServico2 = OrdemServico.criar("99999999997", "ABC1D24", "qualquer coisa",relogioSistema.agora());
 		ordemServicoGateway.save(ordemServico1);
 		ordemServicoGateway.save(ordemServico2);
 		SecurityContextHolder.clearContext();

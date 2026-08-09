@@ -142,12 +142,12 @@ public class OrdemServico {
 		}
 	}
 
-	public static OrdemServico criar(String documentoCliente,String placaVeiculo,String descricaoProblema) {
+	public static OrdemServico criar(String documentoCliente,String placaVeiculo,String descricaoProblema,LocalDateTime agora) {
 		return new OrdemServico(
 				null,
 				documentoCliente,
 				placaVeiculo,
-				LocalDateTime.now(),
+				agora,
 				null,
 				descricaoProblema,
 				OrdemDeServicoStatus.RECEBIDA,
@@ -159,18 +159,18 @@ public class OrdemServico {
 		);
 	}
 
-	public void iniciarExecucao() {
+	public void iniciarExecucao(LocalDateTime dtHoraInicioExecucao) {
 		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.ORCAMENTO_APROVADO) {
 			throw new TransicaoStatusInvalidaException(
 					OS_ENTITY_A_EXECUCAO_SO_PODE_SER_INICIADA_APOS_APROVACAO_DO_ORCAMENTO);
 		}
 
-		this.dtHoraInicioExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));
+		this.dtHoraInicioExecucao = dtHoraInicioExecucao;
 		this.dtHoraFimExecucao = null;
 		this.ordemDeServicoStatus = OrdemDeServicoStatus.EM_EXECUCAO;
 	}
 
-	public void finalizarExecucao() {
+	public void finalizarExecucao(LocalDateTime dtHoraFimExecucao) {
 		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.EM_EXECUCAO) {
 			throw new TransicaoStatusInvalidaException(
 					OS_ENTITY_A_EXECUCAO_SO_PODE_SER_FINALIZADA_QUANDO_ESTIVER_EM_EXECUCAO);
@@ -181,17 +181,17 @@ public class OrdemServico {
 					OS_ENTITY_A_EXECUCAO_NAO_POSSUI_DATA_HORA_DE_INICIO_REGISTRADA);
 		}
 
-		this.dtHoraFimExecucao = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));
+		this.dtHoraFimExecucao = dtHoraFimExecucao;
 		this.ordemDeServicoStatus = OrdemDeServicoStatus.FINALIZADA;
 	}
 
-	public void entregar() {
+	public void entregar(LocalDateTime dtHoraEntrega) {
 		if (this.ordemDeServicoStatus != OrdemDeServicoStatus.FINALIZADA) {
 			throw new TransicaoStatusInvalidaException(
 					OS_ENTITY_A_ORDEM_DE_SERVICO_SO_PODE_SER_ENTREGUE_APOS_FINALIZACAO);
 		}
 
-		this.dtHoraFechamento = LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO));
+		this.dtHoraFechamento = dtHoraEntrega;
 		this.ordemDeServicoStatus = OrdemDeServicoStatus.ENTREGUE;
 	}
 
