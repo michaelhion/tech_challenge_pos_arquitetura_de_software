@@ -105,9 +105,9 @@ class ListarClientesUseCaseTest {
 		List<ClienteCommand> resultado = useCase.findAll();
 
 		assertEquals(1, resultado.size());
-
+		ClienteCommand clienteCommand = resultado.get(0);
 		assertThrows(UnsupportedOperationException.class,
-				() -> resultado.add(resultado.get(0)));
+				() -> resultado.add(clienteCommand));
 
 		verify(clienteGateway).findAll();
 

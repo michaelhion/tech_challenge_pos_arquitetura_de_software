@@ -56,65 +56,65 @@ class EstoqueTest {
 		void deveFalharQuandoQuantidadeParaReservaNaoForPositiva(
 				Integer quantidadeSolicitada
 		) {
-			Estoque estoque = criarEstoque(10, 2);
+			Estoque criarEstoque = criarEstoque(10, 2);
 
 			assertThrows(
 					ItemEstoqueInvalidoException.class,
-					() -> estoque.reservar(quantidadeSolicitada)
+					() -> criarEstoque.reservar(quantidadeSolicitada)
 			);
 
 			assertAll(
-					() -> assertEquals(2, estoque.getReservados()),
-					() -> assertEquals(8, estoque.getDisponiveis())
+					() -> assertEquals(2, criarEstoque.getReservados()),
+					() -> assertEquals(8, criarEstoque.getDisponiveis())
 			);
 		}
 
 		@Test
 		void deveNormalizarQuantidadeEReservadosNulosParaZero() {
-			Estoque estoque = criarEstoque(null, null);
+			Estoque criarEstoque = criarEstoque(null, null);
 
 			assertAll(
 					() -> assertEquals(
 							0,
-							estoque.getQuantidade()
+							criarEstoque.getQuantidade()
 					),
 					() -> assertEquals(
 							0,
-							estoque.getReservados()
+							criarEstoque.getReservados()
 					),
 					() -> assertEquals(
 							0,
-							estoque.getDisponiveis()
+							criarEstoque.getDisponiveis()
 					)
 			);
 		}
 
 		@Test
 		void deveReservarQuandoReservadosForNulo() {
-			Estoque estoque = criarEstoque(10, null);
+			Estoque criaredEstoque = criarEstoque(10, null);
 
-			assertDoesNotThrow(() -> estoque.reservar(2));
+			assertDoesNotThrow(() -> criaredEstoque.reservar(2));
 
 			assertAll(
 					() -> assertEquals(
 							2,
-							estoque.getReservados()
+							criaredEstoque.getReservados()
 					),
 					() -> assertEquals(
 							8,
-							estoque.getDisponiveis()
+							criaredEstoque.getDisponiveis()
 					)
 			);
 		}
 
 		@Test
 		void devePermitirCriarItemComEstoqueZerado() {
-			Estoque estoque = criarEstoque(0, 0);
+			Estoque criarEstoque = criarEstoque(0, 0);
 
 			assertAll(
-					() -> assertEquals(0, estoque.getQuantidade()),
-					() -> assertEquals(0, estoque.getReservados()),
-					() -> assertEquals(0, estoque.getDisponiveis())
+					() -> assertEquals(0, criarEstoque.getQuantidade()),
+					() -> assertEquals(0, criarEstoque.getReservados()),
+					() -> assertEquals(0, criarEstoque.getDisponiveis())
 			);
 		}
 	}
@@ -194,62 +194,62 @@ class EstoqueTest {
 
 		@Test
 		void deveLiberarReserva() {
-			Estoque estoque =
+			Estoque criarEstoque =
 					criarEstoque(10, 4);
 
-			estoque.liberarReserva(3);
+			criarEstoque.liberarReserva(3);
 
 			assertAll(
-					() -> assertEquals(1, estoque.getReservados()),
-					() -> assertEquals(9, estoque.getDisponiveis()),
-					() -> assertEquals(10, estoque.getQuantidade())
+					() -> assertEquals(1, criarEstoque.getReservados()),
+					() -> assertEquals(9, criarEstoque.getDisponiveis()),
+					() -> assertEquals(10, criarEstoque.getQuantidade())
 			);
 		}
 
 		@Test
 		void deveConsumirReserva() {
-			Estoque estoque =
+			Estoque criarEstoque =
 					criarEstoque(10, 4);
 
-			estoque.consumirReserva(4);
+			criarEstoque.consumirReserva(4);
 
 			assertAll(
-					() -> assertEquals(6, estoque.getQuantidade()),
-					() -> assertEquals(0, estoque.getReservados()),
-					() -> assertEquals(6, estoque.getDisponiveis())
+					() -> assertEquals(6, criarEstoque.getQuantidade()),
+					() -> assertEquals(0, criarEstoque.getReservados()),
+					() -> assertEquals(6, criarEstoque.getDisponiveis())
 			);
 		}
 
 		@Test
 		void deveFalharAoLiberarMaisQueOReservado() {
-			Estoque estoque =
+			Estoque criarEstoque =
 					criarEstoque(10, 2);
 
 			assertThrows(
 					ItemEstoqueInvalidoException.class,
-					() -> estoque.liberarReserva(3)
+					() -> criarEstoque.liberarReserva(3)
 			);
 
 			assertAll(
-					() -> assertEquals(10, estoque.getQuantidade()),
-					() -> assertEquals(2, estoque.getReservados()),
-					() -> assertEquals(8, estoque.getDisponiveis())
+					() -> assertEquals(10, criarEstoque.getQuantidade()),
+					() -> assertEquals(2, criarEstoque.getReservados()),
+					() -> assertEquals(8, criarEstoque.getDisponiveis())
 			);
 		}
 
 		@Test
 		void deveFalharAoConsumirMaisQueOReservado() {
-			Estoque estoque =
+			Estoque criarEstoque =
 					criarEstoque(10, 2);
 
 			assertThrows(
 					ItemEstoqueInvalidoException.class,
-					() -> estoque.consumirReserva(3)
+					() -> criarEstoque.consumirReserva(3)
 			);
 
 			assertAll(
-					() -> assertEquals(10, estoque.getQuantidade()),
-					() -> assertEquals(2, estoque.getReservados())
+					() -> assertEquals(10, criarEstoque.getQuantidade()),
+					() -> assertEquals(2, criarEstoque.getReservados())
 			);
 		}
 	}

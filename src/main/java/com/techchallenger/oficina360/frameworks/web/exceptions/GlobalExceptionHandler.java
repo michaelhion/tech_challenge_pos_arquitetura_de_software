@@ -28,6 +28,8 @@ import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AM
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+	public static final String CONFLITO = "Conflito";
+
 	@ExceptionHandler(RecursoNaoEncontradoException.class)
 	public ResponseEntity<ErroResponse> handleRecursoNaoEncontrado(RecursoNaoEncontradoException ex) {
 		return erro(HttpStatus.NOT_FOUND, "Recurso não encontrado", ex.getMessage());
@@ -35,23 +37,23 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ConflitoException.class)
 	public ResponseEntity<ErroResponse> handleConflito(ConflitoException ex) {
-		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+		return erro(HttpStatus.CONFLICT, CONFLITO, ex.getMessage());
 	}
 
 	@ExceptionHandler(ConflitoConcorrenciaEstoqueException.class)
 	public ResponseEntity<ErroResponse> handlerConflitoConcorrenciaEstoqueException(
 			ConflitoConcorrenciaEstoqueException ex) {
-		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+		return erro(HttpStatus.CONFLICT, CONFLITO, ex.getMessage());
 	}
 
 	@ExceptionHandler(DominioException.class)
 	public ResponseEntity<ErroResponse> handleDominioException(DominioException ex) {
-		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+		return erro(HttpStatus.CONFLICT, CONFLITO, ex.getMessage());
 	}
 
 	@ExceptionHandler(AplicacaoException.class)
 	public ResponseEntity<ErroResponse> handleAplicacaoException(AplicacaoException ex) {
-		return erro(HttpStatus.CONFLICT, "Conflito", ex.getMessage());
+		return erro(HttpStatus.CONFLICT, CONFLITO, ex.getMessage());
 	}
 
 	@ExceptionHandler(RegraDeNegocioException.class)

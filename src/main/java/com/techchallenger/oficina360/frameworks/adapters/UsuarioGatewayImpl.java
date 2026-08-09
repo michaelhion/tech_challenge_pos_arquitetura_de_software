@@ -12,11 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.techchallenger.oficina360.frameworks.mappers.usuario.UsuarioDTOMapper.toDomain;
+import static com.techchallenger.oficina360.frameworks.mappers.usuario.UsuarioDTOMapper.toEntity;
+
 @Component
 @RequiredArgsConstructor
 public class UsuarioGatewayImpl implements UsuarioGateway {
 
-	private final UsuarioDTOMapper mapper;
 	private final UsuarioRepository repository;
 	private final UsuarioDTOMapper usuarioDTOMapper;
 
@@ -24,7 +26,7 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 	public Optional<Usuario> findByEmail(String email) {
 		return repository
 				.findByEmail(email)
-				.map(mapper::toDomain);
+				.map(UsuarioDTOMapper::toDomain);
 	}
 
 	@Override
@@ -34,30 +36,30 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 
 	@Override
 	public Usuario save(Usuario usuario) {
-		UsuarioEntity entity = mapper.toEntity(usuario);
+		UsuarioEntity entity = toEntity(usuario);
 		UsuarioEntity persisted = repository.save(entity);
-		return mapper.toDomain(persisted);
+		return toDomain(persisted);
 	}
 
 	@Override
 	public List<Usuario> saveAll(List<Usuario> usuarios) {
 		List<UsuarioEntity> usuarioEntityList = usuarios.stream().map(UsuarioDTOMapper::toEntity).toList();
 		List<UsuarioEntity> usuarioEntitiesSaved = repository.saveAll(usuarioEntityList);
-		return usuarioEntitiesSaved.stream().map(usuarioDTOMapper::toDomain).toList();
+		return usuarioEntitiesSaved.stream().map(UsuarioDTOMapper::toDomain).toList();
 	}
 
 	@Override
 	public List<Usuario> findAll() {
 		return repository.findAll()
 				.stream()
-				.map(mapper::toDomain)
+				.map(UsuarioDTOMapper::toDomain)
 				.toList();
 	}
 
 	@Override
 	public Optional<Usuario> findById(UUID id) {
 		return repository.findById(id)
-				.map(mapper::toDomain);
+				.map(UsuarioDTOMapper::toDomain);
 	}
 
 

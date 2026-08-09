@@ -351,31 +351,6 @@ class OrdemServicoDTOMapperTest {
 				() -> assertEquals(4, resultado.itensEstoque().get(1).quantidade()));
 	}
 
-	private void configurarEntity() {
-		when(ordemServicoEntity.getId()).thenReturn(ORDEM_SERVICO_ID);
-
-		when(ordemServicoEntity.getDocumentoCliente()).thenReturn(DOCUMENTO_CLIENTE);
-
-		when(ordemServicoEntity.getPlacaVeiculo()).thenReturn(PLACA_VEICULO);
-
-		when(ordemServicoEntity.getDtHoraAbertura()).thenReturn(DATA_ABERTURA);
-
-		when(ordemServicoEntity.getDtHoraFechamento()).thenReturn(DATA_FECHAMENTO);
-
-		when(ordemServicoEntity.getDescricaoProblema()).thenReturn(DESCRICAO_PROBLEMA);
-
-		when(ordemServicoEntity.getOrdemDeServicoStatus()).thenReturn(OrdemDeServicoStatus.FINALIZADA);
-
-		when(ordemServicoEntity.getObservacaoCliente()).thenReturn(OBSERVACAO_CLIENTE);
-
-		when(ordemServicoEntity.getServicos()).thenReturn(List.of());
-
-		when(ordemServicoEntity.getItensEstoque()).thenReturn(List.of());
-
-		when(ordemServicoEntity.getDtHoraInicioExecucao()).thenReturn(DATA_INICIO_EXECUCAO);
-
-		when(ordemServicoEntity.getDtHoraFimExecucao()).thenReturn(DATA_FIM_EXECUCAO);
-	}
 
 	private void configurarDomain() {
 		when(ordemServico.getId()).thenReturn(ORDEM_SERVICO_ID);

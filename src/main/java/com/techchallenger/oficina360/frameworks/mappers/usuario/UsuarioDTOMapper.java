@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class UsuarioDTOMapper {
 
 
-    public Usuario toDomain(UsuarioEntity entity) {
+    public static Usuario toDomain(UsuarioEntity entity) {
 
         if (entity == null) {
             return null;

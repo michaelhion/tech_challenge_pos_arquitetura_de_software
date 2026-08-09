@@ -50,10 +50,10 @@ class ListarItensEstoqueUseCaseTest {
 
 		EstoqueCommand segundoItem = resultado.get(1);
 
-		assertEstoque(primeiroItem, PRIMEIRO_ESTOQUE_ID, CODIGO_FILTRO, "Filtro de óleo", new BigDecimal("45.90"), 20,
+		assertEstoque(primeiroItem, CODIGO_FILTRO, "Filtro de óleo", new BigDecimal("45.90"), 20,
 				5, 15);
 
-		assertEstoque(segundoItem, SEGUNDO_ESTOQUE_ID, CODIGO_PASTILHA, "Pastilha de freio", new BigDecimal("120.00"),
+		assertEstoque(segundoItem, CODIGO_PASTILHA, "Pastilha de freio", new BigDecimal("120.00"),
 				10, 2, 8);
 
 		verify(estoqueGateway, times(1)).findAll();
@@ -101,7 +101,7 @@ class ListarItensEstoqueUseCaseTest {
 		return new Estoque(SEGUNDO_ESTOQUE_ID, "Pastilha de freio", new BigDecimal("120.00"), 10, 2, CODIGO_PASTILHA);
 	}
 
-	private void assertEstoque(EstoqueCommand resultado, UUID idEsperado, String codigoEsperado, String nomeEsperado,
+	private void assertEstoque(EstoqueCommand resultado, String codigoEsperado, String nomeEsperado,
 			BigDecimal valorEsperado, int quantidadeEsperada, int reservadosEsperados, int disponiveisEsperados) {
 		assertAll(
 				() -> assertEquals(codigoEsperado, resultado.codigo()),

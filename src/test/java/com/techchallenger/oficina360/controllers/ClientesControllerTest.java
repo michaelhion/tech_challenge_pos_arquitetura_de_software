@@ -163,12 +163,6 @@ class ClientesControllerTest {
 
     @Test
     void deveListarClientesComSucesso() {
-        ClienteDTO segundoCliente = new ClienteDTO(
-                "98765432100",
-                "Maria Oliveira",
-                "maria.oliveira@email.com",
-                "11988887777"
-        );
         ClienteCommand segundoClientCommand = new ClienteCommand(
                 "98765432100",
                 "Maria Oliveira",

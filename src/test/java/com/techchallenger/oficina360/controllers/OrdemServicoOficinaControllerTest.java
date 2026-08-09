@@ -94,8 +94,6 @@ class OrdemServicoOficinaControllerTest {
 	private OrdemServicoOficinaController controller;
 
 	private UUID ordemServicoId;
-	private OrdemServicoDTO ordemServicoDTO;
-	private CriarOrdemServicoRequestDTO criarOrdemServicoRequestDTO;
 	private LocalDateTime dataAbertura;
 
 	@BeforeEach
@@ -104,9 +102,6 @@ class OrdemServicoOficinaControllerTest {
 
 		dataAbertura = LocalDateTime.of(2026, 7, 16, 1, 30);
 
-		ordemServicoDTO = new OrdemServicoDTO(CPF, PLACA, RECLAMACAO_CLIENTE, OrdemDeServicoStatus.RECEBIDA);
-
-		criarOrdemServicoRequestDTO = new CriarOrdemServicoRequestDTO(CPF, PLACA, RECLAMACAO_CLIENTE);
 	}
 
 	@Test
@@ -292,8 +287,6 @@ class OrdemServicoOficinaControllerTest {
 		OrdemServicoDTO request = new OrdemServicoDTO(CPF, PLACA, novaDescricao, OrdemDeServicoStatus.RECEBIDA);
 
 		OrdemServicoReqCommand commandEsperado = new OrdemServicoReqCommand(CPF, PLACA, novaDescricao);
-		OrdemServicoRespCommand commandRespEsperado = new OrdemServicoRespCommand(ordemServicoId, CPF, PLACA,
-				novaDescricao, OrdemDeServicoStatus.AGUARDANDO_APROVACAO);
 
 		OrdemServico ordemServicoAtualizada = new OrdemServico(ordemServicoId, CPF, PLACA,
 				LocalDateTime.of(2026, 7, 20, 8, 0), null, novaDescricao, OrdemDeServicoStatus.RECEBIDA, null,
@@ -361,7 +354,6 @@ class OrdemServicoOficinaControllerTest {
 		OrdemServicoDetailDTO responseBody = response.getBody();
 
 		assertAll(
-//				() -> assertEquals(ordemServicoId, responseBody.id()),
 				() -> assertEquals(CPF, responseBody.documentoCliente()),
 				() -> assertEquals(PLACA, responseBody.placaVeiculo()),
 				() -> assertEquals(RECLAMACAO_CLIENTE, responseBody.descricaoProblema()),

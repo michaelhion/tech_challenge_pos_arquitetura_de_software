@@ -1,6 +1,8 @@
 package com.techchallenger.oficina360.utils;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -86,32 +88,13 @@ class FormataDadosUtilsTest {
 		assertNull(resultado);
 	}
 
-	@Test
-	void deveNormalizarPlacaConvertendoParaMaiusculas() {
-		String resultado = FormataDadosUtils.normalizarPlaca("abc1d23");
+	@ParameterizedTest(name = "[{index}] normalizar \"{0}\" deve resultar em \"{1}\"")
+	@CsvSource({ "'abc1d23',     'ABC1D23'", "'ABC-1D23',    'ABC1D23'", "' AB C1 D23 ', 'ABC1D23'",
+			"' abc-1d23 ',  'ABC1D23'" })
+	void deveNormalizarPlaca(String placaInformada, String placaEsperada) {
+		String resultado = FormataDadosUtils.normalizarPlaca(placaInformada);
 
-		assertEquals("ABC1D23", resultado);
-	}
-
-	@Test
-	void deveNormalizarPlacaRemovendoHifen() {
-		String resultado = FormataDadosUtils.normalizarPlaca("ABC-1D23");
-
-		assertEquals("ABC1D23", resultado);
-	}
-
-	@Test
-	void deveNormalizarPlacaRemovendoEspacos() {
-		String resultado = FormataDadosUtils.normalizarPlaca(" AB C1 D23 ");
-
-		assertEquals("ABC1D23", resultado);
-	}
-
-	@Test
-	void deveNormalizarPlacaComHifenEspacosEMinusculas() {
-		String resultado = FormataDadosUtils.normalizarPlaca(" abc-1d23 ");
-
-		assertEquals("ABC1D23", resultado);
+		assertEquals(placaEsperada, resultado);
 	}
 
 	@Test

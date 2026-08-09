@@ -127,10 +127,6 @@ public class OrdemServicoFluxosIT extends BaseIT {
 		assertEquals(15, estoqueDepois.getDisponiveis());;
 	}
 
-	private ResultActions fazerPatch(String endpoint,String id) throws Exception {
-		return mockMvc.perform(autenticado(
-				patch("/ordem-servico/execucao/finalizar/%s".formatted(id)),tokenAdmin()));
-	}
 
 	private ResultActions aprovar(String id,AprovacaoOrdemServicoDTO aprovacaoOrdemServicoDTO, String token) throws Exception {
 		return mockMvc.perform(autenticado(patch(("/ordem-servico/clientes/aprovacao/%s").formatted(

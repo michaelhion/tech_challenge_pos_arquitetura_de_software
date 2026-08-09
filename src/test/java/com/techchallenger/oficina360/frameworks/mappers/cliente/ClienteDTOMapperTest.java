@@ -136,7 +136,8 @@ class ClienteDTOMapperTest {
 	void naoDeveLancarErroQuandoEntityForNulaNaAtualizacao() {
 		ClienteDTO dto = criarClienteDTO();
 
-		ClienteDTOMapper.updateEntityFromDto(dto, null);
+
+		assertDoesNotThrow(()->ClienteDTOMapper.updateEntityFromDto(dto, null));
 	}
 
 	@Test

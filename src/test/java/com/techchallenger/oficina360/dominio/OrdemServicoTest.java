@@ -134,7 +134,9 @@ class OrdemServicoTest {
 			OrdemServico ordem = criarOrdemServico(FINALIZADA);
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
-			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.adicionarServicos(List.of(servico)));
+			List<OrdemServicoServico> servicos = List.of(servico);
+
+			assertThrows( TransicaoStatusInvalidaException.class, () -> ordem.adicionarServicos(servicos) );
 
 			assertTrue(ordem.getServicos().isEmpty());
 		}
@@ -190,8 +192,8 @@ class OrdemServicoTest {
 		void naoDevePermitirAlterarEstoqueForaDoDiagnostico() {
 			OrdemServico ordem = criarOrdemServico(FINALIZADA);
 			OrdemServicoItemEstoque item = criarItemEstoque(BigDecimal.TEN);
-
-			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.adicionarItensEstoque(List.of(item)));
+			List<OrdemServicoItemEstoque> itemEstoques = List.of(item);
+			assertThrows(TransicaoStatusInvalidaException.class, () -> ordem.adicionarItensEstoque(itemEstoques));
 
 			assertTrue(ordem.getItensEstoque().isEmpty());
 		}
@@ -205,8 +207,8 @@ class OrdemServicoTest {
 			OrdemServicoItemEstoque item = criarItemEstoque(BigDecimal.ONE);
 
 			List<OrdemServicoItemEstoque> itens = Arrays.asList(item, null);
-
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarDiagnostico(List.of(servico), itens));
+			List<OrdemServicoServico> servicos = List.of(servico);
+			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarDiagnostico(servicos, itens));
 
 			assertAll(
 					() -> assertTrue(os.getServicos().isEmpty()),
@@ -229,11 +231,11 @@ class OrdemServicoTest {
 			OrdemServicoItemEstoque novoItem = criarItemEstoque(new BigDecimal("80.00"));
 
 			List<OrdemServicoItemEstoque> novosItensInvalidos = Arrays.asList(novoItem, null);
-
+			List<OrdemServicoServico> novoServicos = List.of(novoServico);
 			assertThrows(
 					ItemEstoqueInvalidoException.class,
 					() -> os.adicionarDiagnostico(
-							List.of(novoServico),
+							novoServicos,
 							novosItensInvalidos)
 			);
 
@@ -298,8 +300,8 @@ class OrdemServicoTest {
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
 
 			List<OrdemServicoItemEstoque> itens = Arrays.asList(criarItemEstoque(BigDecimal.ONE), null);
-
-			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarDiagnostico(List.of(servico), itens));
+			List<OrdemServicoServico> servicos = List.of(servico);
+			assertThrows(ItemEstoqueInvalidoException.class, () -> os.adicionarDiagnostico(servicos, itens));
 
 			assertAll(() -> assertTrue(os.getServicos().isEmpty()), () -> assertTrue(os.getItensEstoque().isEmpty()),
 					() -> assertEquals(BigDecimal.ZERO, os.getValorOs()));
@@ -317,8 +319,8 @@ class OrdemServicoTest {
 		@Test
 		void deveFalharAoAdicionarDiagnosticoForaDoStatusCorreto() {
 			OrdemServicoServico servico = criarServico(BigDecimal.TEN);
-
-			assertThrows(TransicaoStatusInvalidaException.class, () -> os.adicionarDiagnostico(List.of(servico), null));
+			List<OrdemServicoServico> servicos = List.of(servico);
+			assertThrows(TransicaoStatusInvalidaException.class, () -> os.adicionarDiagnostico(servicos, null));
 
 			assertTrue(os.getServicos().isEmpty());
 		}
@@ -355,9 +357,9 @@ class OrdemServicoTest {
 			os.adicionarDiagnostico(List.of(servicoAtual), List.of(itemAtual));
 
 			List<OrdemServicoItemEstoque> itensInvalidos = Arrays.asList(itemAtual, null);
-
+			List<OrdemServicoServico> servicoServicos = List.of(criarServico(new BigDecimal("999.00")));
 			assertThrows(ItemEstoqueInvalidoException.class,
-					() -> os.adicionarDiagnostico(List.of(criarServico(new BigDecimal("999.00"))), itensInvalidos));
+					() -> os.adicionarDiagnostico(servicoServicos, itensInvalidos));
 
 			assertAll(() -> assertEquals(List.of(servicoAtual), os.getServicos()),
 					() -> assertEquals(List.of(itemAtual), os.getItensEstoque()),

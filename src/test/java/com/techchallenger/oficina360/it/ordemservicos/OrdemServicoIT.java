@@ -64,28 +64,11 @@ class OrdemServicoIT extends BaseIT {
 
 	@Test
 	void deveCriarOrdemServico() throws Exception {
-
-		//        mockMvc.perform(autenticado(post(ORDEM_SERVICO_BASE_PATH + "/salvar"),
-		//                         tokenAdmin())
-		//                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ordemServicoValida())))
-		//                .andExpect(status().isCreated())
-		//                .andReturn().getResponse().getContentAsString();
-
 		criarOrdemServico();
 	}
 
 	@Test
 	void devePassarPorTodosStatus() throws Exception {
-
-		//        String response = mockMvc.perform(post(ORDEM_SERVICO_BASE_PATH + "/salvar")
-		//                        .header("Authorization", "Bearer " + tokenAdmin)
-		//                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ordemServicoValida())))
-		//                .andExpect(status().isCreated())
-		//                .andExpect( jsonPath("$.ordemDeServicoStatus").value("RECEBIDA"))
-		//                .andReturn().getResponse().getContentAsString();
-		//
-		//        String id = JsonPath.read(response, "$.id");
-
 		UUID uuid = criarOrdemServico();
 		String id = uuid.toString();
 
@@ -244,14 +227,6 @@ class OrdemServicoIT extends BaseIT {
 		return UUID.fromString(
 				JsonPath.read(response,"$.id")
 		);
-	}
-
-	private void aprovar(String token,String statusOrcamento) throws Exception {
-		mockMvc.perform(autenticado(patch((ORDEM_SERVICO_CLIENTE_BASE_PATH + "/aprovacao/%s").formatted(id)),token)
-						.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(aprovacaoOrdemServicoDTOValido())))
-				.andExpect(status().isOk())
-				.andExpect( jsonPath("$.ordemDeServicoStatus").value(statusOrcamento))
-				.andDo(print());
 	}
 
 }

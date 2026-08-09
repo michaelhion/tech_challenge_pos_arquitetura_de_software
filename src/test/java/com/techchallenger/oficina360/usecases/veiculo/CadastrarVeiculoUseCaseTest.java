@@ -25,8 +25,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CadastrarVeiculoUseCaseTest {
 
-	private static final UUID VEICULO_ID = UUID.fromString("2b3ded6d-2e43-4f2f-8ea3-26714b1398f8");
-
 	private static final String PLACA = "ABC1D23";
 
 	private static final String MARCA = "Volkswagen";
