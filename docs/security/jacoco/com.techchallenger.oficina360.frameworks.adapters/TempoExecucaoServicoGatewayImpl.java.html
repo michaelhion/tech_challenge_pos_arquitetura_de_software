@@ -22,27 +22,27 @@ public class TempoExecucaoServicoGatewayImpl implements TempoExecucaoServicoGate
 
     @Override
     public Double calcularTempoMedio(@Param(&quot;servicoId&quot;) UUID servicoId){
-<span class="nc" id="L25">        return repository.calcularTempoMedio(servicoId);</span>
+<span class="fc" id="L25">        return repository.calcularTempoMedio(servicoId);</span>
     }
     @Override
     public TempoExecucaoServico save(TempoExecucaoServico tempoExecucaoServico){
-<span class="nc" id="L29">        TempoExecucaoServicoEntity entity = mapper.toEntity(tempoExecucaoServico);</span>
-<span class="nc" id="L30">        TempoExecucaoServicoEntity persisted = repository.save(entity);</span>
-<span class="nc" id="L31">        return mapper.toDomain(persisted);</span>
+<span class="fc" id="L29">        TempoExecucaoServicoEntity entity = mapper.toEntity(tempoExecucaoServico);</span>
+<span class="fc" id="L30">        TempoExecucaoServicoEntity persisted = repository.save(entity);</span>
+<span class="fc" id="L31">        return mapper.toDomain(persisted);</span>
     }
 
     @Override
     public List&lt;TempoExecucaoServico&gt; findAll(TempoExecucaoServico tempoExecucaoServico){
-<span class="nc" id="L36">        return repository.findAll()</span>
-<span class="nc" id="L37">                .stream()</span>
-<span class="nc" id="L38">                .map(mapper::toDomain)</span>
-<span class="nc" id="L39">                .toList();</span>
+<span class="fc" id="L36">        return repository.findAll()</span>
+<span class="fc" id="L37">                .stream()</span>
+<span class="fc" id="L38">                .map(mapper::toDomain)</span>
+<span class="fc" id="L39">                .toList();</span>
     }
 
     @Override
     public Optional&lt;TempoExecucaoServico&gt; findById(UUID id){
-<span class="nc" id="L44">        return repository.findById(id)</span>
-<span class="nc" id="L45">                .map(mapper::toDomain);</span>
+<span class="fc" id="L44">        return repository.findById(id)</span>
+<span class="fc" id="L45">                .map(mapper::toDomain);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

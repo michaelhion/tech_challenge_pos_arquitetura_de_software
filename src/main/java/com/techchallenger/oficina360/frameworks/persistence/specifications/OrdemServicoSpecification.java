@@ -21,7 +21,7 @@ public final class OrdemServicoSpecification {
 			}
 
 			if (filtro.documentoCliente() != null && !filtro.documentoCliente().isBlank()) {
-				predicates.add(cb.equal(root.get("documento"), filtro.documentoCliente()));
+				predicates.add(cb.equal(root.get("documentoCliente"), filtro.documentoCliente()));
 			}
 
 			if (filtro.placa() != null && !filtro.placa().isBlank()) {

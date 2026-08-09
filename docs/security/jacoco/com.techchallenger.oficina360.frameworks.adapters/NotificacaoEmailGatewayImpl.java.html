@@ -22,19 +22,19 @@ public class NotificacaoEmailGatewayImpl implements NotificacaoEmailGateway {
 
 	@Override
 	public void enviar(MensagemEmail mensagem) {
-<span class="nc" id="L25">		SimpleMailMessage email = new SimpleMailMessage();</span>
+<span class="fc" id="L25">		SimpleMailMessage email = new SimpleMailMessage();</span>
 
-<span class="nc" id="L27">		email.setFrom(remetente);</span>
-<span class="nc" id="L28">		email.setTo(mensagem.destinatario());</span>
-<span class="nc" id="L29">		email.setSubject(mensagem.assunto());</span>
-<span class="nc" id="L30">		email.setText(mensagem.mensagem());</span>
+<span class="fc" id="L27">		email.setFrom(remetente);</span>
+<span class="fc" id="L28">		email.setTo(mensagem.destinatario());</span>
+<span class="fc" id="L29">		email.setSubject(mensagem.assunto());</span>
+<span class="fc" id="L30">		email.setText(mensagem.mensagem());</span>
 		try{
-<span class="nc" id="L32">			log.info(&quot;enviando email para &quot; + remetente);</span>
-<span class="nc" id="L33">			javaMailSender.send(email);</span>
-<span class="nc" id="L34">		} catch (MailException e) {</span>
-<span class="nc" id="L35">			log.info(e.getMessage());</span>
-<span class="nc" id="L36">			log.error(&quot;falha ao enviar email&quot;);</span>
-<span class="nc" id="L37">		}</span>
-<span class="nc" id="L38">	}</span>
+<span class="fc" id="L32">			log.info(&quot;enviando email para &quot; + remetente);</span>
+<span class="fc" id="L33">			javaMailSender.send(email);</span>
+<span class="fc" id="L34">		} catch (MailException e) {</span>
+<span class="fc" id="L35">			log.info(e.getMessage());</span>
+<span class="fc" id="L36">			log.error(&quot;falha ao enviar email&quot;);</span>
+<span class="fc" id="L37">		}</span>
+<span class="fc" id="L38">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

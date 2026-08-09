@@ -16,9 +16,9 @@ public class ClienteFinder {
 <span class="fc" id="L16">	}</span>
 
 	public Cliente buscarPorDocumentoOuFalhar(String documento) {
-<span class="nc" id="L19">		return gateway.findByDocumento(normalizarDocumento(documento))</span>
-<span class="nc" id="L20">				.orElseThrow(() -&gt;</span>
-<span class="nc" id="L21">						new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));</span>
+<span class="fc" id="L19">		return gateway.findByDocumento(normalizarDocumento(documento))</span>
+<span class="fc" id="L20">				.orElseThrow(() -&gt;</span>
+<span class="fc" id="L21">						new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));</span>
 	}
 
 }

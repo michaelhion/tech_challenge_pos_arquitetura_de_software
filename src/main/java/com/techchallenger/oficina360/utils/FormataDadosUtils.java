@@ -2,38 +2,45 @@ package com.techchallenger.oficina360.utils;
 
 public class FormataDadosUtils {
 
-    private FormataDadosUtils(){}
+	private FormataDadosUtils() {
+	}
 
-    public static String mascararDocumento(String documento) {
-        if (documento == null || documento.length() < 4) {
-            return "***";
-        }
+	public static String mascararDocumento(String documento) {
+		if (documento == null || documento.length() < 4) {
+			return "***";
+		}
 
-        return "***" + documento.substring(documento.length() - 4);
-    }
+		return "***" + documento.substring(documento.length() - 4);
+	}
 
-    public static String normalizarDocumento(String documento) {
-        return documento == null ? null : documento.trim();
-    }
+	public static String normalizarDocumento(String documento) {
+		if (documento == null) {
+			return null;
+		}
 
-    public static String normalizarPlaca(String placa) {
-        return placa == null ? null : placa.trim().toUpperCase();
-    }
+		return documento.trim().replaceAll("\\D", "");
+	}
 
-    public static String mascararPlaca(String placa) {
+	public static String normalizarPlaca(String placa) {
+		if (placa == null) {
+			return null;
+		}
 
-        if (placa == null || placa.isBlank()) {
-            return placa;
-        }
+		return placa.trim().replace("-", "").replace(" ", "").toUpperCase();
+	}
 
-        String placaNormalizada = normalizarPlaca(placa);
+	public static String mascararPlaca(String placa) {
 
-        if (placaNormalizada.length() < 5) {
-            return "***";
-        }
+		if (placa == null || placa.isBlank()) {
+			return placa;
+		}
 
-        return placaNormalizada.substring(0, 3)
-                + "***"
-                + placaNormalizada.substring(placaNormalizada.length() - 2);
-    }
+		String placaNormalizada = normalizarPlaca(placa);
+
+		if (placaNormalizada.length() < 5) {
+			return "***";
+		}
+
+		return placaNormalizada.substring(0, 3) + "***" + placaNormalizada.substring(placaNormalizada.length() - 2);
+	}
 }

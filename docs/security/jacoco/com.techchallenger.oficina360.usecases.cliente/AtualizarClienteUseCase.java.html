@@ -17,17 +17,17 @@ public class AtualizarClienteUseCase {
 <span class="fc" id="L17">	}</span>
 
 	public ClienteCommand edit(String documento, ClienteCommand command) {
-<span class="nc" id="L20">		Cliente cliente = clienteGateway.findByDocumento(documento)</span>
-<span class="nc" id="L21">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));</span>
+<span class="fc" id="L20">		Cliente cliente = clienteGateway.findByDocumento(documento)</span>
+<span class="fc" id="L21">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO));</span>
 
-<span class="nc" id="L23">		cliente.editar(</span>
-<span class="nc" id="L24">				command.documento(),</span>
-<span class="nc" id="L25">				command.nome(),</span>
-<span class="nc" id="L26">				command.email(),</span>
-<span class="nc" id="L27">				command.telefone()</span>
+<span class="fc" id="L23">		cliente.editar(</span>
+<span class="fc" id="L24">				command.documento(),</span>
+<span class="fc" id="L25">				command.nome(),</span>
+<span class="fc" id="L26">				command.email(),</span>
+<span class="fc" id="L27">				command.telefone()</span>
 		);
 
-<span class="nc" id="L30">		return domainToCommand(clienteGateway.save(cliente));</span>
+<span class="fc" id="L30">		return domainToCommand(clienteGateway.save(cliente));</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -29,7 +29,7 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 
 	@Override
 	public boolean existsByEmail(String email) {
-<span class="nc" id="L32">		return repository.existsByEmail(email);</span>
+<span class="fc" id="L32">		return repository.existsByEmail(email);</span>
 	}
 
 	@Override
@@ -41,29 +41,29 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
 
 	@Override
 	public List&lt;Usuario&gt; saveAll(List&lt;Usuario&gt; usuarios) {
-<span class="nc" id="L44">		List&lt;UsuarioEntity&gt; usuarioEntityList = usuarios.stream().map(UsuarioDTOMapper::toEntity).toList();</span>
-<span class="nc" id="L45">		List&lt;UsuarioEntity&gt; usuarioEntitiesSaved = repository.saveAll(usuarioEntityList);</span>
-<span class="nc" id="L46">		return usuarioEntitiesSaved.stream().map(usuarioDTOMapper::toDomain).toList();</span>
+<span class="fc" id="L44">		List&lt;UsuarioEntity&gt; usuarioEntityList = usuarios.stream().map(UsuarioDTOMapper::toEntity).toList();</span>
+<span class="fc" id="L45">		List&lt;UsuarioEntity&gt; usuarioEntitiesSaved = repository.saveAll(usuarioEntityList);</span>
+<span class="fc" id="L46">		return usuarioEntitiesSaved.stream().map(usuarioDTOMapper::toDomain).toList();</span>
 	}
 
 	@Override
 	public List&lt;Usuario&gt; findAll() {
-<span class="nc" id="L51">		return repository.findAll()</span>
-<span class="nc" id="L52">				.stream()</span>
-<span class="nc" id="L53">				.map(mapper::toDomain)</span>
-<span class="nc" id="L54">				.toList();</span>
+<span class="fc" id="L51">		return repository.findAll()</span>
+<span class="fc" id="L52">				.stream()</span>
+<span class="fc" id="L53">				.map(mapper::toDomain)</span>
+<span class="fc" id="L54">				.toList();</span>
 	}
 
 	@Override
 	public Optional&lt;Usuario&gt; findById(UUID id) {
-<span class="nc" id="L59">		return repository.findById(id)</span>
-<span class="nc" id="L60">				.map(mapper::toDomain);</span>
+<span class="fc" id="L59">		return repository.findById(id)</span>
+<span class="fc" id="L60">				.map(mapper::toDomain);</span>
 	}
 
 
 	@Override
 	public void excluirTodos() {
-<span class="nc" id="L66">		repository.deleteAll();</span>
-<span class="nc" id="L67">	}</span>
+<span class="fc" id="L66">		repository.deleteAll();</span>
+<span class="fc" id="L67">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

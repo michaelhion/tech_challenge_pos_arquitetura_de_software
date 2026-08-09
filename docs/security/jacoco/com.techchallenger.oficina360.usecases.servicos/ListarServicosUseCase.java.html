@@ -20,25 +20,25 @@ public class ListarServicosUseCase {
 
 	public List&lt;ServicoCommand&gt; findAll() {
 
-<span class="nc" id="L23">		return servicoGateway.findAll()</span>
-<span class="nc" id="L24">				.stream()</span>
-<span class="nc" id="L25">				.map(this::toDTOComTempoMedio)</span>
-<span class="nc" id="L26">				.toList();</span>
+<span class="fc" id="L23">		return servicoGateway.findAll()</span>
+<span class="fc" id="L24">				.stream()</span>
+<span class="fc" id="L25">				.map(this::toDTOComTempoMedio)</span>
+<span class="fc" id="L26">				.toList();</span>
 	}
 
 	private ServicoCommand toDTOComTempoMedio(Servico servico) {
 
-<span class="nc" id="L31">		Double media = tempoExecucaoServicoGateway</span>
-<span class="nc" id="L32">				.calcularTempoMedio(servico.getId());</span>
+<span class="fc" id="L31">		Double media = tempoExecucaoServicoGateway</span>
+<span class="fc" id="L32">				.calcularTempoMedio(servico.getId());</span>
 
-<span class="nc bnc" id="L34" title="All 2 branches missed.">		Integer tempoMedio = media != null</span>
-<span class="nc" id="L35">				? (int) Math.round(media)</span>
-<span class="nc" id="L36">				: 0;</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">		Integer tempoMedio = media != null</span>
+<span class="fc" id="L35">				? (int) Math.round(media)</span>
+<span class="fc" id="L36">				: 0;</span>
 
-<span class="nc" id="L38">		return new ServicoCommand(</span>
-<span class="nc" id="L39">				servico.getCodigo(),</span>
-<span class="nc" id="L40">				servico.getDescricao(),</span>
-<span class="nc" id="L41">				servico.getValor(),</span>
+<span class="fc" id="L38">		return new ServicoCommand(</span>
+<span class="fc" id="L39">				servico.getCodigo(),</span>
+<span class="fc" id="L40">				servico.getDescricao(),</span>
+<span class="fc" id="L41">				servico.getValor(),</span>
 				tempoMedio
 		);
 	}

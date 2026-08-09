@@ -9,20 +9,20 @@ public class ServicoCommandMapper {
 	}
 
 	public static ServicoCommand domainToCommand(Servico domain) {
-<span class="nc" id="L12">		return new ServicoCommand(</span>
-<span class="nc" id="L13">				domain.getCodigo(),</span>
-<span class="nc" id="L14">				domain.getDescricao(),</span>
-<span class="nc" id="L15">				domain.getValor(),</span>
-<span class="nc" id="L16">				domain.getTempoMedioExecucaoMinutos()</span>
+<span class="fc" id="L12">		return new ServicoCommand(</span>
+<span class="fc" id="L13">				domain.getCodigo(),</span>
+<span class="fc" id="L14">				domain.getDescricao(),</span>
+<span class="fc" id="L15">				domain.getValor(),</span>
+<span class="fc" id="L16">				domain.getTempoMedioExecucaoMinutos()</span>
 		);
 	}
 
 	public static Servico commandToDomain(ServicoCommand command) {
-<span class="nc" id="L21">		return new Servico(</span>
+<span class="fc" id="L21">		return new Servico(</span>
 				null,
-<span class="nc" id="L23">				command.descricao(),</span>
-<span class="nc" id="L24">				command.valor(),</span>
-<span class="nc" id="L25">				command.codigo()</span>
+<span class="fc" id="L23">				command.descricao(),</span>
+<span class="fc" id="L24">				command.valor(),</span>
+<span class="fc" id="L25">				command.codigo()</span>
 		);
 	}
 }

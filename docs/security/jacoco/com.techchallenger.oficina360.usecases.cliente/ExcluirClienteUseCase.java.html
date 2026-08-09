@@ -4,22 +4,24 @@ import com.techchallenger.oficina360.gateways.ClienteGateway;
 import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.CLIENTE_NAO_ENCONTRADO;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
 
 public class ExcluirClienteUseCase {
 
 	private final ClienteGateway clienteGateway;
 
-<span class="fc" id="L12">	public ExcluirClienteUseCase(ClienteGateway clienteGateway) {</span>
-<span class="fc" id="L13">		this.clienteGateway = clienteGateway;</span>
-<span class="fc" id="L14">	}</span>
-
-
+<span class="fc" id="L13">	public ExcluirClienteUseCase(ClienteGateway clienteGateway) {</span>
+<span class="fc" id="L14">		this.clienteGateway = clienteGateway;</span>
+<span class="fc" id="L15">	}</span>
 
 	public void delete(String documento) {
-<span class="nc bnc" id="L19" title="All 2 branches missed.">		if(clienteGateway.existsByDocumento(documento)) {</span>
-<span class="nc" id="L20">			throw new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO);</span>
+<span class="fc" id="L18">		String documentoNormalizado = normalizarDocumento(documento);</span>
+
+<span class="fc bfc" id="L20" title="All 2 branches covered.">		if (!clienteGateway.existsByDocumento(documentoNormalizado)) {</span>
+<span class="fc" id="L21">			throw new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO);</span>
 		}
-<span class="nc" id="L22">		clienteGateway.deleteByDocumento(documento);</span>
-<span class="nc" id="L23">	}</span>
+
+<span class="fc" id="L24">		clienteGateway.deleteByDocumento(documentoNormalizado);</span>
+<span class="fc" id="L25">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

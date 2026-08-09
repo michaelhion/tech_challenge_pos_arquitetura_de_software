@@ -13,19 +13,19 @@ import org.springframework.stereotype.Component;
 	@Override
 	public Usuario obterUsuarioAtual() {
 
-<span class="nc" id="L16">		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc" id="L16">		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
 
-<span class="nc bnc" id="L18" title="All 2 branches missed.">		if (authentication == null) {</span>
-<span class="nc" id="L19">			return null;</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">		if (authentication == null) {</span>
+<span class="fc" id="L19">			return null;</span>
 		}
 
-<span class="nc" id="L22">		Object principal = authentication.getPrincipal();</span>
+<span class="fc" id="L22">		Object principal = authentication.getPrincipal();</span>
 
-<span class="nc bnc" id="L24" title="All 2 branches missed.">		if (!(principal instanceof UsuarioSecurityDetails details)) {</span>
-<span class="nc" id="L25">			return null;</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">		if (!(principal instanceof UsuarioSecurityDetails details)) {</span>
+<span class="fc" id="L25">			return null;</span>
 		}
 
-<span class="nc" id="L28">		return details.getUsuario();</span>
+<span class="fc" id="L28">		return details.getUsuario();</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

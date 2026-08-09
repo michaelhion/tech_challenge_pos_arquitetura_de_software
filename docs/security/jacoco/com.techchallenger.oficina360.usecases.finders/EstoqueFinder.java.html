@@ -17,12 +17,12 @@ public class EstoqueFinder {
 <span class="fc" id="L17">	}</span>
 
 	public Estoque obterOuFalhar(String codigo) {
-<span class="nc" id="L20">		return estoqueGateway.findByCodigo(codigo)</span>
-<span class="nc" id="L21">				.orElseThrow(() -&gt; new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA));</span>
+<span class="fc" id="L20">		return estoqueGateway.findByCodigo(codigo)</span>
+<span class="fc" id="L21">				.orElseThrow(() -&gt; new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA));</span>
 	}
 
 	public Optional&lt;Estoque&gt; obter(String codigo) {
-<span class="nc" id="L25">		return estoqueGateway.findByCodigo(codigo);</span>
+<span class="fc" id="L25">		return estoqueGateway.findByCodigo(codigo);</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

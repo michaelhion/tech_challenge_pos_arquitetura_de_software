@@ -84,25 +84,6 @@ public class OrdemServicoDTOMapper {
 		);
 	}
 
-	private static PecasInsumosAdicionadosDTO toPecaInsumoDTO(OrdemServicoItemEstoque item) {
-		if (item == null) {
-			return null;
-		}
-
-		return new PecasInsumosAdicionadosDTO(item.getNome(), item.getValorUnitario(), item.getQuantidade(),
-				item.getValorTotal());
-	}
-
-
-
-	private static ServicosAdicionadosDTO toServicoAdicionadoDTO(OrdemServicoServico servico) {
-		if (servico == null) {
-			return null;
-		}
-
-		return new ServicosAdicionadosDTO(servico.getDescricao(), servico.getValor());
-	}
-
 	public static AprovacaoOrdemServicoCommand aprovacaoDTOToCommand(AprovacaoOrdemServicoDTO aprovacaoDTO) {
 		return new AprovacaoOrdemServicoCommand(
 				aprovacaoDTO.aprovado(),
@@ -191,37 +172,6 @@ public class OrdemServicoDTOMapper {
 				command.placaVeiculo(),
 				command.descricaoProblema(),
 				command.status()
-		);
-	}
-
-	private static List<ServicosAdicionadosDTO> toServicosAdicionadosDTO(List<OrdemServicoServico> servicos) {
-		if (servicos == null || servicos.isEmpty()) {
-			return List.of();
-		}
-
-		return servicos.stream().map(OrdemServicoDTOMapper::toServicoAdicionadoDTO).toList();
-	}
-
-	private static List<PecasInsumosAdicionadosDTO> toPecasInsumosAdicionadosDTO(
-			List<OrdemServicoItemEstoque> itensEstoque) {
-		if (itensEstoque == null || itensEstoque.isEmpty()) {
-			return List.of();
-		}
-
-		return itensEstoque.stream().map(OrdemServicoDTOMapper::toPecaInsumoDTO).toList();
-	}
-
-	private static DadosFinanceirosDTO toDadosFinanceirosDTO(OrdemServico ordemServico) {
-		if (ordemServico == null) {
-			return null;
-		}
-
-		return new DadosFinanceirosDTO(
-				toServicosAdicionadosDTO(ordemServico.getServicos()),
-				toPecasInsumosAdicionadosDTO(ordemServico.getItensEstoque()),
-				ordemServico.getValorServicos(),
-				ordemServico.getValorPecasInsumos(),
-				ordemServico.getValorOs()
 		);
 	}
 

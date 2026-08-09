@@ -17,11 +17,11 @@ public class BuscarVeiculoPorPlacaUseCase {
 <span class="fc" id="L17">	}</span>
 
 	public VeiculoCommand findByPlaca(String placa) {
-<span class="nc" id="L20">		String placaNormalizada = normalizarPlaca(placa);</span>
+<span class="fc" id="L20">		String placaNormalizada = normalizarPlaca(placa);</span>
 
-<span class="nc" id="L22">		Veiculo veiculo = veiculoGateway.findByPlaca(placaNormalizada)</span>
-<span class="nc" id="L23">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Veiculo não encontrado&quot;));</span>
-<span class="nc" id="L24">		return domainToCommand(veiculo);</span>
+<span class="fc" id="L22">		Veiculo veiculo = veiculoGateway.findByPlaca(placaNormalizada)</span>
+<span class="fc" id="L23">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Veiculo não encontrado&quot;));</span>
+<span class="fc" id="L24">		return domainToCommand(veiculo);</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

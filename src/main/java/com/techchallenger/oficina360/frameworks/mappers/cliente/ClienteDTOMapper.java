@@ -70,21 +70,6 @@ public class ClienteDTOMapper {
         entity.setTelefone(dto.telefone());
     }
 
-    public static void updateDomainFromDto(ClienteDTO dto, Cliente domain) {
-        if (dto == null || domain == null) {
-            return;
-        }
-        Cliente newCliente = new Cliente(
-                domain.getId(),
-                domain.getDocumento(),
-                domain.getNome(),
-                domain.getEmail(),
-                domain.getTelefone()
-        );
-        domain = newCliente;
-
-    }
-
     public static ClienteDTO commandToDTO(ClienteCommand command){
         return new ClienteDTO(
                 command.documento(),

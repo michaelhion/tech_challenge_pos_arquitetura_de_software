@@ -9,23 +9,23 @@ public class EstoqueCommandMapper {
 
 
     public static EstoqueCommand domaintoCommand(Estoque estoque) {
-<span class="nc" id="L12">        return new EstoqueCommand(</span>
-<span class="nc" id="L13">                estoque.getCodigo(),</span>
-<span class="nc" id="L14">                estoque.getNome(),</span>
-<span class="nc" id="L15">                estoque.getValor(),</span>
-<span class="nc" id="L16">                estoque.getQuantidade(),</span>
-<span class="nc" id="L17">                estoque.getReservados(),</span>
-<span class="nc" id="L18">                estoque.getDisponiveis()</span>
+<span class="fc" id="L12">        return new EstoqueCommand(</span>
+<span class="fc" id="L13">                estoque.getCodigo(),</span>
+<span class="fc" id="L14">                estoque.getNome(),</span>
+<span class="fc" id="L15">                estoque.getValor(),</span>
+<span class="fc" id="L16">                estoque.getQuantidade(),</span>
+<span class="fc" id="L17">                estoque.getReservados(),</span>
+<span class="fc" id="L18">                estoque.getDisponiveis()</span>
         );
     }
 
     public static Estoque commandToDomain(EstoqueCommand command) {
-<span class="nc" id="L23">        Estoque estoque = new Estoque();</span>
-<span class="nc" id="L24">        return estoque.criar(</span>
-<span class="nc" id="L25">                command.codigo(),</span>
-<span class="nc" id="L26">                command.nome(),</span>
-<span class="nc" id="L27">                command.valor(),</span>
-<span class="nc" id="L28">                command.quantidade()</span>
+<span class="fc" id="L23">        Estoque estoque = new Estoque();</span>
+<span class="fc" id="L24">        return estoque.criar(</span>
+<span class="fc" id="L25">                command.codigo(),</span>
+<span class="fc" id="L26">                command.nome(),</span>
+<span class="fc" id="L27">                command.valor(),</span>
+<span class="fc" id="L28">                command.quantidade()</span>
         );
     }
 }

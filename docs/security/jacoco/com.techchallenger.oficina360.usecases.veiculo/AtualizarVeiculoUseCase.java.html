@@ -28,35 +28,35 @@ public class AtualizarVeiculoUseCase {
 <span class="fc" id="L28">	}</span>
 
 	public VeiculoCommand edit(String placaAtual, VeiculoCommand command) {
-<span class="nc" id="L31">		String placaAtualNormalizada = normalizarPlaca(placaAtual);</span>
-<span class="nc" id="L32">		String novaPlacaNormalizada = normalizarPlaca(command.placa());</span>
-<span class="nc" id="L33">		String documentoClienteNormalizado = normalizarDocumento(command.clienteDocumento());</span>
+<span class="fc" id="L31">		String placaAtualNormalizada = normalizarPlaca(placaAtual);</span>
+<span class="fc" id="L32">		String novaPlacaNormalizada = normalizarPlaca(command.placa());</span>
+<span class="fc" id="L33">		String documentoClienteNormalizado = normalizarDocumento(command.clienteDocumento());</span>
 
-<span class="nc" id="L35">		Veiculo veiculo = veiculoFinder.buscarPorPlacaOuFalhar(placaAtualNormalizada);</span>
+<span class="fc" id="L35">		Veiculo veiculo = veiculoFinder.buscarPorPlacaOuFalhar(placaAtualNormalizada);</span>
 
-<span class="nc" id="L37">		clienteFinder.buscarPorDocumentoOuFalhar(documentoClienteNormalizado);</span>
-<span class="nc" id="L38">		validarPlacaDisponivelParaEdicao(novaPlacaNormalizada, veiculo.getId());</span>
+<span class="fc" id="L37">		clienteFinder.buscarPorDocumentoOuFalhar(documentoClienteNormalizado);</span>
+<span class="fc" id="L38">		validarPlacaDisponivelParaEdicao(novaPlacaNormalizada, veiculo.getId());</span>
 
-<span class="nc" id="L40">		veiculo.editar(</span>
-<span class="nc" id="L41">				command.placa(),</span>
-<span class="nc" id="L42">				command.marca(),</span>
-<span class="nc" id="L43">				command.modelo(),</span>
-<span class="nc" id="L44">				command.ano(),</span>
-<span class="nc" id="L45">				command.clienteDocumento()</span>
+<span class="fc" id="L40">		veiculo.editar(</span>
+<span class="fc" id="L41">				command.placa(),</span>
+<span class="fc" id="L42">				command.marca(),</span>
+<span class="fc" id="L43">				command.modelo(),</span>
+<span class="fc" id="L44">				command.ano(),</span>
+<span class="fc" id="L45">				command.clienteDocumento()</span>
 		);
 
-<span class="nc" id="L48">		Veiculo veiculoAtualizado = veiculoGateway.save(veiculo);</span>
+<span class="fc" id="L48">		Veiculo veiculoAtualizado = veiculoGateway.save(veiculo);</span>
 
-<span class="nc" id="L50">		return domainToCommand(veiculoAtualizado);</span>
+<span class="fc" id="L50">		return domainToCommand(veiculoAtualizado);</span>
 	}
 
 	private void validarPlacaDisponivelParaEdicao(
 			String novaPlaca,
 			UUID id
 	) {
-<span class="nc bnc" id="L57" title="All 2 branches missed.">		if (veiculoGateway.existsByPlacaAndIdNot(novaPlaca, id)) {</span>
-<span class="nc" id="L58">			throw new PlacaJaExisteException(VEICULO_SERV_VEICULO_CADASTRADO);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">		if (veiculoGateway.existsByPlacaAndIdNot(novaPlaca, id)) {</span>
+<span class="fc" id="L58">			throw new PlacaJaExisteException(VEICULO_SERV_VEICULO_CADASTRADO);</span>
 		}
-<span class="nc" id="L60">	}</span>
+<span class="fc" id="L60">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

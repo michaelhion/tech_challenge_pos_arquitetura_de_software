@@ -2,105 +2,185 @@ package com.techchallenger.oficina360.utils;
 
 import org.junit.jupiter.api.Test;
 
-import static com.techchallenger.oficina360.utils.FormataDadosUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class FormataDadosUtilsTest {
 
-    @Test
-    void deveMascararDocumentoComSucesso() {
+	@Test
+	void deveMascararCpfMantendoUltimosQuatroDigitos() {
+		String resultado = FormataDadosUtils.mascararDocumento("12345678901");
 
-        String resultado = FormataDadosUtils.mascararDocumento("12345678901");
+		assertEquals("***8901", resultado);
+	}
 
-        assertEquals("***8901", resultado);
-    }
+	@Test
+	void deveMascararCnpjMantendoUltimosQuatroDigitos() {
+		String resultado = FormataDadosUtils.mascararDocumento("11222333000181");
 
-    @Test
-    void deveRetornarTresAsteriscosQuandoDocumentoForNulo() {
+		assertEquals("***0181", resultado);
+	}
 
-        String resultado = FormataDadosUtils.mascararDocumento(null);
+	@Test
+	void deveMascararDocumentoComExatamenteQuatroCaracteres() {
+		String resultado = FormataDadosUtils.mascararDocumento("1234");
 
-        assertEquals("***", resultado);
-    }
+		assertEquals("***1234", resultado);
+	}
 
-    @Test
-    void deveRetornarTresAsteriscosQuandoDocumentoTiverMenosDeQuatroCaracteres() {
+	@Test
+	void deveRetornarMascaraQuandoDocumentoForNulo() {
+		String resultado = FormataDadosUtils.mascararDocumento(null);
 
-        String resultado = FormataDadosUtils.mascararDocumento("123");
+		assertEquals("***", resultado);
+	}
 
-        assertEquals("***", resultado);
-    }
+	@Test
+	void deveRetornarMascaraQuandoDocumentoPossuirMenosDeQuatroCaracteres() {
+		assertAll(() -> assertEquals("***", FormataDadosUtils.mascararDocumento("")),
+				() -> assertEquals("***", FormataDadosUtils.mascararDocumento("1")),
+				() -> assertEquals("***", FormataDadosUtils.mascararDocumento("123")));
+	}
 
-    @Test
-    void deveNormalizarDocumentoComSucesso() {
+	@Test
+	void deveNormalizarCpfRemovendoFormatacao() {
+		String resultado = FormataDadosUtils.normalizarDocumento("123.456.789-01");
 
-        String resultado = normalizarDocumento(" 12345678901 ");
+		assertEquals("12345678901", resultado);
+	}
 
-        assertEquals("12345678901", resultado);
-    }
+	@Test
+	void deveNormalizarCnpjRemovendoFormatacao() {
+		String resultado = FormataDadosUtils.normalizarDocumento("11.222.333/0001-81");
 
-    @Test
-    void deveRetornarNullAoNormalizarDocumentoNulo() {
+		assertEquals("11222333000181", resultado);
+	}
 
-        String resultado = normalizarDocumento(null);
+	@Test
+	void deveRemoverEspacosExternosDoDocumento() {
+		String resultado = FormataDadosUtils.normalizarDocumento("  12345678901  ");
 
-        assertNull(resultado);
-    }
+		assertEquals("12345678901", resultado);
+	}
 
-    @Test
-    void deveNormalizarPlacaComSucesso() {
+	@Test
+	void deveRemoverTodosOsCaracteresNaoNumericosDoDocumento() {
+		String resultado = FormataDadosUtils.normalizarDocumento("CPF: 123.456.789-01");
 
-        String resultado = normalizarPlaca(" abc1d23 ");
+		assertEquals("12345678901", resultado);
+	}
 
-        assertEquals("ABC1D23", resultado);
-    }
+	@Test
+	void deveRetornarTextoVazioQuandoDocumentoNaoPossuirNumeros() {
+		String resultado = FormataDadosUtils.normalizarDocumento("documento");
 
-    @Test
-    void deveRetornarNullAoNormalizarPlacaNula() {
+		assertEquals("", resultado);
+	}
 
-        String resultado = normalizarPlaca(null);
+	@Test
+	void deveRetornarNullAoNormalizarDocumentoNulo() {
+		String resultado = FormataDadosUtils.normalizarDocumento(null);
 
-        assertNull(resultado);
-    }
+		assertNull(resultado);
+	}
 
-    @Test
-    void deveMascararPlacaComSucesso() {
+	@Test
+	void deveNormalizarPlacaConvertendoParaMaiusculas() {
+		String resultado = FormataDadosUtils.normalizarPlaca("abc1d23");
 
-        String resultado = mascararPlaca("abc1d23");
+		assertEquals("ABC1D23", resultado);
+	}
 
-        assertEquals("ABC***23", resultado);
-    }
+	@Test
+	void deveNormalizarPlacaRemovendoHifen() {
+		String resultado = FormataDadosUtils.normalizarPlaca("ABC-1D23");
 
-    @Test
-    void deveRetornarNullQuandoPlacaForNula() {
+		assertEquals("ABC1D23", resultado);
+	}
 
-        String resultado =mascararPlaca(null);
+	@Test
+	void deveNormalizarPlacaRemovendoEspacos() {
+		String resultado = FormataDadosUtils.normalizarPlaca(" AB C1 D23 ");
 
-        assertNull(resultado);
-    }
+		assertEquals("ABC1D23", resultado);
+	}
 
-    @Test
-    void deveRetornarPlacaQuandoEstiverEmBranco() {
+	@Test
+	void deveNormalizarPlacaComHifenEspacosEMinusculas() {
+		String resultado = FormataDadosUtils.normalizarPlaca(" abc-1d23 ");
 
-        String resultado = mascararPlaca("   ");
+		assertEquals("ABC1D23", resultado);
+	}
 
-        assertEquals("   ", resultado);
-    }
+	@Test
+	void deveRetornarNullAoNormalizarPlacaNula() {
+		String resultado = FormataDadosUtils.normalizarPlaca(null);
 
-    @Test
-    void deveRetornarTresAsteriscosQuandoPlacaTiverMenosDeCincoCaracteres() {
+		assertNull(resultado);
+	}
 
-        String resultado = mascararPlaca("AB12");
+	@Test
+	void deveMascararPlacaMantendoInicioEFim() {
+		String resultado = FormataDadosUtils.mascararPlaca("ABC1D23");
 
-        assertEquals("***", resultado);
-    }
+		assertEquals("ABC***23", resultado);
+	}
 
-    @Test
-    void deveMascararPlacaNormalizandoAntesDoProcessamento() {
+	@Test
+	void deveNormalizarPlacaAntesDeMascarar() {
+		String resultado = FormataDadosUtils.mascararPlaca(" abc-1d23 ");
 
-        String resultado = mascararPlaca(" abc1d23 ");
+		assertEquals("ABC***23", resultado);
+	}
 
-        assertEquals("ABC***23", resultado);
-    }
+	@Test
+	void deveRetornarNullAoMascararPlacaNula() {
+		String resultado = FormataDadosUtils.mascararPlaca(null);
+
+		assertNull(resultado);
+	}
+
+	@Test
+	void deveRetornarTextoEmBrancoAoMascararPlacaEmBranco() {
+		String placaEmBranco = "   ";
+
+		String resultado = FormataDadosUtils.mascararPlaca(placaEmBranco);
+
+		assertEquals(placaEmBranco, resultado);
+	}
+
+	@Test
+	void deveRetornarTextoVazioAoMascararPlacaVazia() {
+		String resultado = FormataDadosUtils.mascararPlaca("");
+
+		assertEquals("", resultado);
+	}
+
+	@Test
+	void deveRetornarMascaraQuandoPlacaNormalizadaPossuirMenosDeCincoCaracteres() {
+		assertAll(() -> assertEquals("***", FormataDadosUtils.mascararPlaca("ABC1")),
+				() -> assertEquals("***", FormataDadosUtils.mascararPlaca("A-B C")));
+	}
+
+	@Test
+	void deveMascararPlacaComExatamenteCincoCaracteres() {
+		String resultado = FormataDadosUtils.mascararPlaca("ABC12");
+
+		assertEquals("ABC***12", resultado);
+	}
+
+	@Test
+	void devePossuirConstrutorPrivado() throws Exception {
+		Constructor<FormataDadosUtils> constructor = FormataDadosUtils.class.getDeclaredConstructor();
+
+		assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+
+		constructor.setAccessible(true);
+
+		FormataDadosUtils instancia = constructor.newInstance();
+
+		assertNotNull(instancia);
+	}
 }

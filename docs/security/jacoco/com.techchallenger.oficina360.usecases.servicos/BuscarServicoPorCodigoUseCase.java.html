@@ -15,7 +15,7 @@ public class BuscarServicoPorCodigoUseCase {
 <span class="fc" id="L15">	}</span>
 
 	public ServicoCommand findByCodigo(String codigo) {
-<span class="nc" id="L18">		return domainToCommand(servicoGateway.findByCodigo(codigo).orElseThrow(()-&gt; new RecursoNaoEncontradoException(&quot;Serviço não encontrado&quot;)));</span>
+<span class="fc" id="L18">		return domainToCommand(servicoGateway.findByCodigo(codigo).orElseThrow(()-&gt; new RecursoNaoEncontradoException(&quot;Serviço não encontrado&quot;)));</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

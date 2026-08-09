@@ -17,10 +17,10 @@ public class CadastrarClienteUseCase {
 <span class="fc" id="L17">	}</span>
 
 	public ClienteCommand save(ClienteCommand command) {
-<span class="nc bnc" id="L20" title="All 2 branches missed.">		if (clienteGateway.existsByDocumento(normalizarDocumento(command.documento()))) {</span>
-<span class="nc" id="L21">			throw new ClienteJaCadastradoException(CLIENTE_JA_CADASTRADO);</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">		if (clienteGateway.existsByDocumento(normalizarDocumento(command.documento()))) {</span>
+<span class="fc" id="L21">			throw new ClienteJaCadastradoException(CLIENTE_JA_CADASTRADO);</span>
 		}
-<span class="nc" id="L23">		return domainToCommand(clienteGateway.save(domainToCommand(command)));</span>
+<span class="fc" id="L23">		return domainToCommand(clienteGateway.save(domainToCommand(command)));</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

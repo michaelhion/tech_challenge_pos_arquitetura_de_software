@@ -74,22 +74,22 @@ public class OrdemServicoEntity {
 	private List&lt;OrdemServicoItemEstoqueEntity&gt; itensEstoque = new ArrayList&lt;&gt;();
 
 	public void adicionarServico(OrdemServicoServicoEntity servico) {
-<span class="nc bnc" id="L77" title="All 2 branches missed.">		if (servico == null) {</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">		if (servico == null) {</span>
 <span class="nc" id="L78">			return;</span>
 		}
 
-<span class="nc" id="L81">		servico.setOrdemServico(this);</span>
-<span class="nc" id="L82">		this.servicos.add(servico);</span>
-<span class="nc" id="L83">	}</span>
+<span class="fc" id="L81">		servico.setOrdemServico(this);</span>
+<span class="fc" id="L82">		this.servicos.add(servico);</span>
+<span class="fc" id="L83">	}</span>
 
 	public void adicionarItemEstoque(OrdemServicoItemEstoqueEntity itemEstoque) {
-<span class="nc bnc" id="L86" title="All 2 branches missed.">		if (itemEstoque == null) {</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">		if (itemEstoque == null) {</span>
 <span class="nc" id="L87">			return;</span>
 		}
 
-<span class="nc" id="L90">		itemEstoque.setOrdemServico(this);</span>
-<span class="nc" id="L91">		this.itensEstoque.add(itemEstoque);</span>
-<span class="nc" id="L92">	}</span>
+<span class="fc" id="L90">		itemEstoque.setOrdemServico(this);</span>
+<span class="fc" id="L91">		this.itensEstoque.add(itemEstoque);</span>
+<span class="fc" id="L92">	}</span>
 
 	public void removerServico(OrdemServicoServicoEntity servico) {
 <span class="nc bnc" id="L95" title="All 2 branches missed.">		if (servico == null) {</span>

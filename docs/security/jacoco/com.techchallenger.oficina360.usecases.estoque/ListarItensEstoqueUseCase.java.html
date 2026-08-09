@@ -15,10 +15,10 @@ public class ListarItensEstoqueUseCase {
 <span class="fc" id="L15">	}</span>
 
 	public List&lt;EstoqueCommand&gt; findAll() {
-<span class="nc" id="L18">		return estoqueGateway.findAll()</span>
-<span class="nc" id="L19">				.stream()</span>
-<span class="nc" id="L20">				.map(EstoqueCommandMapper::domaintoCommand)</span>
-<span class="nc" id="L21">				.toList();</span>
+<span class="fc" id="L18">		return estoqueGateway.findAll()</span>
+<span class="fc" id="L19">				.stream()</span>
+<span class="fc" id="L20">				.map(EstoqueCommandMapper::domaintoCommand)</span>
+<span class="fc" id="L21">				.toList();</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

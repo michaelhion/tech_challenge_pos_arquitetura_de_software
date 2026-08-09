@@ -4,6 +4,7 @@ import com.techchallenger.oficina360.gateways.ClienteGateway;
 import com.techchallenger.oficina360.usecases.shared.exception.RecursoNaoEncontradoException;
 
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.CLIENTE_NAO_ENCONTRADO;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.normalizarDocumento;
 
 public class ExcluirClienteUseCase {
 
@@ -13,12 +14,13 @@ public class ExcluirClienteUseCase {
 		this.clienteGateway = clienteGateway;
 	}
 
-
-
 	public void delete(String documento) {
-		if(clienteGateway.existsByDocumento(documento)) {
+		String documentoNormalizado = normalizarDocumento(documento);
+
+		if (!clienteGateway.existsByDocumento(documentoNormalizado)) {
 			throw new RecursoNaoEncontradoException(CLIENTE_NAO_ENCONTRADO);
 		}
-		clienteGateway.deleteByDocumento(documento);
+
+		clienteGateway.deleteByDocumento(documentoNormalizado);
 	}
 }

@@ -21,43 +21,43 @@ public class ServicoGatewayImpl implements ServicoGateway {
 
     @Override
     public Optional&lt;Servico&gt; findByCodigo(String codigo){
-<span class="nc" id="L24">        return repository</span>
-<span class="nc" id="L25">                .findByCodigo(codigo)</span>
-<span class="nc" id="L26">                .map(mapper::toDomain);</span>
+<span class="fc" id="L24">        return repository</span>
+<span class="fc" id="L25">                .findByCodigo(codigo)</span>
+<span class="fc" id="L26">                .map(mapper::toDomain);</span>
     }
 
     @Override
     public void deleteByCodigo(String codigo){
-<span class="nc" id="L31">        repository.deleteByCodigo(codigo);</span>
-<span class="nc" id="L32">    }</span>
+<span class="fc" id="L31">        repository.deleteByCodigo(codigo);</span>
+<span class="fc" id="L32">    }</span>
 
     @Override
     public List&lt;Servico&gt; findByCodigoIn(List&lt;String&gt; codigos){
-<span class="nc" id="L36">        return repository.findByCodigoIn(codigos)</span>
-<span class="nc" id="L37">                .stream()</span>
-<span class="nc" id="L38">                .map(mapper::toDomain)</span>
-<span class="nc" id="L39">                .toList();</span>
+<span class="fc" id="L36">        return repository.findByCodigoIn(codigos)</span>
+<span class="fc" id="L37">                .stream()</span>
+<span class="fc" id="L38">                .map(mapper::toDomain)</span>
+<span class="fc" id="L39">                .toList();</span>
     }
 
     @Override
     public Servico save(Servico servico){
-<span class="nc" id="L44">        ServicoEntity entity = mapper.toEntity(servico);</span>
-<span class="nc" id="L45">        ServicoEntity persisted = repository.save(entity);</span>
-<span class="nc" id="L46">        return mapper.toDomain(persisted);</span>
+<span class="fc" id="L44">        ServicoEntity entity = mapper.toEntity(servico);</span>
+<span class="fc" id="L45">        ServicoEntity persisted = repository.save(entity);</span>
+<span class="fc" id="L46">        return mapper.toDomain(persisted);</span>
     }
 
     @Override
     public List&lt;Servico&gt; findAll(){
-<span class="nc" id="L51">        return repository.findAll()</span>
-<span class="nc" id="L52">                .stream()</span>
-<span class="nc" id="L53">                .map(mapper::toDomain)</span>
-<span class="nc" id="L54">                .toList();</span>
+<span class="fc" id="L51">        return repository.findAll()</span>
+<span class="fc" id="L52">                .stream()</span>
+<span class="fc" id="L53">                .map(mapper::toDomain)</span>
+<span class="fc" id="L54">                .toList();</span>
     }
 
     @Override
     public Optional&lt;Servico&gt; findById(UUID id){
-<span class="nc" id="L59">        return repository.findById(id)</span>
-<span class="nc" id="L60">                .map(mapper::toDomain);</span>
+<span class="fc" id="L59">        return repository.findById(id)</span>
+<span class="fc" id="L60">                .map(mapper::toDomain);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

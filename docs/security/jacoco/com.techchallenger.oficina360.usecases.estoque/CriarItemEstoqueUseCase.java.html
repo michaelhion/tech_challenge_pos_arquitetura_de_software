@@ -23,12 +23,12 @@ public class CriarItemEstoqueUseCase {
 <span class="fc" id="L23">	}</span>
 
 	public EstoqueCommand save(EstoqueCommand command) {
-<span class="nc" id="L26">		Optional&lt;Estoque&gt; obter = estoqueFinder.obter(command.codigo());</span>
-<span class="nc bnc" id="L27" title="All 2 branches missed.">		if(obter.isPresent()){</span>
-<span class="nc" id="L28">			throw new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA);</span>
+<span class="fc" id="L26">		Optional&lt;Estoque&gt; obter = estoqueFinder.obter(command.codigo());</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">		if(obter.isPresent()){</span>
+<span class="fc" id="L28">			throw new RegraDeNegocioException(ESTOQUE_CODIGO_JA_EXISTE_NO_SISTEMA);</span>
 		}
-<span class="nc" id="L30">		Estoque estoqueSaved = estoqueGateway.save(commandToDomain(command));</span>
-<span class="nc" id="L31">		return domaintoCommand(estoqueSaved);</span>
+<span class="fc" id="L30">		Estoque estoqueSaved = estoqueGateway.save(commandToDomain(command));</span>
+<span class="fc" id="L31">		return domaintoCommand(estoqueSaved);</span>
 	}
 
 

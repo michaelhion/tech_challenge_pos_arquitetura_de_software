@@ -17,7 +17,7 @@ public class OrdemServicoFinder {
 <span class="fc" id="L17">	}</span>
 
 	public OrdemServico obterOuFalhar(UUID id){
-<span class="nc" id="L20">		return gateway.findById(id).orElseThrow(()-&gt; new RecursoNaoEncontradoException(OS_ORDEM_DE_SERVICO_NAO_ENCONTRADA));</span>
+<span class="fc" id="L20">		return gateway.findById(id).orElseThrow(()-&gt; new RecursoNaoEncontradoException(OS_ORDEM_DE_SERVICO_NAO_ENCONTRADA));</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

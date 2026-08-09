@@ -34,70 +34,70 @@ public class AutorizacaoClienteUseCase {
 
 	public boolean podeAcessarClientePorDocumento(String documento) {
 
-<span class="nc" id="L37">		Usuario usuario =</span>
-<span class="nc" id="L38">				usuarioAutenticadoGateway.obterUsuarioAtual();</span>
+<span class="fc" id="L37">		Usuario usuario =</span>
+<span class="fc" id="L38">				usuarioAutenticadoGateway.obterUsuarioAtual();</span>
 
 
-<span class="nc bnc" id="L41" title="All 2 branches missed.">		if (!usuarioValido(usuario)) {</span>
-<span class="nc" id="L42">			return false;</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">		if (!usuarioValido(usuario)) {</span>
+<span class="fc" id="L42">			return false;</span>
 		}
 
 
-<span class="nc" id="L46">		return usuario.getDocumento()</span>
-<span class="nc" id="L47">				.equals(normalizarDocumento(documento));</span>
+<span class="fc" id="L46">		return usuario.getDocumento()</span>
+<span class="fc" id="L47">				.equals(normalizarDocumento(documento));</span>
 	}
 
 
 
 	public boolean podeAcessarVeiculo(String placa) {
 
-<span class="nc" id="L54">		Usuario usuario =</span>
-<span class="nc" id="L55">				usuarioAutenticadoGateway.obterUsuarioAtual();</span>
+<span class="fc" id="L54">		Usuario usuario =</span>
+<span class="fc" id="L55">				usuarioAutenticadoGateway.obterUsuarioAtual();</span>
 
 
-<span class="nc bnc" id="L58" title="All 2 branches missed.">		if (!usuarioValido(usuario)) {</span>
-<span class="nc" id="L59">			return false;</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">		if (!usuarioValido(usuario)) {</span>
+<span class="fc" id="L59">			return false;</span>
 		}
 
 
-<span class="nc" id="L63">		return veiculoGateway.findByPlaca(</span>
-<span class="nc" id="L64">						normalizarPlaca(placa)</span>
+<span class="fc" id="L63">		return veiculoGateway.findByPlaca(</span>
+<span class="fc" id="L64">						normalizarPlaca(placa)</span>
 				)
-<span class="nc" id="L66">				.map(veiculo -&gt;</span>
-<span class="nc" id="L67">						usuario.getDocumento()</span>
-<span class="nc" id="L68">								.equals(veiculo.getClienteDocumento())</span>
+<span class="fc" id="L66">				.map(veiculo -&gt;</span>
+<span class="fc" id="L67">						usuario.getDocumento()</span>
+<span class="fc" id="L68">								.equals(veiculo.getClienteDocumento())</span>
 				)
-<span class="nc" id="L70">				.orElse(false);</span>
+<span class="fc" id="L70">				.orElse(false);</span>
 	}
 
 
 
 	public boolean podeAcessarOrdemServico(UUID id) {
 
-<span class="nc" id="L77">		Usuario usuario =</span>
-<span class="nc" id="L78">				usuarioAutenticadoGateway.obterUsuarioAtual();</span>
+<span class="fc" id="L77">		Usuario usuario =</span>
+<span class="fc" id="L78">				usuarioAutenticadoGateway.obterUsuarioAtual();</span>
 
 
-<span class="nc bnc" id="L81" title="All 2 branches missed.">		if (!usuarioValido(usuario)) {</span>
-<span class="nc" id="L82">			return false;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">		if (!usuarioValido(usuario)) {</span>
+<span class="fc" id="L82">			return false;</span>
 		}
 
 
-<span class="nc" id="L86">		return ordemServicoGateway.findById(id)</span>
-<span class="nc" id="L87">				.map(os -&gt;</span>
-<span class="nc" id="L88">						usuario.getDocumento()</span>
-<span class="nc" id="L89">								.equals(os.getDocumentoCliente())</span>
+<span class="fc" id="L86">		return ordemServicoGateway.findById(id)</span>
+<span class="fc" id="L87">				.map(os -&gt;</span>
+<span class="fc" id="L88">						usuario.getDocumento()</span>
+<span class="fc" id="L89">								.equals(os.getDocumentoCliente())</span>
 				)
-<span class="nc" id="L91">				.orElse(false);</span>
+<span class="fc" id="L91">				.orElse(false);</span>
 	}
 
 
 
 	private boolean usuarioValido(Usuario usuario) {
 
-<span class="nc bnc" id="L98" title="All 2 branches missed.">		return usuario != null</span>
-<span class="nc bnc" id="L99" title="All 2 branches missed.">				&amp;&amp; usuario.getDocumento() != null</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">				&amp;&amp; !usuario.getDocumento().isBlank();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">		return usuario != null</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">				&amp;&amp; usuario.getDocumento() != null</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">				&amp;&amp; !usuario.getDocumento().isBlank();</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -8,24 +8,24 @@ public class VeiculoCommandMapper {
     private VeiculoCommandMapper(){}
 
     public static VeiculoCommand domainToCommand(Veiculo domain){
-<span class="nc" id="L11">        return new VeiculoCommand(</span>
-<span class="nc" id="L12">              domain.getPlaca(),</span>
-<span class="nc" id="L13">              domain.getMarca(),</span>
-<span class="nc" id="L14">              domain.getModelo(),</span>
-<span class="nc" id="L15">              domain.getAno(),</span>
-<span class="nc" id="L16">              domain.getClienteDocumento()</span>
+<span class="fc" id="L11">        return new VeiculoCommand(</span>
+<span class="fc" id="L12">              domain.getPlaca(),</span>
+<span class="fc" id="L13">              domain.getMarca(),</span>
+<span class="fc" id="L14">              domain.getModelo(),</span>
+<span class="fc" id="L15">              domain.getAno(),</span>
+<span class="fc" id="L16">              domain.getClienteDocumento()</span>
         );
     }
 
 
     public static Veiculo commandToDomain(VeiculoCommand command){
-<span class="nc" id="L22">        return new Veiculo(</span>
+<span class="fc" id="L22">        return new Veiculo(</span>
                 null,
-<span class="nc" id="L24">                command.placa(),</span>
-<span class="nc" id="L25">                command.marca(),</span>
-<span class="nc" id="L26">                command.modelo(),</span>
-<span class="nc" id="L27">                command.ano(),</span>
-<span class="nc" id="L28">                command.clienteDocumento()</span>
+<span class="fc" id="L24">                command.placa(),</span>
+<span class="fc" id="L25">                command.marca(),</span>
+<span class="fc" id="L26">                command.modelo(),</span>
+<span class="fc" id="L27">                command.ano(),</span>
+<span class="fc" id="L28">                command.clienteDocumento()</span>
         );
     }
 }

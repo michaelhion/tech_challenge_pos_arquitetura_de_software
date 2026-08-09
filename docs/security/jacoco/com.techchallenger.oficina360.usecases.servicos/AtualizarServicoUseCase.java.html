@@ -17,13 +17,13 @@ public class AtualizarServicoUseCase {
 <span class="fc" id="L17">	}</span>
 
 	public ServicoCommand edit(String codigo, ServicoCommand command) {
-<span class="nc" id="L20">		Servico servico = servicoGateway.findByCodigo(codigo)</span>
-<span class="nc" id="L21">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));</span>
-<span class="nc" id="L22">		servico.editar(command.descricao(),command.valor(),command.codigo());</span>
+<span class="fc" id="L20">		Servico servico = servicoGateway.findByCodigo(codigo)</span>
+<span class="fc" id="L21">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));</span>
+<span class="fc" id="L22">		servico.editar(command.descricao(),command.valor(),command.codigo());</span>
 
-<span class="nc" id="L24">		Servico servicoAtualizado = servicoGateway.save(servico);</span>
+<span class="fc" id="L24">		Servico servicoAtualizado = servicoGateway.save(servico);</span>
 
-<span class="nc" id="L26">		return domainToCommand(servicoAtualizado);</span>
+<span class="fc" id="L26">		return domainToCommand(servicoAtualizado);</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -90,42 +90,4 @@ public class OrdemServicoEntity {
 		itemEstoque.setOrdemServico(this);
 		this.itensEstoque.add(itemEstoque);
 	}
-
-	public void removerServico(OrdemServicoServicoEntity servico) {
-		if (servico == null) {
-			return;
-		}
-
-		this.servicos.remove(servico);
-		servico.setOrdemServico(null);
-	}
-
-	public void removerItemEstoque(OrdemServicoItemEstoqueEntity itemEstoque) {
-		if (itemEstoque == null) {
-			return;
-		}
-
-		this.itensEstoque.remove(itemEstoque);
-		itemEstoque.setOrdemServico(null);
-	}
-
-	public void substituirServicos(List<OrdemServicoServicoEntity> novosServicos) {
-		this.servicos.forEach(servico -> servico.setOrdemServico(null));
-
-		this.servicos.clear();
-
-		if (novosServicos != null) {
-			novosServicos.forEach(this::adicionarServico);
-		}
-	}
-
-	public void substituirItensEstoque(List<OrdemServicoItemEstoqueEntity> novosItens) {
-		this.itensEstoque.forEach(item -> item.setOrdemServico(null));
-
-		this.itensEstoque.clear();
-
-		if (novosItens != null) {
-			novosItens.forEach(this::adicionarItemEstoque);
-		}
-	}
 }

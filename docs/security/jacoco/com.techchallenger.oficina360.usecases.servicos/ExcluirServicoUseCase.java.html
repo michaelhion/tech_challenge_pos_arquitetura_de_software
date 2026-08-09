@@ -14,10 +14,10 @@ public class ExcluirServicoUseCase {
 <span class="fc" id="L14">	}</span>
 
 	public void delete(String codigo) {
-<span class="nc" id="L17">		servicoGateway.findByCodigo(codigo)</span>
-<span class="nc" id="L18">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));</span>
+<span class="fc" id="L17">		servicoGateway.findByCodigo(codigo)</span>
+<span class="fc" id="L18">				.orElseThrow(() -&gt; new RecursoNaoEncontradoException(SERVICO_NAO_ENCONTRADO));</span>
 
-<span class="nc" id="L20">		servicoGateway.deleteByCodigo(codigo);</span>
-<span class="nc" id="L21">	}</span>
+<span class="fc" id="L20">		servicoGateway.deleteByCodigo(codigo);</span>
+<span class="fc" id="L21">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
