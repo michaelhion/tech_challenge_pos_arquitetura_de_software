@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 import static com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueDTOMapper.dtoToCommand;
 import static com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueDTOMapper.reservarDTOToCommand;

@@ -7,10 +7,7 @@ import com.techchallenger.oficina360.gateways.Relogio;
 import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.AMERICA_SAO_PAULO;
 
 public class TempoExecucaoService {
 
