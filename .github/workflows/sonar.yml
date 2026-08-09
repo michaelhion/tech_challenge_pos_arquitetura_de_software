@@ -37,9 +37,10 @@ jobs:
 
 
       - name: SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn sonar:sonar \
             -Dsonar.projectKey=michaelhion_tech_challenge_pos_arquitetura_de_software \
             -Dsonar.organization=michaelhion \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
