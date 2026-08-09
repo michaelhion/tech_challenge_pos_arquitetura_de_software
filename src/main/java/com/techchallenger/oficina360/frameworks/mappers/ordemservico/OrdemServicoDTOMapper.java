@@ -1,8 +1,6 @@
 package com.techchallenger.oficina360.frameworks.mappers.ordemservico;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;
-import com.techchallenger.oficina360.dominio.OrdemServicoServico;
 import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
 import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;

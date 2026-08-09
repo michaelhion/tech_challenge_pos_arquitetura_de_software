@@ -170,7 +170,6 @@ class EstoqueControllerTest {
 
 	@Test
 	void deveListarEstoquesComSucesso() {
-		UUID segundoEstoqueId = UUID.randomUUID();
 
 		EstoqueDTO segundoItem = new EstoqueDTO("PASTILHA-DE-FREIO", "Pastilha de freio",
 				new BigDecimal("120.00"), 10, 2,0);

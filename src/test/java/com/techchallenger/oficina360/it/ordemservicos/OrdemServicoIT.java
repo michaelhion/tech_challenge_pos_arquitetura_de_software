@@ -20,7 +20,6 @@ import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.EM_EXECUC
 import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.FINALIZADA;
 import static com.techchallenger.oficina360.it.fixtures.ordemservico.OrderServiceFixture.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UsuarioDTOMapper {
 
+    private UsuarioDTOMapper(){}
 
     public static Usuario toDomain(UsuarioEntity entity) {
 

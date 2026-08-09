@@ -21,15 +21,14 @@ public class TempoExecucaoService {
 
 	public void registrar(OrdemServico ordemServico) {
 
-		int tempoTotal = (int) Duration
-				.between(ordemServico.getDtHoraInicioExecucao(), ordemServico.getDtHoraFimExecucao())
-				.toMinutes();
+		ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
+
+		int tempoTotal = Math.toIntExact(Duration.between(ordemServico.getDtHoraInicioExecucao().atZone(zoneId),
+				ordemServico.getDtHoraFimExecucao().atZone(zoneId)).toMinutes());
 
 		int quantidadeServicos = ordemServico.getServicos().size();
 
-		int tempoPorServico = quantidadeServicos > 0
-				? tempoTotal / quantidadeServicos
-				: tempoTotal;
+		int tempoPorServico = quantidadeServicos > 0 ? tempoTotal / quantidadeServicos : tempoTotal;
 
 		for (OrdemServicoServico oss : ordemServico.getServicos()) {
 			tempoExecucaoServicoGateway.save(buildTempoExecucaoServico(oss, tempoPorServico));
@@ -37,9 +36,7 @@ public class TempoExecucaoService {
 	}
 
 	private TempoExecucaoServico buildTempoExecucaoServico(OrdemServicoServico oss, int tempoPorServico) {
-		return new TempoExecucaoServico(
-				oss.getServicoId(),
-				tempoPorServico,
+		return new TempoExecucaoServico(oss.getServicoId(), tempoPorServico,
 				LocalDateTime.now(ZoneId.of(AMERICA_SAO_PAULO)));
 	}
 }

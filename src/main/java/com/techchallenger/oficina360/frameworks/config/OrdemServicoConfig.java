@@ -161,9 +161,8 @@ public class OrdemServicoConfig {
 	}
 
 	@Bean
-	public DeletarOrdemServicoUseCase deletarOrdemServicoUseCase(OrdemServicoGateway gateway,
-			OrdemServicoFinder loader) {
-		return new DeletarOrdemServicoUseCase(gateway, loader);
+	public DeletarOrdemServicoUseCase deletarOrdemServicoUseCase(OrdemServicoGateway gateway) {
+		return new DeletarOrdemServicoUseCase(gateway);
 	}
 
 }
