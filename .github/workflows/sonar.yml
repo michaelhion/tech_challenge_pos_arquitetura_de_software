@@ -87,7 +87,7 @@ jobs:
   sonar:
     name: SonarCloud
     needs:
-      - security
+#      - security
       - test
 
     runs-on: ubuntu-latest
