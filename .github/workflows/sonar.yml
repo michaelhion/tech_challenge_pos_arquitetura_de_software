@@ -14,42 +14,79 @@ env:
   IMAGE_NAME: oficina360
 
 jobs:
-#todo descobrir como utilizar cache
-#  # ============================================================
-#  # 1. SECURITY
-#  # ============================================================
-#  security:
-#    name: OWASP Dependency Check
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Java
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: temurin
-#          java-version: ${{ env.JAVA_VERSION }}
-#          cache: maven
-#
-#      - name: Cache OWASP data
-#        uses: actions/cache@v4
-#        with:
-#          path: ~/.m2/dependency-check-data
-#          key: ${{ runner.os }}-owasp-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: |
-#            ${{ runner.os }}-owasp-
-#
-#      - name: OWASP Dependency Check
-#        run: mvn dependency-check:check
-#        env:
-#          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
+  # ============================================================
+  # 1. SECURITY - OWASP
+  # ============================================================
+
+  security:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      # --------------------------------------------------------
+      # OWASP cache
+      # --------------------------------------------------------
+
+      - name: Get OWASP cache date
+        id: cache-date
+        run: |
+          echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore OWASP cache
+        id: owasp-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: ${{ runner.os }}-owasp-${{ steps.cache-date.outputs.date }}
+          restore-keys: |
+            ${{ runner.os }}-owasp-
+
+      - name: Show OWASP cache
+        run: |
+          echo "Cache hit: ${{ steps.owasp-cache.outputs.cache-hit }}"
+          echo "OWASP data directory:"
+          du -sh ~/.m2/repository/org/owasp/dependency-check-data 2>/dev/null || true
+          find ~/.m2/repository/org/owasp/dependency-check-data \
+            -maxdepth 1 \
+            -type f \
+            -printf '%f\n' 2>/dev/null || true
+
+      # --------------------------------------------------------
+      # OWASP scan
+      # --------------------------------------------------------
+
+      - name: OWASP Dependency Check
+        run: mvn --no-transfer-progress dependency-check:check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
+      # --------------------------------------------------------
+      # Save updated OWASP cache
+      # --------------------------------------------------------
+
+      - name: Save OWASP cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: ${{ runner.os }}-owasp-${{ steps.cache-date.outputs.date }}
 
 
   # ============================================================
   # 2. BUILD + TEST + COVERAGE
   # ============================================================
+
   test:
     name: Build, Tests and Coverage
     runs-on: ubuntu-latest
@@ -66,28 +103,43 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn clean verify
+        run: mvn --no-transfer-progress clean verify
 
-      - name: Upload JAR
+      # --------------------------------------------------------
+      # Debug JaCoCo
+      # --------------------------------------------------------
+
+      - name: Verify JaCoCo report
+        run: |
+          echo "JaCoCo report:"
+          ls -lh target/site/jacoco/jacoco.xml
+
+          echo ""
+          echo "Report location:"
+          find target/site/jacoco -maxdepth 2 -type f -print
+
+      # --------------------------------------------------------
+      # Artifacts
+      # --------------------------------------------------------
+
+      - name: Upload build data
         uses: actions/upload-artifact@v4
         with:
-          name: oficina360-jar
-          path: target/*.jar
-
-      - name: Upload JaCoCo report
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: docs/security/jacoco/
+          name: build-data
+          path: |
+            target/*.jar
+            target/classes
+            target/site/jacoco/jacoco.xml
 
 
   # ============================================================
   # 3. SONARCLOUD
   # ============================================================
+
   sonar:
     name: SonarCloud
     needs:
-#      - security
+      - security
       - test
 
     runs-on: ubuntu-latest
@@ -103,31 +155,58 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
 
-      - name: Download JaCoCo report
+      # --------------------------------------------------------
+      # Restore build generated by test job
+      # --------------------------------------------------------
+
+      - name: Download build data
         uses: actions/download-artifact@v4
         with:
-          name: jacoco-report
-          path: docs/security/jacoco
+          name: build-data
+          path: .
+
+      # --------------------------------------------------------
+      # Verify JaCoCo
+      # --------------------------------------------------------
+
+      - name: Verify JaCoCo report
+        run: |
+          echo "JaCoCo report:"
+          find . -name "jacoco.xml" -print
+
+          echo ""
+          echo "Classes:"
+          find target/classes -type f | head -20
+
+          echo ""
+          echo "Report:"
+          ls -lh target/site/jacoco/jacoco.xml
+
+      # --------------------------------------------------------
+      # SonarCloud
+      # --------------------------------------------------------
 
       - name: SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn sonar:sonar \
+          mvn --no-transfer-progress sonar:sonar \
             -Dsonar.projectKey=michaelhion_tech_challenge_pos_arquitetura_de_software \
             -Dsonar.organization=michaelhion \
-            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
 
   # ============================================================
   # 4. DOCKER
   # ============================================================
+
   docker:
     name: Build and Push Docker Image
     needs: sonar
 
-    # Só publica imagem quando for push
-    # Não publica em Pull Request
+    # Só cria/publica imagem em push.
+    # Pull Request não publica imagem.
     if: github.event_name == 'push'
 
     runs-on: ubuntu-latest
@@ -136,11 +215,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download JAR
+      - name: Download build data
         uses: actions/download-artifact@v4
         with:
-          name: oficina360-jar
-          path: target
+          name: build-data
+          path: .
+
+      - name: Verify JAR
+        run: |
+          ls -lh target/*.jar
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -161,6 +244,7 @@ jobs:
 #  # ============================================================
 #  # 5. DEPLOY KUBERNETES
 #  # ============================================================
+#
 #  deploy:
 #    name: Deploy to Kubernetes
 #    needs: docker
@@ -190,19 +274,15 @@ jobs:
 #      # --------------------------------------------------------
 #      # Database
 #      # --------------------------------------------------------
+#
 #      - name: Deploy database
 #        run: |
 #          kubectl apply -f k8s/database/
 #
-#      - name: Wait for PostgreSQL
-#        run: |
-#          kubectl rollout status \
-#            deployment/postgres \
-#            --timeout=180s
-#
 #      # --------------------------------------------------------
 #      # Application
 #      # --------------------------------------------------------
+#
 #      - name: Apply application manifests
 #        run: |
 #          kubectl apply -f k8s/app/
@@ -210,21 +290,23 @@ jobs:
 #      # --------------------------------------------------------
 #      # Update image
 #      # --------------------------------------------------------
+#
 #      - name: Update application image
 #        run: |
 #          kubectl set image deployment/oficina360 \
 #            oficina360=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 #
 #      # --------------------------------------------------------
-#      # Wait for deployment
+#      # Wait for application
 #      # --------------------------------------------------------
+#
 #      - name: Wait for application rollout
 #        run: |
 #          kubectl rollout status \
 #            deployment/oficina360 \
 #            --timeout=180s
 #
-#      - name: Check application pods
+#      - name: Check Kubernetes resources
 #        run: |
 #          kubectl get pods
 #          kubectl get services
