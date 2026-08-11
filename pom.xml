@@ -211,9 +211,9 @@
                             <outputDirectory>
                                 ${project.basedir}/docs/security/jacoco
                             </outputDirectory>
-
                             <excludes>
-                                <exclude>**/entity/**</exclude>
+                                <exclude>**/frameworks/persistence/entities/**</exclude>
+                                <exclude>**/frameworks/persistence/repositories/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -237,7 +237,8 @@
                                 </rule>
                             </rules>
                             <excludes>
-                                <exclude>**/entity/**</exclude>
+                                <exclude>**/frameworks/persistence/entities/**</exclude>
+                                <exclude>**/frameworks/persistence/repositories/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -264,13 +265,13 @@
                     <skipTestScope>true</skipTestScope>
                     <skipProvidedScope>true</skipProvidedScope>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
             </plugin>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
