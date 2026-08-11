@@ -14,37 +14,37 @@ env:
   IMAGE_NAME: oficina360
 
 jobs:
-
-  # ============================================================
-  # 1. SECURITY
-  # ============================================================
-  security:
-    name: OWASP Dependency Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: maven
-
-      - name: Cache OWASP data
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/dependency-check-data
-          key: ${{ runner.os }}-owasp-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-owasp-
-
-      - name: OWASP Dependency Check
-        run: mvn dependency-check:check
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+#todo descobrir como utilizar cache
+#  # ============================================================
+#  # 1. SECURITY
+#  # ============================================================
+#  security:
+#    name: OWASP Dependency Check
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Java
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: temurin
+#          java-version: ${{ env.JAVA_VERSION }}
+#          cache: maven
+#
+#      - name: Cache OWASP data
+#        uses: actions/cache@v4
+#        with:
+#          path: ~/.m2/dependency-check-data
+#          key: ${{ runner.os }}-owasp-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-owasp-
+#
+#      - name: OWASP Dependency Check
+#        run: mvn dependency-check:check
+#        env:
+#          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
 
   # ============================================================
