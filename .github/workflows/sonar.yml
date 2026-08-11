@@ -26,12 +26,8 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-      - name: Run tests and validate coverage
+      - name: Run tests and validate coverage and vulnerabilities
         run: mvn clean verify
-
-      - name: OWASP Dependency check
-        continue-on-error: true
-        run: mvn dependency-check:check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
