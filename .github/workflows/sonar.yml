@@ -112,11 +112,11 @@ jobs:
       - name: Verify JaCoCo report
         run: |
           echo "JaCoCo report:"
-          ls -lh target/site/jacoco/jacoco.xml
+          ls -lh docs/security/jacoco/jacoco.xml
 
           echo ""
           echo "Report location:"
-          find target/site/jacoco -maxdepth 2 -type f -print
+          find docs/security/jacoco -maxdepth 2 -type f -print
 
       # --------------------------------------------------------
       # Artifacts
@@ -129,7 +129,7 @@ jobs:
           path: |
             target/*.jar
             target/classes
-            target/site/jacoco/jacoco.xml
+            docs/security/jacoco.xml
 
 
   # ============================================================
@@ -180,7 +180,7 @@ jobs:
 
           echo ""
           echo "Report:"
-          ls -lh target/site/jacoco/jacoco.xml
+          ls -lh docs/security/jacoco.xml
 
       # --------------------------------------------------------
       # SonarCloud
