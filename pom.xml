@@ -33,9 +33,6 @@
         <tomcat.version>11.0.24</tomcat.version>
         <maven.compiler.release>21</maven.compiler.release>
 
-        <sonar.coverage.jacoco.xmlReportPaths>
-            target/site/jacoco/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/docs/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.dependencyCheck.jsonReportPath>target/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
         <sonar.dependencyCheck.htmlReportPath>target/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
@@ -208,9 +205,7 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>
-                                ${project.basedir}/docs/security/jacoco
-                            </outputDirectory>
+                            <outputDirectory>${project.basedir}/docs/security/jacoco</outputDirectory>
                             <excludes>
                                 <exclude>**/frameworks/persistence/entities/**</exclude>
                                 <exclude>**/frameworks/persistence/repositories/**</exclude>
@@ -265,13 +260,6 @@
                     <skipTestScope>true</skipTestScope>
                     <skipProvidedScope>true</skipProvidedScope>
                 </configuration>
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
             </plugin>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
