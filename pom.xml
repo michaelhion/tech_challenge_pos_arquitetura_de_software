@@ -33,7 +33,7 @@
         <tomcat.version>11.0.24</tomcat.version>
         <maven.compiler.release>21</maven.compiler.release>
 
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/docs/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/docs/security/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.dependencyCheck.jsonReportPath>target/dependency-check-report.json</sonar.dependencyCheck.jsonReportPath>
         <sonar.dependencyCheck.htmlReportPath>target/dependency-check-report.html</sonar.dependencyCheck.htmlReportPath>
     </properties>
