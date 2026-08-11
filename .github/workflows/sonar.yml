@@ -76,7 +76,7 @@ jobs:
       # --------------------------------------------------------
 
       - name: Save OWASP cache
-        if: always()
+        if: success()
         uses: actions/cache/save@v4
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
