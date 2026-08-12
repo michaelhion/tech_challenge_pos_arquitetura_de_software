@@ -129,7 +129,7 @@ jobs:
           path: |
             target/*.jar
             target/classes
-            docs/security/jacoco.xml
+            docs/security/jacoco/jacoco.xml
 
 
   # ============================================================
@@ -180,7 +180,7 @@ jobs:
 
           echo ""
           echo "Report:"
-          ls -lh docs/security/jacoco.xml
+          ls -lh docs/security/jacoco/jacoco.xml
 
       # --------------------------------------------------------
       # SonarCloud
@@ -194,7 +194,7 @@ jobs:
             -Dsonar.projectKey=michaelhion_tech_challenge_pos_arquitetura_de_software \
             -Dsonar.organization=michaelhion \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -Dsonar.coverage.jacoco.xmlReportPaths=docs/security/jacoco/jacoco.xml
 
 
   # ============================================================
