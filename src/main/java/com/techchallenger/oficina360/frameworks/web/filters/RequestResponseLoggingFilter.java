@@ -21,124 +21,134 @@ import java.util.UUID;
 @Component
 public class RequestResponseLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
+	private static final Logger log = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
 
-    private static final int MAX_PAYLOAD_LENGTH = 1000;
+	private static final int MAX_PAYLOAD_LENGTH = 1000;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		return request.getRequestURI().startsWith("/actuator");
+	}
 
-        String requestId = UUID.randomUUID().toString();
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
-        MDC.put("requestId", requestId);
+		String requestId = UUID.randomUUID().toString();
 
-        ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request, 10_000);
+		MDC.put("requestId", requestId);
 
-        ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request, 10_000);
 
-        long startTime = System.currentTimeMillis();
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
 
-        try {
-            filterChain.doFilter(requestWrapper, responseWrapper);
-        } finally {
+		long startTime = System.currentTimeMillis();
 
-            long duration = System.currentTimeMillis() - startTime;
+		try {
+			filterChain.doFilter(requestWrapper, responseWrapper);
+		} finally {
 
-            logRequest(requestWrapper, requestId);
-            logResponse(responseWrapper, duration, requestId);
+			long duration = System.currentTimeMillis() - startTime;
 
-            responseWrapper.copyBodyToResponse();
-            MDC.clear();
-        }
-    }
+			logRequest(requestWrapper, requestId);
+			logResponse(responseWrapper, duration, requestId);
 
-    private void logRequest(ContentCachingRequestWrapper request, String requestId) {
+			responseWrapper.copyBodyToResponse();
+			MDC.clear();
+		}
+	}
 
-        if (!log.isInfoEnabled()) {
-            return;
-        }
+	private void logRequest(ContentCachingRequestWrapper request, String requestId) {
 
-        String body = getBody(request.getContentAsByteArray());
-        body = sanitizePayload(body);
+		if (!log.isInfoEnabled()) {
+			return;
+		}
 
-        String user = getUsuarioLogado();
+		String body = getBody(request.getContentAsByteArray());
+		body = sanitizePayload(body);
 
-        log.info("""
-                
-                ======== HTTP REQUEST ========
-                requestId : {}
-                method    : {}
-                uri       : {}{}
-                user      : {}
-                ip        : {}
-                payload   : {}
-                ==============================
-                """, requestId, request.getMethod(), request.getRequestURI(), getQueryString(request), user, request.getRemoteAddr(), body);
-    }
+		String user = getUsuarioLogado();
 
-    private void logResponse(ContentCachingResponseWrapper response, long duration, String requestId) {
+		log.info("""
+						
+						======== HTTP REQUEST ========
+						requestId : {}
+						method    : {}
+						uri       : {}{}
+						user      : {}
+						ip        : {}
+						payload   : {}
+						==============================
+						""", requestId, request.getMethod(), request.getRequestURI(), getQueryString(request), user,
+				request.getRemoteAddr(), body);
+	}
 
-        if (!log.isInfoEnabled()) {
-            return;
-        }
+	private void logResponse(ContentCachingResponseWrapper response, long duration, String requestId) {
 
-        String body = getBody(response.getContentAsByteArray());
-        body = sanitizePayload(body);
+		if (!log.isInfoEnabled()) {
+			return;
+		}
 
-        log.info("""
-                
-                ======== HTTP RESPONSE ========
-                requestId : {}
-                status    : {}
-                duration  : {} ms
-                payload   : {}
-                ==============================
-                """, requestId, response.getStatus(), duration, body);
-    }
+		String body = getBody(response.getContentAsByteArray());
+		body = sanitizePayload(body);
 
-    private String getBody(byte[] content) {
-        if (content.length == 0) {
-            return "[empty]";
-        }
+		log.info("""
+				
+				======== HTTP RESPONSE ========
+				requestId : {}
+				status    : {}
+				duration  : {} ms
+				payload   : {}
+				==============================
+				""", requestId, response.getStatus(), duration, body);
+	}
 
-        String body = new String(content, StandardCharsets.UTF_8);
+	private String getBody(byte[] content) {
 
-        if (body.length() > MAX_PAYLOAD_LENGTH) {
-            return body.substring(0, MAX_PAYLOAD_LENGTH) + "...[truncated]";
-        }
+		if (content.length == 0) {
+			return "[empty]";
+		}
 
-        return body;
-    }
+		String body = new String(content, StandardCharsets.UTF_8);
 
-    private String sanitizePayload(String body) {
+		if (body.length() > MAX_PAYLOAD_LENGTH) {
+			return body.substring(0, MAX_PAYLOAD_LENGTH) + "...[truncated]";
+		}
 
-        if (body == null) return null;
+		return body;
+	}
 
-        body = body.replaceAll("\\b\\d{11}\\b", "***CPF***");
+	private String sanitizePayload(String body) {
 
-        body = body.replaceAll("\\b\\d{14}\\b", "***CNPJ***");
+		if (body == null) {
+			return null;
+		}
 
-        body = body.replaceAll("(?i)\"senha\"\\s*:\\s*\"[^\"]*+\"","\"senha\":\"***\""
-        );
+		body = body.replaceAll("\\b\\d{11}\\b", "***CPF***");
 
-        body = body.replaceAll("(?i)\"token\"\\s*:\\s*\"[^\"]*+\"","\"token\":\"***\""
-        );
-        body = body.replaceAll("\\b[A-Z]{3}\\d[A-Z0-9]\\d{2}\\b","***PLACA***");
+		body = body.replaceAll("\\b\\d{14}\\b", "***CNPJ***");
 
-        return body;
-    }
+		body = body.replaceAll("(?i)\"senha\"\\s*:\\s*\"[^\"]*\"", "\"senha\":\"***\"");
 
-    private String getUsuarioLogado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		body = body.replaceAll("(?i)\"token\"\\s*:\\s*\"[^\"]*\"", "\"token\":\"***\"");
 
-        if (authentication == null || authentication.getName() == null) {
-            return "anonymous";
-        }
+		body = body.replaceAll("\\b[A-Z]{3}\\d[A-Z0-9]\\d{2}\\b", "***PLACA***");
 
-        return authentication.getName();
-    }
+		return body;
+	}
 
-    private String getQueryString(HttpServletRequest request) {
-        return request.getQueryString() != null ? "?" + request.getQueryString() : "";
-    }
+	private String getUsuarioLogado() {
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null || authentication.getName() == null) {
+			return "anonymous";
+		}
+
+		return authentication.getName();
+	}
+
+	private String getQueryString(HttpServletRequest request) {
+		return request.getQueryString() != null ? "?" + request.getQueryString() : "";
+	}
 }

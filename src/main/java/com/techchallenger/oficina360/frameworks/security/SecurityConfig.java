@@ -34,6 +34,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // PUBLIC
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**"
+                        ).permitAll()
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",

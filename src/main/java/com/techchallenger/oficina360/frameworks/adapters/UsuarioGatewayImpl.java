@@ -20,7 +20,6 @@ import static com.techchallenger.oficina360.frameworks.mappers.usuario.UsuarioDT
 public class UsuarioGatewayImpl implements UsuarioGateway {
 
 	private final UsuarioRepository repository;
-	private final UsuarioDTOMapper usuarioDTOMapper;
 
 	@Override
 	public Optional<Usuario> findByEmail(String email) {

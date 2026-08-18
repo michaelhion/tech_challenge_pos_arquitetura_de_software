@@ -40,16 +40,8 @@ public class OrdemServicoServico {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public UUID getServicoId() {
         return servicoId;
-    }
-
-    public void setServicoId(UUID servicoId) {
-        this.servicoId = servicoId;
     }
 
     public String getDescricao() {
@@ -64,7 +56,4 @@ public class OrdemServicoServico {
         return valor;
     }
 
-    public void setValor(BigDecimal valor) {
-        this.valor = valor;
-    }
 }
