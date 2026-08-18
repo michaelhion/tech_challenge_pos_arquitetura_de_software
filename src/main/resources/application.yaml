@@ -56,3 +56,34 @@ api:
 
 app:
   timezone: ${TIME_ZONE:America/Sao_Paulo}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  health:
+    mail:
+      enabled: false
+
+    readinessstate:
+      enabled: true
+
+    livenessstate:
+      enabled: true
+
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+      group:
+        readiness:
+          include:
+            - readinessState
+            - db
+
+        liveness:
+          include:
+            - livenessState

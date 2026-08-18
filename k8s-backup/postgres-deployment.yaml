@@ -19,19 +19,27 @@ spec:
         app: postgres
 
     spec:
+
       containers:
+
         - name: postgres
+
           image: postgres:16
+
           ports:
             - containerPort: 5432
+
           env:
+
             - name: POSTGRES_DB
               value: oficina360
+
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: oficina360-secret
                   key: DB_USERNAME
+
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
