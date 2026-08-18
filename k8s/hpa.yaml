@@ -12,17 +12,43 @@ spec:
     kind: Deployment
     name: oficina360-api
 
-  minReplicas: 1
-
+  minReplicas: 2
   maxReplicas: 5
+
+  behavior:
+
+    scaleUp:
+      stabilizationWindowSeconds: 60
+
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+
+      selectPolicy: Max
+
+    scaleDown:
+      stabilizationWindowSeconds: 300
+
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+
+      selectPolicy: Max
 
   metrics:
 
     - type: Resource
-
       resource:
         name: cpu
-
         target:
           type: Utilization
           averageUtilization: 50
+
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
