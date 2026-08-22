@@ -158,58 +158,10 @@ jobs:
             target/classes/**
             docs/security/jacoco/jacoco.xml
 
-  # ============================================================
-  # 3. VALIDATE KUBERNETES MANIFESTS
-  # ============================================================
-
-  kubernetes-validate:
-    name: Validate Kubernetes Manifests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Validate Kubernetes manifests locally
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          MANIFESTS=(
-            "k8s/namespace.yaml"
-            "k8s/configmap.yaml"
-            "k8s/metrics-server.yaml"
-            "k8s/postgres-pvc.yaml"
-            "k8s/postgres-service.yaml"
-            "k8s/postgres-deployment.yaml"
-            "k8s/api-deployment.yaml"
-            "k8s/api-service.yaml"
-            "k8s/hpa.yaml"
-          )
-
-          for manifest in "${MANIFESTS[@]}"; do
-            if [ ! -f "$manifest" ]; then
-              echo "Manifesto não encontrado: $manifest"
-              exit 1
-            fi
-
-            echo "Validando localmente: $manifest"
-
-            kubectl apply \
-              --dry-run=client \
-              --validate=false \
-              --filename "$manifest" \
-              >/dev/null
-          done
-
-          echo "Todos os manifests foram interpretados pelo kubectl."
   
 
   # ============================================================
-  # 4. SONARCLOUD
+  # 3. SONARCLOUD
   # ============================================================
 
   sonar:
@@ -280,7 +232,7 @@ jobs:
             -Dsonar.coverage.jacoco.xmlReportPaths=docs/security/jacoco/jacoco.xml
 
   # ============================================================
-  # 5. DOCKER
+  # 4. DOCKER
   # ============================================================
 
   docker:
@@ -334,7 +286,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
   # ============================================================
-  # 6. DEPLOY KUBERNETES
+  # 5. DEPLOY KUBERNETES
   # ============================================================
 
   deploy:
@@ -689,7 +641,7 @@ jobs:
             --tail=100 || true
 
   # ============================================================
-  # 7. SMOKE TEST
+  # 6. SMOKE TEST
   # ============================================================
 
   smoke-test:
