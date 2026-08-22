@@ -1,9 +1,14 @@
+---
 apiVersion: v1
 kind: ConfigMap
 
 metadata:
   name: oficina360-config
   namespace: oficina360
+  labels:
+    app.kubernetes.io/name: oficina360
+    app.kubernetes.io/component: configuration
+    app.kubernetes.io/part-of: oficina360
 
 data:
   SPRING_PROFILES_ACTIVE: "docker"

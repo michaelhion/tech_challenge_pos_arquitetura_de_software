@@ -38,3 +38,11 @@ terraform.tfvars
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+
+#utils
+gera-imagem-docker.sh
+
+
+k8s/secret.yaml
+
+/*-bkp

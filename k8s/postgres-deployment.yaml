@@ -1,9 +1,15 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 
 metadata:
   name: postgres
   namespace: oficina360
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: oficina360
 
 spec:
   replicas: 1
@@ -12,28 +18,93 @@ spec:
     matchLabels:
       app: postgres
 
-  template:
+  strategy:
+    type: Recreate
 
+  template:
     metadata:
       labels:
         app: postgres
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: oficina360
 
     spec:
       containers:
         - name: postgres
-          image: postgres:16
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+
           ports:
-            - containerPort: 5432
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+
           env:
             - name: POSTGRES_DB
-              value: oficina360
+              valueFrom:
+                configMapKeyRef:
+                  name: oficina360-config
+                  key: DB_NAME
+
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: oficina360-secret
                   key: DB_USERNAME
+
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: oficina360-secret
                   key: DB_PASSWORD
+
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc

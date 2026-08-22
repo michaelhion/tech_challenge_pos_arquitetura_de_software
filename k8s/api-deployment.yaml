@@ -1,12 +1,18 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 
 metadata:
   name: oficina360-api
   namespace: oficina360
+  labels:
+    app: oficina360-api
+    app.kubernetes.io/name: oficina360-api
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: oficina360
 
 spec:
-  replicas: 2
+  replicas: 1
 
   selector:
     matchLabels:
@@ -16,56 +22,20 @@ spec:
     metadata:
       labels:
         app: oficina360-api
+        app.kubernetes.io/name: oficina360-api
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/part-of: oficina360
 
     spec:
       containers:
         - name: oficina360-api
           image: michaelhion/oficina360:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "1000m"
-              memory: "1Gi"
-
-          startupProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: http
-              scheme: HTTP
-            initialDelaySeconds: 40
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 30
-            successThreshold: 1
-
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: http
-              scheme: HTTP
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-            successThreshold: 1
-
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: http
-              scheme: HTTP
-            periodSeconds: 20
-            timeoutSeconds: 5
-            failureThreshold: 3
-            successThreshold: 1
 
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -92,6 +62,12 @@ spec:
                   name: oficina360-config
                   key: DB_NAME
 
+            - name: JWT_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  name: oficina360-config
+                  key: JWT_ISSUER
+
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -109,3 +85,41 @@ spec:
                 secretKeyRef:
                   name: oficina360-secret
                   key: JWT_SECRET
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+            successThreshold: 1
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+              scheme: HTTP
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+              scheme: HTTP
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3

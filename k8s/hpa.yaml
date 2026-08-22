@@ -1,3 +1,4 @@
+---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 
@@ -6,49 +7,35 @@ metadata:
   namespace: oficina360
 
 spec:
-
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: oficina360-api
 
-  minReplicas: 2
-  maxReplicas: 5
+  minReplicas: 1
+  maxReplicas: 2
 
   behavior:
-
     scaleUp:
       stabilizationWindowSeconds: 60
-
       policies:
-        - type: Percent
-          value: 100
+        - type: Pods
+          value: 1
           periodSeconds: 60
-
       selectPolicy: Max
 
     scaleDown:
       stabilizationWindowSeconds: 300
-
       policies:
-        - type: Percent
-          value: 50
+        - type: Pods
+          value: 1
           periodSeconds: 60
-
       selectPolicy: Max
 
   metrics:
-
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50
-
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
+          averageUtilization: 70
