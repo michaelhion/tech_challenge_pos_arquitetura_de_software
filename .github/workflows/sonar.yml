@@ -1,3 +1,4 @@
+---
 name: CI/CD
 
 on:
@@ -10,13 +11,13 @@ on:
   pull_request:
 
 env:
-  JAVA_VERSION: '21'
+  JAVA_VERSION: "21"
   IMAGE_NAME: oficina360
+  KUBERNETES_NAMESPACE: oficina360
 
 jobs:
-
   # ============================================================
-  # 1. SECURITY - OWASP
+  # 1. SECURITY: OWASP
   # ============================================================
 
   security:
@@ -40,7 +41,10 @@ jobs:
 
       - name: Get OWASP cache date
         id: cache-date
+        shell: bash
         run: |
+          set -Eeuo pipefail
+
           echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
 
       - name: Restore OWASP cache
@@ -52,39 +56,48 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-owasp-
 
-      - name: Show OWASP cache
+      - name: Show OWASP cache status
+        shell: bash
         run: |
+          set -Eeuo pipefail
+
           echo "Cache hit: ${{ steps.owasp-cache.outputs.cache-hit }}"
           echo "OWASP data directory:"
-          du -sh ~/.m2/repository/org/owasp/dependency-check-data 2>/dev/null || true
-          find ~/.m2/repository/org/owasp/dependency-check-data \
-            -maxdepth 1 \
-            -type f \
-            -printf '%f\n' 2>/dev/null || true
+
+          du -sh \
+            ~/.m2/repository/org/owasp/dependency-check-data \
+            2>/dev/null || true
 
       # --------------------------------------------------------
       # OWASP scan
       # --------------------------------------------------------
 
       - name: OWASP Dependency Check
-        run: mvn --no-transfer-progress dependency-check:check
+        shell: bash
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          set -Eeuo pipefail
+
+          mvn \
+            --no-transfer-progress \
+            dependency-check:check
 
       # --------------------------------------------------------
-      # Save updated OWASP cache
+      # Save OWASP cache
       # --------------------------------------------------------
 
       - name: Save OWASP cache
-        if: success()
+        if: >
+          success() &&
+          steps.owasp-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
           key: ${{ runner.os }}-owasp-${{ steps.cache-date.outputs.date }}
 
-
   # ============================================================
-  # 2. BUILD + TEST + COVERAGE
+  # 2. BUILD, TESTS AND COVERAGE
   # ============================================================
 
   test:
@@ -103,37 +116,100 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn --no-transfer-progress clean verify
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          mvn \
+            --no-transfer-progress \
+            clean verify
 
       # --------------------------------------------------------
-      # Debug JaCoCo
+      # JaCoCo
       # --------------------------------------------------------
 
       - name: Verify JaCoCo report
+        shell: bash
         run: |
-          echo "JaCoCo report:"
-          ls -lh docs/security/jacoco/jacoco.xml
+          set -Eeuo pipefail
 
-          echo ""
-          echo "Report location:"
-          find docs/security/jacoco -maxdepth 2 -type f -print
+          JACOCO_REPORT="docs/security/jacoco/jacoco.xml"
+
+          if [ ! -f "$JACOCO_REPORT" ]; then
+            echo "Relatório JaCoCo não encontrado em: $JACOCO_REPORT"
+            exit 1
+          fi
+
+          echo "Relatório JaCoCo:"
+          ls -lh "$JACOCO_REPORT"
 
       # --------------------------------------------------------
-      # Artifacts
+      # Build artifacts
       # --------------------------------------------------------
 
       - name: Upload build data
         uses: actions/upload-artifact@v4
         with:
           name: build-data
+          if-no-files-found: error
+          retention-days: 3
           path: |
             target/*.jar
-            target/classes
+            target/classes/**
             docs/security/jacoco/jacoco.xml
 
+  # ============================================================
+  # 3. VALIDATE KUBERNETES MANIFESTS
+  # ============================================================
+
+  kubernetes-validate:
+    name: Validate Kubernetes Manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Validate Kubernetes manifests locally
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          MANIFESTS=(
+            "k8s/namespace.yaml"
+            "k8s/configmap.yaml"
+            "k8s/metrics-server.yaml"
+            "k8s/postgres-pvc.yaml"
+            "k8s/postgres-service.yaml"
+            "k8s/postgres-deployment.yaml"
+            "k8s/api-deployment.yaml"
+            "k8s/api-service.yaml"
+            "k8s/hpa.yaml"
+          )
+
+          for manifest in "${MANIFESTS[@]}"; do
+            if [ ! -f "$manifest" ]; then
+              echo "Manifesto não encontrado: $manifest"
+              exit 1
+            fi
+
+            echo "Validando localmente: $manifest"
+
+            kubectl apply \
+              --dry-run=client \
+              --validate=false \
+              --filename "$manifest" \
+              >/dev/null
+          done
+
+          echo "Todos os manifests foram interpretados pelo kubectl."
+  
 
   # ============================================================
-  # 3. SONARCLOUD
+  # 4. SONARCLOUD
   # ============================================================
 
   sonar:
@@ -147,6 +223,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -155,58 +233,62 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
 
-      # --------------------------------------------------------
-      # Restore build generated by test job
-      # --------------------------------------------------------
-
       - name: Download build data
         uses: actions/download-artifact@v4
         with:
           name: build-data
           path: .
 
-      # --------------------------------------------------------
-      # Verify JaCoCo
-      # --------------------------------------------------------
-
-      - name: Verify JaCoCo report
+      - name: Verify downloaded build data
+        shell: bash
         run: |
-          echo "JaCoCo report:"
-          find . -name "jacoco.xml" -print
+          set -Eeuo pipefail
 
-          echo ""
-          echo "Classes:"
-          find target/classes -type f | head -20
+          JACOCO_REPORT="docs/security/jacoco/jacoco.xml"
 
-          echo ""
-          echo "Report:"
-          ls -lh docs/security/jacoco/jacoco.xml
+          if [ ! -f "$JACOCO_REPORT" ]; then
+            echo "Relatório JaCoCo não foi recuperado."
+            exit 1
+          fi
 
-      # --------------------------------------------------------
-      # SonarCloud
-      # --------------------------------------------------------
+          if [ ! -d "target/classes" ]; then
+            echo "Classes compiladas não foram recuperadas."
+            exit 1
+          fi
+
+          echo "Relatório JaCoCo:"
+          ls -lh "$JACOCO_REPORT"
+
+          echo "Algumas classes recuperadas:"
+          find target/classes \
+            -type f \
+            | head -20
 
       - name: SonarCloud
+        shell: bash
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn --no-transfer-progress sonar:sonar \
+          set -Eeuo pipefail
+
+          mvn \
+            --no-transfer-progress \
+            sonar:sonar \
             -Dsonar.projectKey=michaelhion_tech_challenge_pos_arquitetura_de_software \
             -Dsonar.organization=michaelhion \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=docs/security/jacoco/jacoco.xml
 
-
   # ============================================================
-  # 4. DOCKER
+  # 5. DOCKER
   # ============================================================
 
   docker:
     name: Build and Push Docker Image
-    needs: sonar
+    needs:
+      - sonar
+      - kubernetes-validate
 
-    # Só cria/publica imagem em push.
-    # Pull Request não publica imagem.
     if: github.event_name == 'push'
 
     runs-on: ubuntu-latest
@@ -222,7 +304,15 @@ jobs:
           path: .
 
       - name: Verify JAR
+        shell: bash
         run: |
+          set -Eeuo pipefail
+
+          if ! compgen -G "target/*.jar" > /dev/null; then
+            echo "Nenhum arquivo JAR foi encontrado."
+            exit 1
+          fi
+
           ls -lh target/*.jar
 
       - name: Login to Docker Hub
@@ -230,6 +320,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
@@ -240,73 +333,423 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
+  # ============================================================
+  # 6. DEPLOY KUBERNETES
+  # ============================================================
 
-#  # ============================================================
-#  # 5. DEPLOY KUBERNETES
-#  # ============================================================
-#
-#  deploy:
-#    name: Deploy to Kubernetes
-#    needs: docker
-#
-#    # Deploy somente na main
-#    if: github.ref == 'refs/heads/main'
-#
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#
-#      - name: Setup kubectl
-#        uses: azure/setup-kubectl@v4
-#
-#      - name: Configure Kubernetes
-#        run: |
-#          mkdir -p ~/.kube
-#          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
-#
-#      - name: Check Kubernetes connection
-#        run: |
-#          kubectl cluster-info
-#          kubectl get nodes
-#
-#      # --------------------------------------------------------
-#      # Database
-#      # --------------------------------------------------------
-#
-#      - name: Deploy database
-#        run: |
-#          kubectl apply -f k8s/database/
-#
-#      # --------------------------------------------------------
-#      # Application
-#      # --------------------------------------------------------
-#
-#      - name: Apply application manifests
-#        run: |
-#          kubectl apply -f k8s/app/
-#
-#      # --------------------------------------------------------
-#      # Update image
-#      # --------------------------------------------------------
-#
-#      - name: Update application image
-#        run: |
-#          kubectl set image deployment/oficina360 \
-#            oficina360=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-#
-#      # --------------------------------------------------------
-#      # Wait for application
-#      # --------------------------------------------------------
-#
-#      - name: Wait for application rollout
-#        run: |
-#          kubectl rollout status \
-#            deployment/oficina360 \
-#            --timeout=180s
-#
-#      - name: Check Kubernetes resources
-#        run: |
-#          kubectl get pods
-#          kubectl get services
+  deploy:
+    name: Deploy to Kubernetes
+    needs:
+      - docker
+
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: lab
+      url: http://${{ vars.EC2_PUBLIC_IP }}:30080
+
+    steps:
+      # --------------------------------------------------------
+      # Checkout and kubectl
+      # --------------------------------------------------------
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      # --------------------------------------------------------
+      # Kubeconfig
+      # --------------------------------------------------------
+
+      - name: Configure Kubernetes
+        shell: bash
+        env:
+          KUBE_CONFIG_BASE64: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          set -Eeuo pipefail
+
+          if [ -z "$KUBE_CONFIG_BASE64" ]; then
+            echo "O Secret KUBE_CONFIG não foi configurado."
+            exit 1
+          fi
+
+          mkdir -p "$HOME/.kube"
+
+          printf '%s' "$KUBE_CONFIG_BASE64" \
+            | base64 --decode \
+            > "$HOME/.kube/config"
+
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Check Kubernetes connection
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl cluster-info
+          kubectl get nodes -o wide
+
+      # --------------------------------------------------------
+      # Namespace
+      # --------------------------------------------------------
+
+      - name: Create namespace
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl apply \
+            --filename k8s/namespace.yaml
+
+      # --------------------------------------------------------
+      # Kubernetes Secret
+      # --------------------------------------------------------
+
+      - name: Create Kubernetes Secret
+        shell: bash
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          set -Eeuo pipefail
+
+          if [ -z "$DB_USERNAME" ]; then
+            echo "O Secret DB_USERNAME não foi configurado."
+            exit 1
+          fi
+
+          if [ -z "$DB_PASSWORD" ]; then
+            echo "O Secret DB_PASSWORD não foi configurado."
+            exit 1
+          fi
+
+          if [ -z "$JWT_SECRET" ]; then
+            echo "O Secret JWT_SECRET não foi configurado."
+            exit 1
+          fi
+
+          kubectl create secret generic oficina360-secret \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            --from-literal=DB_USERNAME="$DB_USERNAME" \
+            --from-literal=DB_PASSWORD="$DB_PASSWORD" \
+            --from-literal=JWT_SECRET="$JWT_SECRET" \
+            --dry-run=client \
+            --output=yaml \
+            | kubectl apply --filename -
+
+      # --------------------------------------------------------
+      # ConfigMap
+      # --------------------------------------------------------
+
+      - name: Apply ConfigMap
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl apply \
+            --filename k8s/configmap.yaml
+
+      # --------------------------------------------------------
+      # Metrics Server
+      # --------------------------------------------------------
+
+      - name: Deploy Metrics Server
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl apply \
+            --filename k8s/metrics-server.yaml
+
+          kubectl rollout status \
+            deployment/metrics-server \
+            --namespace kube-system \
+            --timeout=300s
+
+      # --------------------------------------------------------
+      # PostgreSQL
+      # --------------------------------------------------------
+
+      - name: Deploy PostgreSQL
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl apply \
+            --filename k8s/postgres-pvc.yaml
+
+          kubectl apply \
+            --filename k8s/postgres-service.yaml
+
+          kubectl apply \
+            --filename k8s/postgres-deployment.yaml
+
+      - name: Wait for PostgreSQL rollout
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl rollout status \
+            deployment/postgres \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            --timeout=300s
+
+      # --------------------------------------------------------
+      # API Deployment
+      # --------------------------------------------------------
+
+      - name: Apply API Deployment
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl apply \
+            --filename k8s/api-deployment.yaml
+
+      - name: Update application image
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+
+          IMAGE_URI="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          kubectl set image \
+            deployment/oficina360-api \
+            oficina360-api="$IMAGE_URI" \
+            --namespace "$KUBERNETES_NAMESPACE"
+
+          echo "Imagem solicitada para implantação: $IMAGE_URI"
+
+      - name: Wait for API rollout
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl rollout status \
+            deployment/oficina360-api \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            --timeout=600s
+
+      # --------------------------------------------------------
+      # Service and HPA
+      # --------------------------------------------------------
+
+      - name: Apply API Service and HPA
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          kubectl apply \
+            --filename k8s/api-service.yaml
+
+          kubectl apply \
+            --filename k8s/hpa.yaml
+
+      # --------------------------------------------------------
+      # Validate deployed image
+      # --------------------------------------------------------
+
+      - name: Verify deployed image
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+
+          EXPECTED_IMAGE="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          DEPLOYED_IMAGE="$(
+            kubectl get deployment oficina360-api \
+              --namespace "$KUBERNETES_NAMESPACE" \
+              --output=jsonpath='{.spec.template.spec.containers[0].image}'
+          )"
+
+          echo "Imagem esperada: $EXPECTED_IMAGE"
+          echo "Imagem implantada: $DEPLOYED_IMAGE"
+
+          if [ "$DEPLOYED_IMAGE" != "$EXPECTED_IMAGE" ]; then
+            echo "A imagem implantada não corresponde ao commit atual."
+            exit 1
+          fi
+
+      # --------------------------------------------------------
+      # Validate cluster resources
+      # --------------------------------------------------------
+
+      - name: Check Kubernetes resources
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo "=== Nodes ==="
+          kubectl get nodes -o wide
+
+          echo ""
+          echo "=== Pods ==="
+          kubectl get pods \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            -o wide
+
+          echo ""
+          echo "=== Deployments ==="
+          kubectl get deployments \
+            --namespace "$KUBERNETES_NAMESPACE"
+
+          echo ""
+          echo "=== Services ==="
+          kubectl get services \
+            --namespace "$KUBERNETES_NAMESPACE"
+
+          echo ""
+          echo "=== PVCs ==="
+          kubectl get pvc \
+            --namespace "$KUBERNETES_NAMESPACE"
+
+          echo ""
+          echo "=== Endpoints ==="
+          kubectl get endpoints \
+            --namespace "$KUBERNETES_NAMESPACE"
+
+          echo ""
+          echo "=== HPA ==="
+          kubectl get hpa \
+            --namespace "$KUBERNETES_NAMESPACE"
+
+      # --------------------------------------------------------
+      # Diagnostics
+      # --------------------------------------------------------
+
+      - name: Show diagnostics on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== Nodes ==="
+          kubectl get nodes -o wide || true
+
+          echo ""
+          echo "=== Pods ==="
+          kubectl get pods \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            -o wide || true
+
+          echo ""
+          echo "=== Deployments ==="
+          kubectl get deployments \
+            --namespace "$KUBERNETES_NAMESPACE" || true
+
+          echo ""
+          echo "=== Services ==="
+          kubectl get services \
+            --namespace "$KUBERNETES_NAMESPACE" || true
+
+          echo ""
+          echo "=== Endpoints ==="
+          kubectl get endpoints \
+            --namespace "$KUBERNETES_NAMESPACE" || true
+
+          echo ""
+          echo "=== PVCs ==="
+          kubectl get pvc \
+            --namespace "$KUBERNETES_NAMESPACE" || true
+
+          echo ""
+          echo "=== HPA ==="
+          kubectl get hpa \
+            --namespace "$KUBERNETES_NAMESPACE" || true
+
+          echo ""
+          echo "=== Events ==="
+          kubectl get events \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            --sort-by='.lastTimestamp' || true
+
+          echo ""
+          echo "=== API logs ==="
+          kubectl logs \
+            deployment/oficina360-api \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            --tail=200 || true
+
+          echo ""
+          echo "=== PostgreSQL logs ==="
+          kubectl logs \
+            deployment/postgres \
+            --namespace "$KUBERNETES_NAMESPACE" \
+            --tail=100 || true
+
+  # ============================================================
+  # 7. SMOKE TEST
+  # ============================================================
+
+  smoke-test:
+    name: Validate Application Health
+    needs:
+      - deploy
+
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: lab
+      url: http://${{ vars.EC2_PUBLIC_IP }}:30080/swagger-ui/index.html
+
+    env:
+      PUBLIC_IP: ${{ vars.EC2_PUBLIC_IP }}
+      API_PORT: "30080"
+
+    steps:
+      - name: Validate smoke test configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          if [ -z "$PUBLIC_IP" ]; then
+            echo "A variável EC2_PUBLIC_IP não foi configurada no GitHub."
+            exit 1
+          fi
+
+      - name: Test application health
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          HEALTH_URL="http://${PUBLIC_IP}:${API_PORT}/actuator/health/liveness"
+          SWAGGER_URL="http://${PUBLIC_IP}:${API_PORT}/swagger-ui/index.html"
+
+          echo "Validando aplicação em: $HEALTH_URL"
+
+          for attempt in $(seq 1 20); do
+            if curl \
+              --fail \
+              --silent \
+              --show-error \
+              --connect-timeout 5 \
+              --max-time 15 \
+              "$HEALTH_URL"; then
+
+              echo ""
+              echo "Aplicação Oficina360 respondeu com sucesso."
+              echo "Swagger: $SWAGGER_URL"
+              exit 0
+            fi
+
+            echo "Tentativa ${attempt}/20: aguardando aplicação..."
+            sleep 10
+          done
+
+          echo "A aplicação não respondeu no prazo esperado."
+          exit 1
