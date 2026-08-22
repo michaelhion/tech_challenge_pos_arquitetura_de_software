@@ -181,45 +181,37 @@ jobs:
           name: build-data
           path: .
 
-      - name: Verify downloaded build data
-        shell: bash
+      # --------------------------------------------------------
+      # Verify JaCoCo
+      # --------------------------------------------------------
+
+      - name: Verify JaCoCo report
         run: |
-          set -Eeuo pipefail
+          echo "JaCoCo report:"
+          find . -name "jacoco.xml" -print
 
-          JACOCO_REPORT="docs/security/jacoco/jacoco.xml"
+          echo ""
+          echo "Classes:"
+          find target/classes -type f | head -20
 
-          if [ ! -f "$JACOCO_REPORT" ]; then
-            echo "Relatório JaCoCo não foi recuperado."
-            exit 1
-          fi
+          echo ""
+          echo "Report:"
+          ls -lh docs/security/jacoco.xml
 
-          if [ ! -d "target/classes" ]; then
-            echo "Classes compiladas não foram recuperadas."
-            exit 1
-          fi
-
-          echo "Relatório JaCoCo:"
-          ls -lh "$JACOCO_REPORT"
-
-          echo "Algumas classes recuperadas:"
-          find target/classes \
-            -type f \
-            | head -20
+      # --------------------------------------------------------
+      # SonarCloud
+      # --------------------------------------------------------
 
       - name: SonarCloud
-        shell: bash
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          set -Eeuo pipefail
-
-          mvn \
-            --no-transfer-progress \
-            sonar:sonar \
+          mvn --no-transfer-progress sonar:sonar \
             -Dsonar.projectKey=michaelhion_tech_challenge_pos_arquitetura_de_software \
             -Dsonar.organization=michaelhion \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=docs/security/jacoco/jacoco.xml
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+
 
   # ============================================================
   # 4. DOCKER
@@ -227,8 +219,7 @@ jobs:
 
   docker:
     name: Build and Push Docker Image
-    needs:
-      - sonar
+    needs: sonar
 
     if: github.event_name == 'push'
 
