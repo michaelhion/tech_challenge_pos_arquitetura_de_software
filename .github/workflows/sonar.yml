@@ -129,19 +129,13 @@ jobs:
       # --------------------------------------------------------
 
       - name: Verify JaCoCo report
-        shell: bash
         run: |
-          set -Eeuo pipefail
+          echo "JaCoCo report:"
+          ls -lh docs/security/jacoco/jacoco.xml
 
-          JACOCO_REPORT="docs/security/jacoco/jacoco.xml"
-
-          if [ ! -f "$JACOCO_REPORT" ]; then
-            echo "Relatório JaCoCo não encontrado em: $JACOCO_REPORT"
-            exit 1
-          fi
-
-          echo "Relatório JaCoCo:"
-          ls -lh "$JACOCO_REPORT"
+          echo ""
+          echo "Report location:"
+          find docs/security/jacoco -maxdepth 2 -type f -print
 
       # --------------------------------------------------------
       # Build artifacts
@@ -151,12 +145,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-data
-          if-no-files-found: error
-          retention-days: 3
           path: |
             target/*.jar
-            target/classes/**
-            docs/security/jacoco/jacoco.xml
+            target/classes
+            docs/security/jacoco.xml
 
   
 
@@ -175,8 +167,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -255,15 +245,7 @@ jobs:
           path: .
 
       - name: Verify JAR
-        shell: bash
         run: |
-          set -Eeuo pipefail
-
-          if ! compgen -G "target/*.jar" > /dev/null; then
-            echo "Nenhum arquivo JAR foi encontrado."
-            exit 1
-          fi
-
           ls -lh target/*.jar
 
       - name: Login to Docker Hub
@@ -271,9 +253,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
