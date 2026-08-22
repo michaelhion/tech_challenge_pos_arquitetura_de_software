@@ -239,7 +239,6 @@ jobs:
     name: Build and Push Docker Image
     needs:
       - sonar
-      - kubernetes-validate
 
     if: github.event_name == 'push'
 
