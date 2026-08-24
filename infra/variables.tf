@@ -72,3 +72,34 @@ variable "api_allowed_cidr" {
     error_message = "api_allowed_cidr deve ser um CIDR IPv4 valido."
   }
 }
+
+variable "internet_gateway_id" {
+  description = "ID do Internet Gateway existente e anexado a VPC do laboratorio"
+  type        = string
+
+  validation {
+    condition     = startswith(var.internet_gateway_id, "igw-")
+    error_message = "internet_gateway_id deve começar com igw-."
+  }
+}
+
+variable "key_name" {
+  description = "Nome do Key Pair existente utilizado para acesso SSH"
+  type        = string
+  default     = "vockey"
+
+  validation {
+    condition     = length(trimspace(var.key_name)) > 0
+    error_message = "key_name deve conter o nome de um Key Pair existente."
+  }
+}
+
+variable "kubernetes_api_allowed_cidr" {
+  description = "CIDR autorizado a acessar temporariamente a API do K3s"
+  type        = string
+
+  validation {
+    condition     = can(cidrnetmask(var.kubernetes_api_allowed_cidr))
+    error_message = "kubernetes_api_allowed_cidr deve ser um CIDR IPv4 valido."
+  }
+}

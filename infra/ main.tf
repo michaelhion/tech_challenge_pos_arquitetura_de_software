@@ -1,6 +1,7 @@
 resource "aws_instance" "k3s" {
   ami           = var.ami_id
   instance_type = var.instance_type
+  key_name      = var.key_name
 
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
@@ -23,4 +24,9 @@ resource "aws_instance" "k3s" {
     Environment = var.environment
     ManagedBy   = "Terraform"
   }
+
+  depends_on = [
+    aws_route.internet,
+    aws_route_table_association.public_subnet
+  ]
 }

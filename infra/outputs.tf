@@ -32,3 +32,13 @@ output "ssh_command" {
   description = "Comando-base para acesso SSH"
   value       = "ssh ubuntu@${aws_instance.k3s.public_ip}"
 }
+
+output "public_route_table_id" {
+  description = "ID da tabela de rotas publica criada pelo Terraform"
+  value       = aws_route_table.public.id
+}
+
+output "internet_gateway_id" {
+  description = "ID do Internet Gateway utilizado"
+  value       = var.internet_gateway_id
+}
