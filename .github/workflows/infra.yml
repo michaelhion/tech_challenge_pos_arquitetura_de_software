@@ -7,21 +7,31 @@ on:
       action:
         description: "Ação desejada"
         required: true
-        default: "deploy"
+        default: "plan"
         type: choice
         options:
           - plan
           - deploy
           - destroy
 
+      image_tag:
+        description: "Tag da imagem Docker que será implantada"
+        required: true
+        default: "latest"
+        type: string
+
 concurrency:
   group: oficina360-aws-lab
   cancel-in-progress: false
+
+permissions:
+  contents: read
 
 env:
   AWS_REGION: us-east-1
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
+
   IMAGE_NAME: oficina360
   KUBERNETES_NAMESPACE: oficina360
 
@@ -33,29 +43,176 @@ jobs:
     environment:
       name: lab
 
+    env:
+      # --------------------------------------------------------
+      # Variáveis Terraform configuradas no environment lab
+      # --------------------------------------------------------
+
+      TF_VAR_vpc_id: ${{ vars.TF_VAR_vpc_id }}
+      TF_VAR_subnet_id: ${{ vars.TF_VAR_subnet_id }}
+      TF_VAR_internet_gateway_id: ${{ vars.TF_VAR_internet_gateway_id }}
+      TF_VAR_ssh_allowed_cidr: ${{ vars.TF_VAR_ssh_allowed_cidr }}
+      TF_VAR_ami_id: ${{ vars.TF_VAR_ami_id }}
+
+      # --------------------------------------------------------
+      # Valores fixos do laboratório
+      # --------------------------------------------------------
+
+      TF_VAR_instance_type: "t3.micro"
+      TF_VAR_key_name: "vockey"
+      TF_VAR_project_name: "Oficina360"
+      TF_VAR_environment: "lab"
+      TF_VAR_api_node_port: "30080"
+      TF_VAR_api_allowed_cidr: "0.0.0.0/0"
+
     steps:
+      # ========================================================
+      # CHECKOUT
+      # ========================================================
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
+      # ========================================================
+      # VALIDATE CONFIGURATION
+      # ========================================================
+
+      - name: Validate Terraform variables
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          required_variables=(
+            "TF_VAR_vpc_id"
+            "TF_VAR_subnet_id"
+            "TF_VAR_internet_gateway_id"
+            "TF_VAR_ssh_allowed_cidr"
+            "TF_VAR_ami_id"
+          )
+
+          missing=0
+
+          for variable_name in "${required_variables[@]}"; do
+            if [ -z "${!variable_name:-}" ]; then
+              echo "Variável não configurada: $variable_name"
+              missing=1
+            else
+              echo "Variável configurada: $variable_name"
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo ""
+            echo "Configure as variáveis ausentes em:"
+            echo "Settings > Environments > lab > Environment variables"
+            exit 1
+          fi
+
+          echo ""
+          echo "Todas as variáveis obrigatórias estão configuradas."
+
+      - name: Validate AWS credentials configuration
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID_VALUE: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY_VALUE: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN_VALUE: ${{ secrets.AWS_SESSION_TOKEN }}
+        run: |
+          set -Eeuo pipefail
+
+          missing=0
+
+          if [ -z "$AWS_ACCESS_KEY_ID_VALUE" ]; then
+            echo "Secret não configurado: AWS_ACCESS_KEY_ID"
+            missing=1
+          fi
+
+          if [ -z "$AWS_SECRET_ACCESS_KEY_VALUE" ]; then
+            echo "Secret não configurado: AWS_SECRET_ACCESS_KEY"
+            missing=1
+          fi
+
+          if [ -z "$AWS_SESSION_TOKEN_VALUE" ]; then
+            echo "Secret não configurado: AWS_SESSION_TOKEN"
+            missing=1
+          fi
+
+          if [ "$missing" -ne 0 ]; then
+            echo ""
+            echo "Configure os Secrets AWS no environment lab."
+            exit 1
+          fi
+
+          echo "Os três Secrets AWS estão configurados."
+
+      - name: Validate deployment secrets
+        if: inputs.action == 'deploy'
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          set -Eeuo pipefail
+
+          required_variables=(
+            "SSH_PRIVATE_KEY"
+            "DB_USERNAME"
+            "DB_PASSWORD"
+            "JWT_SECRET"
+            "DOCKERHUB_USERNAME"
+          )
+
+          missing=0
+
+          for variable_name in "${required_variables[@]}"; do
+            if [ -z "${!variable_name:-}" ]; then
+              echo "Secret não configurado: $variable_name"
+              missing=1
+            else
+              echo "Secret configurado: $variable_name"
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo ""
+            echo "Configure os Secrets de deploy no environment lab."
+            exit 1
+          fi
+
+          echo ""
+          echo "Todos os Secrets de deploy estão configurados."
+
+      # ========================================================
+      # AWS
+      # ========================================================
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.2.3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Validate AWS credentials
+      - name: Validate AWS identity
         shell: bash
         run: |
           set -Eeuo pipefail
 
+          echo "Identidade AWS utilizada pelo workflow:"
           aws sts get-caller-identity
+
+      # ========================================================
+      # TERRAFORM
+      # ========================================================
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
       - name: Terraform format
         shell: bash
@@ -69,7 +226,8 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          terraform -chdir=infra init
+          terraform -chdir=infra init \
+            -input=false
 
       - name: Terraform validate
         shell: bash
@@ -77,6 +235,10 @@ jobs:
           set -Eeuo pipefail
 
           terraform -chdir=infra validate
+
+      # --------------------------------------------------------
+      # PLAN
+      # --------------------------------------------------------
 
       - name: Terraform plan
         if: inputs.action != 'destroy'
@@ -88,11 +250,22 @@ jobs:
             -input=false \
             -out=tfplan
 
-      - name: Terraform plan only
+      - name: Terraform plan summary
         if: inputs.action == 'plan'
         shell: bash
         run: |
-          echo "Plano concluído. Nenhum recurso foi alterado."
+          set -Eeuo pipefail
+
+          echo "======================================"
+          echo " Terraform plan concluído"
+          echo "======================================"
+          echo ""
+          echo "Nenhum recurso foi alterado."
+          echo "Execute novamente selecionando deploy para aplicar o plano."
+
+      # --------------------------------------------------------
+      # APPLY
+      # --------------------------------------------------------
 
       - name: Terraform apply
         if: inputs.action == 'deploy'
@@ -121,8 +294,19 @@ jobs:
             exit 1
           fi
 
+          if [[ ! "$PUBLIC_IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+            echo "Terraform retornou um IP público inválido."
+            exit 1
+          fi
+
           echo "public_ip=$PUBLIC_IP" >> "$GITHUB_OUTPUT"
+
           echo "EC2 provisionada."
+          echo "IP público: $PUBLIC_IP"
+
+      # ========================================================
+      # SSH
+      # ========================================================
 
       - name: Configure SSH key
         if: inputs.action == 'deploy'
@@ -132,11 +316,6 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          if [ -z "$SSH_PRIVATE_KEY" ]; then
-            echo "EC2_SSH_PRIVATE_KEY não foi configurado."
-            exit 1
-          fi
-
           mkdir -p "$HOME/.ssh"
 
           printf '%s\n' "$SSH_PRIVATE_KEY" \
@@ -144,273 +323,16 @@ jobs:
 
           chmod 600 "$HOME/.ssh/labsuser.pem"
 
+          if ! ssh-keygen \
+            -y \
+            -f "$HOME/.ssh/labsuser.pem" \
+            >/dev/null; then
+
+            echo "EC2_SSH_PRIVATE_KEY não contém uma chave privada válida."
+            exit 1
+          fi
+
+          echo "Chave SSH configurada."
+
       - name: Wait for EC2 SSH
-        if: inputs.action == 'deploy'
-        shell: bash
-        env:
-          PUBLIC_IP: ${{ steps.terraform-output.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          for attempt in $(seq 1 30); do
-            if ssh \
-              -i "$HOME/.ssh/labsuser.pem" \
-              -o IdentitiesOnly=yes \
-              -o StrictHostKeyChecking=no \
-              -o ConnectTimeout=5 \
-              "ec2-user@${PUBLIC_IP}" \
-              "echo EC2 disponível"; then
-
-              exit 0
-            fi
-
-            echo "Tentativa ${attempt}/30: aguardando SSH..."
-            sleep 10
-          done
-
-          echo "A EC2 não ficou disponível por SSH."
-          exit 1
-
-      - name: Wait for K3s
-        if: inputs.action == 'deploy'
-        shell: bash
-        env:
-          PUBLIC_IP: ${{ steps.terraform-output.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            "ec2-user@${PUBLIC_IP}" \
-            '
-              set -Eeuo pipefail
-
-              for attempt in $(seq 1 60); do
-                if sudo timeout 10 \
-                  k3s kubectl get nodes \
-                  >/dev/null 2>&1; then
-
-                  sudo k3s kubectl get nodes -o wide
-                  exit 0
-                fi
-
-                echo "Tentativa ${attempt}/60: aguardando K3s..."
-                sleep 10
-              done
-
-              echo "K3s não ficou disponível."
-
-              sudo systemctl status k3s \
-                --no-pager \
-                --full || true
-
-              sudo journalctl \
-                -u k3s \
-                -n 200 \
-                --no-pager || true
-
-              exit 1
-            '
-
-      - name: Copy Kubernetes manifests
-        if: inputs.action == 'deploy'
-        shell: bash
-        env:
-          PUBLIC_IP: ${{ steps.terraform-output.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            "ec2-user@${PUBLIC_IP}" \
-            "rm -rf /tmp/oficina360 && mkdir -p /tmp/oficina360"
-
-          scp \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -r k8s \
-            "ec2-user@${PUBLIC_IP}:/tmp/oficina360/"
-
-      - name: Deploy Kubernetes resources
-        if: inputs.action == 'deploy'
-        shell: bash
-        env:
-          PUBLIC_IP: ${{ steps.terraform-output.outputs.public_ip }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          set -Eeuo pipefail
-
-          DB_USERNAME_BASE64="$(
-            printf '%s' "$DB_USERNAME" | base64 -w 0
-          )"
-
-          DB_PASSWORD_BASE64="$(
-            printf '%s' "$DB_PASSWORD" | base64 -w 0
-          )"
-
-          JWT_SECRET_BASE64="$(
-            printf '%s' "$JWT_SECRET" | base64 -w 0
-          )"
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            "ec2-user@${PUBLIC_IP}" \
-            "DB_USERNAME_BASE64='$DB_USERNAME_BASE64'
-             DB_PASSWORD_BASE64='$DB_PASSWORD_BASE64'
-             JWT_SECRET_BASE64='$JWT_SECRET_BASE64'
-             DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME'
-             IMAGE_TAG='$IMAGE_TAG'
-             bash -s" <<'REMOTE'
-          set -Eeuo pipefail
-
-          KUBECTL="sudo k3s kubectl"
-          NAMESPACE="oficina360"
-          K8S_DIR="/tmp/oficina360/k8s"
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/namespace.yaml"
-
-          DB_USERNAME="$(
-            printf '%s' "$DB_USERNAME_BASE64" | base64 -d
-          )"
-
-          DB_PASSWORD="$(
-            printf '%s' "$DB_PASSWORD_BASE64" | base64 -d
-          )"
-
-          JWT_SECRET="$(
-            printf '%s' "$JWT_SECRET_BASE64" | base64 -d
-          )"
-
-          $KUBECTL create secret generic oficina360-secret \
-            --namespace "$NAMESPACE" \
-            --from-literal=DB_USERNAME="$DB_USERNAME" \
-            --from-literal=DB_PASSWORD="$DB_PASSWORD" \
-            --from-literal=JWT_SECRET="$JWT_SECRET" \
-            --dry-run=client \
-            --output=yaml \
-            | $KUBECTL apply --filename -
-
-          unset DB_USERNAME DB_PASSWORD JWT_SECRET
-          unset DB_USERNAME_BASE64
-          unset DB_PASSWORD_BASE64
-          unset JWT_SECRET_BASE64
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/configmap.yaml"
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/metrics-server.yaml"
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/postgres-pvc.yaml"
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/postgres-service.yaml"
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/postgres-deployment.yaml"
-
-          $KUBECTL rollout status \
-            deployment/postgres \
-            --namespace "$NAMESPACE" \
-            --timeout=300s
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/api-deployment.yaml"
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/api-service.yaml"
-
-          IMAGE_URI="${DOCKERHUB_USERNAME}/oficina360:${IMAGE_TAG}"
-
-          $KUBECTL set image \
-            deployment/oficina360-api \
-            oficina360-api="$IMAGE_URI" \
-            --namespace "$NAMESPACE"
-
-          $KUBECTL rollout status \
-            deployment/oficina360-api \
-            --namespace "$NAMESPACE" \
-            --timeout=600s
-
-          $KUBECTL apply \
-            --filename "$K8S_DIR/hpa.yaml"
-
-          echo "=== Recursos implantados ==="
-
-          $KUBECTL get pods \
-            --namespace "$NAMESPACE" \
-            -o wide
-
-          $KUBECTL get services \
-            --namespace "$NAMESPACE"
-
-          $KUBECTL get pvc \
-            --namespace "$NAMESPACE"
-
-          $KUBECTL get hpa \
-            --namespace "$NAMESPACE"
-
-          echo "=== Imagem implantada ==="
-
-          $KUBECTL get deployment oficina360-api \
-            --namespace "$NAMESPACE" \
-            --output=jsonpath='{.spec.template.spec.containers[0].image}'
-
-          echo ""
-          REMOTE
-
-      - name: Smoke test
-        if: inputs.action == 'deploy'
-        shell: bash
-        env:
-          PUBLIC_IP: ${{ steps.terraform-output.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          HEALTH_URL="http://${PUBLIC_IP}:30080/actuator/health/liveness"
-
-          for attempt in $(seq 1 30); do
-            if curl \
-              --fail \
-              --silent \
-              --show-error \
-              --connect-timeout 5 \
-              --max-time 15 \
-              "$HEALTH_URL"; then
-
-              echo ""
-              echo "Aplicação respondeu com sucesso."
-              echo "Swagger:"
-              echo "http://${PUBLIC_IP}:30080/swagger-ui/index.html"
-              exit 0
-            fi
-
-            echo "Tentativa ${attempt}/30..."
-            sleep 10
-          done
-
-          echo "A aplicação não respondeu."
-          exit 1
-
-      - name: Terraform destroy
-        if: inputs.action == 'destroy'
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          terraform -chdir=infra destroy \
-            -input=false \
-            -auto-approve
+        if: inputs.action == 'deploy
