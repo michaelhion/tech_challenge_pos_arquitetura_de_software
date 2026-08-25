@@ -93,13 +93,3 @@ variable "key_name" {
     error_message = "key_name deve conter o nome de um Key Pair existente."
   }
 }
-
-variable "kubernetes_api_allowed_cidr" {
-  description = "CIDR autorizado a acessar temporariamente a API do K3s"
-  type        = string
-
-  validation {
-    condition     = can(cidrnetmask(var.kubernetes_api_allowed_cidr))
-    error_message = "kubernetes_api_allowed_cidr deve ser um CIDR IPv4 valido."
-  }
-}
