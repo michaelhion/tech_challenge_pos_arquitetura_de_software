@@ -99,8 +99,7 @@ variable "iam_instance_profile_name" {
   type        = string
 
   validation {
-    condition = (
-      length(trimspace(var.iam_instance_profile_name)) > 0
-    )
-
-    error_message = "iam_instance_profile_name deve ser
+    condition     = length(trimspace(var.iam_instance_profile_name)) > 0
+    error_message = "iam_instance_profile_name deve ser informado."
+  }
+}
