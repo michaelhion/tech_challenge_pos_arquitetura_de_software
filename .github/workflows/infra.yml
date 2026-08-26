@@ -89,6 +89,40 @@ jobs:
       - name: Validate AWS Identity
         run: aws sts get-caller-identity
 
+      - name: Check Existing Route Tables
+        if: ${{ inputs.action == 'deploy' }}
+        run: |
+          set -Eeuo pipefail
+
+          ROUTE_TABLE_COUNT="$(
+            aws ec2 describe-route-tables \
+              --region "$AWS_REGION" \
+              --filters \
+                "Name=tag:Name,Values=Oficina360-lab-public-rt" \
+              --query 'length(RouteTables)' \
+              --output text
+          )"
+
+          STATE_HAS_ROUTE_TABLE="false"
+
+          if terraform state show \
+            aws_route_table.public \
+            >/dev/null 2>&1; then
+
+            STATE_HAS_ROUTE_TABLE="true"
+          fi
+
+          echo "Tabelas Oficina360 na AWS: $ROUTE_TABLE_COUNT"
+          echo "Tabela presente no state: $STATE_HAS_ROUTE_TABLE"
+
+          if [ "$ROUTE_TABLE_COUNT" -gt 0 ] &&
+             [ "$STATE_HAS_ROUTE_TABLE" = "false" ]; then
+
+            echo "ERRO: existem tabelas Oficina360 na AWS que não estão no state."
+            echo "Faça a limpeza ou importação antes do apply."
+            exit 1
+          fi
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
