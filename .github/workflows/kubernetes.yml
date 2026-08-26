@@ -1,11 +1,11 @@
 ---
-name: Kubernetes Deploy
+name: Kubernetes Deploy with SSM
 
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: "Ação do Kubernetes"
+        description: "Ação Kubernetes"
         required: true
         default: "deploy"
         type: choice
@@ -46,8 +46,16 @@ jobs:
         shell: bash
 
     steps:
+      # ========================================================
+      # CHECKOUT
+      # ========================================================
+
       - name: Checkout
         uses: actions/checkout@v4
+
+      # ========================================================
+      # AWS
+      # ========================================================
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.2.3
@@ -57,372 +65,285 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Validate AWS Identity
+        run: aws sts get-caller-identity
+
+      # ========================================================
+      # LOCATE EC2
+      # ========================================================
+
       - name: Locate EC2 Instance
         id: ec2
         run: |
           set -Eeuo pipefail
 
-          PUBLIC_IP="$(
+          INSTANCE_ID="$(
             aws ec2 describe-instances \
+              --region "$AWS_REGION" \
               --filters \
                 "Name=tag:Name,Values=${EC2_INSTANCE_NAME}" \
                 "Name=instance-state-name,Values=running" \
-              --query 'Reservations[].Instances[].PublicIpAddress' \
+              --query 'Reservations[].Instances[].InstanceId' \
               --output text
           )"
 
-          if [ -z "$PUBLIC_IP" ] || [ "$PUBLIC_IP" = "None" ]; then
-            echo "Nenhuma EC2 em execução foi encontrada com a tag Name=${EC2_INSTANCE_NAME}."
+          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+            echo "Nenhuma EC2 em execução foi encontrada."
+            echo "Tag esperada: Name=${EC2_INSTANCE_NAME}"
             exit 1
           fi
 
-          if [ "$(wc -w <<< "$PUBLIC_IP")" -ne 1 ]; then
-            echo "Mais de uma EC2 em execução foi encontrada: $PUBLIC_IP"
+          INSTANCE_COUNT="$(
+            wc -w <<< "$INSTANCE_ID"
+          )"
+
+          if [ "$INSTANCE_COUNT" -ne 1 ]; then
+            echo "Foram encontradas várias instâncias: $INSTANCE_ID"
             exit 1
           fi
 
-          if [[ ! "$PUBLIC_IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
-            echo "O endereço retornado não é um IPv4 válido: $PUBLIC_IP"
-            exit 1
-          fi
+          echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
+          echo "EC2 localizada: $INSTANCE_ID"
 
-          echo "public_ip=$PUBLIC_IP" >> "$GITHUB_OUTPUT"
-          echo "EC2 localizada no IP $PUBLIC_IP."
+      # ========================================================
+      # VERIFY SSM
+      # ========================================================
 
-      - name: Validate Deploy Secrets
-        if: ${{ inputs.action == 'deploy' }}
+      - name: Wait for SSM
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        run: |
-          set -Eeuo pipefail
-
-          required_secrets=(
-            SSH_PRIVATE_KEY
-            DB_USERNAME
-            DB_PASSWORD
-            JWT_SECRET
-            DOCKERHUB_USERNAME
-          )
-
-          for secret_name in "${required_secrets[@]}"; do
-            if [ -z "${!secret_name:-}" ]; then
-              echo "Secret não configurado: $secret_name"
-              exit 1
-            fi
-          done
-
-          echo "Secrets de deploy configurados."
-
-      - name: Configure SSH Key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-        run: |
-          set -Eeuo pipefail
-
-          if [ -z "$SSH_PRIVATE_KEY" ]; then
-            echo "O Secret EC2_SSH_PRIVATE_KEY não foi configurado."
-            exit 1
-          fi
-
-          mkdir -p "$HOME/.ssh"
-          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/labsuser.pem"
-          chmod 600 "$HOME/.ssh/labsuser.pem"
-
-          ssh-keygen -y -f "$HOME/.ssh/labsuser.pem" >/dev/null
-
-      - name: Wait for SSH
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
         run: |
           set -Eeuo pipefail
 
           for attempt in $(seq 1 30); do
-            if ssh \
-              -i "$HOME/.ssh/labsuser.pem" \
-              -o IdentitiesOnly=yes \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o ConnectTimeout=5 \
-              "ec2-user@${PUBLIC_IP}" \
-              "echo SSH disponível"; then
+            STATUS="$(
+              aws ssm describe-instance-information \
+                --region "$AWS_REGION" \
+                --filters \
+                  "Key=InstanceIds,Values=${INSTANCE_ID}" \
+                --query 'InstanceInformationList[0].PingStatus' \
+                --output text
+            )"
+
+            if [ "$STATUS" = "Online" ]; then
+              echo "EC2 Online no Systems Manager."
               exit 0
             fi
 
-            echo "Tentativa ${attempt}/30: aguardando SSH..."
+            echo "Tentativa ${attempt}/30: status SSM '${STATUS:-ausente}'"
             sleep 10
           done
 
-          echo "A EC2 não ficou disponível por SSH."
+          echo "A EC2 não ficou Online no SSM."
+          echo "Verifique o Instance Profile e o amazon-ssm-agent."
           exit 1
 
-      - name: Wait for K3s
+      # ========================================================
+      # VERIFY K3S
+      # ========================================================
+
+      - name: Verify K3s with SSM
+        id: verify-k3s
         env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
         run: |
           set -Eeuo pipefail
 
-          for attempt in $(seq 1 60); do
-            if ssh \
-              -i "$HOME/.ssh/labsuser.pem" \
-              -o IdentitiesOnly=yes \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              "ec2-user@${PUBLIC_IP}" \
-              "sudo timeout 10 k3s kubectl get nodes >/dev/null 2>&1"; then
+          jq -n \
+            '{
+              commands: [
+                "set -Eeuo pipefail",
+                "sudo systemctl is-active k3s",
+                "sudo timeout 20 k3s kubectl get nodes -o wide"
+              ]
+            }' \
+            > /tmp/verify-k3s.json
 
-              ssh \
-                -i "$HOME/.ssh/labsuser.pem" \
-                -o IdentitiesOnly=yes \
-                -o StrictHostKeyChecking=no \
-                -o UserKnownHostsFile=/dev/null \
-                "ec2-user@${PUBLIC_IP}" \
-                "sudo k3s kubectl get nodes -o wide"
+          COMMAND_ID="$(
+            aws ssm send-command \
+              --region "$AWS_REGION" \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --comment "Validar K3s Oficina360" \
+              --parameters file:///tmp/verify-k3s.json \
+              --timeout-seconds 120 \
+              --query 'Command.CommandId' \
+              --output text
+          )"
 
-              exit 0
-            fi
+          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
+          echo "Command ID: $COMMAND_ID"
 
-            echo "Tentativa ${attempt}/60: aguardando K3s..."
-            sleep 10
-          done
-
-          echo "K3s não ficou disponível."
-          exit 1
-
-      - name: Copy Kubernetes Files
-        if: ${{ inputs.action == 'deploy' }}
+      - name: Wait for K3s Verification
         env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+          COMMAND_ID: ${{ steps.verify-k3s.outputs.command_id }}
         run: |
           set -Eeuo pipefail
 
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "rm -rf /tmp/oficina360 && mkdir -p /tmp/oficina360"
+          set +e
 
-          scp \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -r k8s \
-            "ec2-user@${PUBLIC_IP}:/tmp/oficina360/"
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID"
 
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "rm -f /tmp/oficina360/k8s/secret.yaml"
+          WAIT_RESULT=$?
 
-      - name: Create Kubernetes Secret
+          set -e
+
+          STATUS="$(
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'Status' \
+              --output text
+          )"
+
+          echo "Status: $STATUS"
+
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'StandardOutputContent' \
+            --output text
+
+          if [ "$WAIT_RESULT" -ne 0 ] || [ "$STATUS" != "Success" ]; then
+            echo ""
+            echo "=== Erros ==="
+
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StandardErrorContent' \
+              --output text
+
+            exit 1
+          fi
+
+      # ========================================================
+      # PACKAGE MANIFESTS
+      # ========================================================
+
+      - name: Package Kubernetes Manifests
         if: ${{ inputs.action == 'deploy' }}
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           set -Eeuo pipefail
 
-          DB_USERNAME_BASE64="$(printf '%s' "$DB_USERNAME" | base64 -w 0)"
-          DB_PASSWORD_BASE64="$(printf '%s' "$DB_PASSWORD" | base64 -w 0)"
-          JWT_SECRET_BASE64="$(printf '%s' "$JWT_SECRET" | base64 -w 0)"
+          if [ ! -d "k8s" ]; then
+            echo "Diretório k8s não encontrado."
+            exit 1
+          fi
 
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "mkdir -p /tmp/oficina360/secrets && \
-             printf '%s' '$DB_USERNAME_BASE64' | base64 -d > /tmp/oficina360/secrets/DB_USERNAME && \
-             printf '%s' '$DB_PASSWORD_BASE64' | base64 -d > /tmp/oficina360/secrets/DB_PASSWORD && \
-             printf '%s' '$JWT_SECRET_BASE64' | base64 -d > /tmp/oficina360/secrets/JWT_SECRET && \
-             sudo k3s kubectl apply -f /tmp/oficina360/k8s/namespace.yaml && \
-             sudo k3s kubectl create secret generic oficina360-secret \
-               --namespace '${KUBERNETES_NAMESPACE}' \
-               --from-file=DB_USERNAME=/tmp/oficina360/secrets/DB_USERNAME \
-               --from-file=DB_PASSWORD=/tmp/oficina360/secrets/DB_PASSWORD \
-               --from-file=JWT_SECRET=/tmp/oficina360/secrets/JWT_SECRET \
-               --dry-run=client \
-               --output=yaml \
-               | sudo k3s kubectl apply --filename - && \
-             rm -rf /tmp/oficina360/secrets"
+          rm -rf /tmp/oficina360-package
+          mkdir -p /tmp/oficina360-package
 
-      - name: Deploy Kubernetes Resources
+          cp -R k8s /tmp/oficina360-package/k8s
+
+          rm -f \
+            /tmp/oficina360-package/k8s/secret.yaml \
+            /tmp/oficina360-package/k8s/secrets.yaml
+
+          find /tmp/oficina360-package/k8s \
+            -type f \
+            -maxdepth 2 \
+            -print
+
+          tar \
+            -C /tmp/oficina360-package \
+            -czf /tmp/oficina360-k8s.tar.gz \
+            k8s
+
+          base64 \
+            -w 0 \
+            /tmp/oficina360-k8s.tar.gz \
+            > /tmp/oficina360-k8s.base64
+
+          ARCHIVE_SIZE="$(
+            stat -c '%s' /tmp/oficina360-k8s.tar.gz
+          )"
+
+          BASE64_SIZE="$(
+            stat -c '%s' /tmp/oficina360-k8s.base64
+          )"
+
+          echo "Tamanho compactado: ${ARCHIVE_SIZE} bytes"
+          echo "Tamanho Base64: ${BASE64_SIZE} bytes"
+
+          if [ ! -s /tmp/oficina360-k8s.base64 ]; then
+            echo "O pacote Base64 está vazio."
+            exit 1
+          fi
+
+          # Evita tentar transportar arquivos grandes pelo SendCommand.
+          if [ "$BASE64_SIZE" -gt 200000 ]; then
+            echo "O pacote Base64 está muito grande para este fluxo."
+            echo "Mantenha somente YAMLs e pequenos scripts na pasta k8s."
+            exit 1
+          fi
+
+      # ========================================================
+      # DEPLOY
+      # ========================================================
+
+      - name: Send Kubernetes Manifests
         if: ${{ inputs.action == 'deploy' }}
+        id: deploy-command
         env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "chmod +x /tmp/oficina360/k8s/deploy.sh && \
-             KUBECTL='sudo k3s kubectl' \
-             bash /tmp/oficina360/k8s/deploy.sh"
-
-      - name: Update Application Image
-        if: ${{ inputs.action == 'deploy' }}
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
           set -Eeuo pipefail
 
-          IMAGE_URI="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "sudo k3s kubectl set image \
-               deployment/oficina360-api \
-               oficina360-api='${IMAGE_URI}' \
-               --namespace '${KUBERNETES_NAMESPACE}' && \
-             sudo k3s kubectl rollout status \
-               deployment/oficina360-api \
-               --namespace '${KUBERNETES_NAMESPACE}' \
-               --timeout=600s"
-
-          echo "Imagem implantada: $IMAGE_URI"
-
-      - name: Show Kubernetes Status
-        if: ${{ inputs.action == 'deploy' || inputs.action == 'status' }}
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "echo '=== Nodes ===' && \
-             sudo k3s kubectl get nodes -o wide && \
-             echo '' && \
-             echo '=== Pods ===' && \
-             sudo k3s kubectl get pods --namespace '${KUBERNETES_NAMESPACE}' -o wide && \
-             echo '' && \
-             echo '=== Services ===' && \
-             sudo k3s kubectl get services --namespace '${KUBERNETES_NAMESPACE}' && \
-             echo '' && \
-             echo '=== PVCs ===' && \
-             sudo k3s kubectl get pvc --namespace '${KUBERNETES_NAMESPACE}' && \
-             echo '' && \
-             echo '=== HPA ===' && \
-             sudo k3s kubectl get hpa --namespace '${KUBERNETES_NAMESPACE}'"
-
-      - name: Smoke Test
-        if: ${{ inputs.action == 'deploy' }}
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          HEALTH_URL="http://${PUBLIC_IP}:30080/actuator/health/liveness"
-          OPENAPI_URL="http://${PUBLIC_IP}:30080/v3/api-docs"
-
-          for attempt in $(seq 1 30); do
-            if curl \
-              --fail \
-              --silent \
-              --show-error \
-              --connect-timeout 5 \
-              --max-time 15 \
-              "$HEALTH_URL"; then
-
-              echo ""
-              echo "Aplicação respondeu com sucesso."
-              break
-            fi
-
-            if [ "$attempt" -eq 30 ]; then
-              echo "A aplicação não respondeu no prazo esperado."
-              exit 1
-            fi
-
-            echo "Tentativa ${attempt}/30: aguardando aplicação..."
-            sleep 10
-          done
-
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            --connect-timeout 5 \
-            --max-time 30 \
-            "$OPENAPI_URL" \
-            >/dev/null
-
-          echo "OpenAPI disponível."
-          echo "Swagger: http://${PUBLIC_IP}:30080/swagger-ui/index.html"
-
-      - name: Remove Kubernetes Workloads
-        if: ${{ inputs.action == 'remove' }}
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-        run: |
-          set -Eeuo pipefail
-
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "ec2-user@${PUBLIC_IP}" \
-            "sudo k3s kubectl delete namespace \
-               '${KUBERNETES_NAMESPACE}' \
-               --ignore-not-found=true"
-
-          echo "Recursos do namespace ${KUBERNETES_NAMESPACE} removidos."
-
-      - name: Show Diagnostics
-        if: ${{ failure() }}
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-        run: |
-          set +e
-
-          if [ -z "${PUBLIC_IP:-}" ] || [ ! -f "$HOME/.ssh/labsuser.pem" ]; then
-            exit 0
+          if [ -z "$DOCKERHUB_USERNAME" ]; then
+            echo "O Secret DOCKERHUB_USERNAME não foi configurado."
+            exit 1
           fi
 
-          ssh \
-            -i "$HOME/.ssh/labsuser.pem" \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -o ConnectTimeout=10 \
-            "ec2-user@${PUBLIC_IP}" \
-            "sudo systemctl status k3s --no-pager --full || true; \
-             sudo k3s kubectl get pods --all-namespaces -o wide || true; \
-             sudo k3s kubectl get events \
-               --namespace '${KUBERNETES_NAMESPACE}' \
-               --sort-by=.lastTimestamp || true; \
-             sudo k3s kubectl logs \
-               deployment/oficina360-api \
-               --namespace '${KUBERNETES_NAMESPACE}' \
-               --tail=200 || true; \
-             sudo k3s kubectl logs \
-               deployment/postgres \
-               --namespace '${KUBERNETES_NAMESPACE}' \
-               --tail=100 || true"
+          MANIFESTS_BASE64="$(
+            cat /tmp/oficina360-k8s.base64
+          )"
+
+          IMAGE_URI="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          jq -n \
+            --arg package "$MANIFESTS_BASE64" \
+            --arg image "$IMAGE_URI" \
+            --arg namespace "$KUBERNETES_NAMESPACE" \
+            '{
+              commands: [
+                "set -Eeuo pipefail",
+                "rm -rf /tmp/oficina360",
+                "mkdir -p /tmp/oficina360",
+                (
+                  "printf '\''%s'\'' '\''"
+                  + $package
+                  + "'\'' | base64 -d > /tmp/oficina360/k8s.tar.gz"
+                ),
+                "tar -xzf /tmp/oficina360/k8s.tar.gz -C /tmp/oficina360",
+                "rm -f /tmp/oficina360/k8s.tar.gz",
+                "test -d /tmp/oficina360/k8s",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/namespace.yaml",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/configmap.yaml",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/postgres-pvc.yaml",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/postgres-service.yaml",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/postgres-deployment.yaml",
+                (
+                  "sudo k3s kubectl rollout status deployment/postgres"
+                  + " --namespace "
+                  + $namespace
+                  + " --timeout=300s"
+                ),
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/api-deployment.yaml",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/api-service.yaml",
+                (
+                  "sudo k3s kubectl set image"
+                  + " deployment/oficina360-api"
+                  + " oficina360-api="
+                  + $image
+                  + " --namespace "
+                  + $namespace
