@@ -159,3 +159,29 @@ echo "Instalando K3s com TLS SAN..."
 
 curl -sfL https://get.k3s.io \
   | INSTALL_K3S_EXEC="server --tls-san ${PUBLIC_IP}" sh -
+
+
+echo "Configurando SSM Agent..."
+
+if ! systemctl list-unit-files \
+  | grep -q '^amazon-ssm-agent.service'; then
+
+  dnf install -y amazon-ssm-agent
+fi
+
+systemctl enable amazon-ssm-agent
+systemctl restart amazon-ssm-agent
+
+if ! systemctl is-active \
+  --quiet \
+  amazon-ssm-agent; then
+
+  echo "ERRO: amazon-ssm-agent não está ativo."
+
+  systemctl status amazon-ssm-agent \
+    --no-pager \
+    --full || true
+
+  exit 1
+fi
+

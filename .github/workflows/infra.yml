@@ -40,6 +40,7 @@ jobs:
       TF_VAR_internet_gateway_id: ${{ vars.TF_VAR_internet_gateway_id }}
       TF_VAR_ssh_allowed_cidr: ${{ vars.TF_VAR_ssh_allowed_cidr }}
       TF_VAR_ami_id: ${{ vars.TF_VAR_ami_id }}
+      TF_VAR_iam_instance_profile_name: ${{ vars.TF_VAR_iam_instance_profile_name }}
 
       TF_VAR_project_name: "Oficina360"
       TF_VAR_environment: "lab"
@@ -67,6 +68,7 @@ jobs:
             "TF_VAR_internet_gateway_id"
             "TF_VAR_ssh_allowed_cidr"
             "TF_VAR_ami_id"
+          "TF_VAR_iam_instance_profile"
           )
 
           for variable_name in "${required_variables[@]}"; do
