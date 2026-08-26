@@ -68,7 +68,7 @@ jobs:
             "TF_VAR_internet_gateway_id"
             "TF_VAR_ssh_allowed_cidr"
             "TF_VAR_ami_id"
-          "TF_VAR_iam_instance_profile"
+            "TF_VAR_iam_instance_profile_name"
           )
 
           for variable_name in "${required_variables[@]}"; do
