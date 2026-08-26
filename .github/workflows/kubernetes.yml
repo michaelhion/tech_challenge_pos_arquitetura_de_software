@@ -46,16 +46,8 @@ jobs:
         shell: bash
 
     steps:
-      # ========================================================
-      # CHECKOUT
-      # ========================================================
-
       - name: Checkout
         uses: actions/checkout@v4
-
-      # ========================================================
-      # AWS
-      # ========================================================
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.2.3
@@ -68,46 +60,41 @@ jobs:
       - name: Validate AWS Identity
         run: aws sts get-caller-identity
 
-      # ========================================================
-      # LOCATE EC2
-      # ========================================================
-
       - name: Locate EC2 Instance
         id: ec2
         run: |
           set -Eeuo pipefail
 
-          INSTANCE_ID="$(
+          INSTANCE_IDS="$(
             aws ec2 describe-instances \
               --region "$AWS_REGION" \
               --filters \
                 "Name=tag:Name,Values=${EC2_INSTANCE_NAME}" \
-                "Name=instance-state-name,Values=running" \
+                "Name=instance-state-name,Values=pending,running" \
               --query 'Reservations[].Instances[].InstanceId' \
               --output text
           )"
 
-          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
-            echo "Nenhuma EC2 em execução foi encontrada."
-            echo "Tag esperada: Name=${EC2_INSTANCE_NAME}"
+          if [ -z "$INSTANCE_IDS" ] || [ "$INSTANCE_IDS" = "None" ]; then
+            echo "Nenhuma EC2 foi encontrada com a tag Name=${EC2_INSTANCE_NAME}."
             exit 1
           fi
 
-          INSTANCE_COUNT="$(
-            wc -w <<< "$INSTANCE_ID"
-          )"
+          INSTANCE_COUNT="$(wc -w <<< "$INSTANCE_IDS")"
 
           if [ "$INSTANCE_COUNT" -ne 1 ]; then
-            echo "Foram encontradas várias instâncias: $INSTANCE_ID"
+            echo "Foram encontradas várias instâncias: $INSTANCE_IDS"
             exit 1
           fi
+
+          INSTANCE_ID="$INSTANCE_IDS"
+
+          aws ec2 wait instance-running \
+            --region "$AWS_REGION" \
+            --instance-ids "$INSTANCE_ID"
 
           echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
           echo "EC2 localizada: $INSTANCE_ID"
-
-      # ========================================================
-      # VERIFY SSM
-      # ========================================================
 
       - name: Wait for SSM
         env:
@@ -119,8 +106,7 @@ jobs:
             STATUS="$(
               aws ssm describe-instance-information \
                 --region "$AWS_REGION" \
-                --filters \
-                  "Key=InstanceIds,Values=${INSTANCE_ID}" \
+                --filters "Key=InstanceIds,Values=${INSTANCE_ID}" \
                 --query 'InstanceInformationList[0].PingStatus' \
                 --output text
             )"
@@ -135,14 +121,10 @@ jobs:
           done
 
           echo "A EC2 não ficou Online no SSM."
-          echo "Verifique o Instance Profile e o amazon-ssm-agent."
+          echo "Verifique LabInstanceProfile e amazon-ssm-agent."
           exit 1
 
-      # ========================================================
-      # VERIFY K3S
-      # ========================================================
-
-      - name: Verify K3s with SSM
+      - name: Send K3s Verification
         id: verify-k3s
         env:
           INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
@@ -153,8 +135,14 @@ jobs:
             '{
               commands: [
                 "set -Eeuo pipefail",
-                "sudo systemctl is-active k3s",
-                "sudo timeout 20 k3s kubectl get nodes -o wide"
+                "for attempt in $(seq 1 60); do if sudo test -f /var/lib/oficina360-bootstrap-complete && sudo timeout 15 k3s kubectl get nodes >/dev/null 2>&1; then echo K3s disponível; sudo k3s kubectl get nodes -o wide; exit 0; fi; echo Tentativa ${attempt}/60: aguardando bootstrap e K3s; sleep 10; done",
+                "echo ERRO: K3s não ficou disponível",
+                "sudo ls -l /var/lib/oficina360-bootstrap-complete || true",
+                "sudo systemctl status k3s --no-pager --full || true",
+                "sudo ss -lntp | grep :6443 || true",
+                "sudo journalctl --unit k3s --lines 200 --no-pager || true",
+                "sudo tail -n 200 /var/log/user-data.log || true",
+                "exit 1"
               ]
             }' \
             > /tmp/verify-k3s.json
@@ -164,12 +152,17 @@ jobs:
               --region "$AWS_REGION" \
               --instance-ids "$INSTANCE_ID" \
               --document-name "AWS-RunShellScript" \
-              --comment "Validar K3s Oficina360" \
+              --comment "Aguardar K3s Oficina360" \
               --parameters file:///tmp/verify-k3s.json \
-              --timeout-seconds 120 \
+              --timeout-seconds 720 \
               --query 'Command.CommandId' \
               --output text
           )"
+
+          if [ -z "$COMMAND_ID" ] || [ "$COMMAND_ID" = "None" ]; then
+            echo "O SSM não retornou um Command ID."
+            exit 1
+          fi
 
           echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
           echo "Command ID: $COMMAND_ID"
@@ -182,14 +175,11 @@ jobs:
           set -Eeuo pipefail
 
           set +e
-
           aws ssm wait command-executed \
             --region "$AWS_REGION" \
             --command-id "$COMMAND_ID" \
             --instance-id "$INSTANCE_ID"
-
           WAIT_RESULT=$?
-
           set -e
 
           STATUS="$(
@@ -201,7 +191,8 @@ jobs:
               --output text
           )"
 
-          echo "Status: $STATUS"
+          echo "Status final: $STATUS"
+          echo "=== Saída ==="
 
           aws ssm get-command-invocation \
             --region "$AWS_REGION" \
@@ -210,65 +201,102 @@ jobs:
             --query 'StandardOutputContent' \
             --output text
 
+          echo "=== Erros ==="
+
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'StandardErrorContent' \
+            --output text
+
           if [ "$WAIT_RESULT" -ne 0 ] || [ "$STATUS" != "Success" ]; then
-            echo ""
-            echo "=== Erros ==="
-
-            aws ssm get-command-invocation \
-              --region "$AWS_REGION" \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$INSTANCE_ID" \
-              --query 'StandardErrorContent' \
-              --output text
-
             exit 1
           fi
 
-      # ========================================================
-      # PACKAGE MANIFESTS
-      # ========================================================
-
-      - name: Package Kubernetes Manifests
+      - name: Validate Deploy Secrets
         if: ${{ inputs.action == 'deploy' }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           set -Eeuo pipefail
 
-          if [ ! -d "k8s" ]; then
-            echo "Diretório k8s não encontrado."
-            exit 1
-          fi
+          required_secrets=(
+            DOCKERHUB_USERNAME
+            DB_USERNAME
+            DB_PASSWORD
+            JWT_SECRET
+          )
+
+          for secret_name in "${required_secrets[@]}"; do
+            if [ -z "${!secret_name:-}" ]; then
+              echo "Secret não configurado: $secret_name"
+              exit 1
+            fi
+          done
+
+      - name: Package Kubernetes Manifests
+        if: ${{ inputs.action == 'deploy' }}
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          set -Eeuo pipefail
+
+          required_files=(
+            k8s/namespace.yaml
+            k8s/configmap.yaml
+            k8s/postgres-pvc.yaml
+            k8s/postgres-service.yaml
+            k8s/postgres-deployment.yaml
+            k8s/api-deployment.yaml
+            k8s/api-service.yaml
+            k8s/hpa.yaml
+          )
+
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Manifesto obrigatório não encontrado: $file"
+              exit 1
+            fi
+          done
 
           rm -rf /tmp/oficina360-package
-          mkdir -p /tmp/oficina360-package
+          mkdir -p /tmp/oficina360-package/k8s
+          cp "${required_files[@]}" /tmp/oficina360-package/k8s/
 
-          cp -R k8s /tmp/oficina360-package/k8s
+          DB_USERNAME_B64="$(printf '%s' "$DB_USERNAME" | base64 -w 0)"
+          DB_PASSWORD_B64="$(printf '%s' "$DB_PASSWORD" | base64 -w 0)"
+          JWT_SECRET_B64="$(printf '%s' "$JWT_SECRET" | base64 -w 0)"
 
-          rm -f \
-            /tmp/oficina360-package/k8s/secret.yaml \
-            /tmp/oficina360-package/k8s/secrets.yaml
-
-          find /tmp/oficina360-package/k8s \
-            -type f \
-            -maxdepth 2 \
-            -print
+          cat > /tmp/oficina360-package/k8s/secret.generated.yaml <<EOF
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: oficina360-secret
+            namespace: oficina360
+          type: Opaque
+          data:
+            DB_USERNAME: ${DB_USERNAME_B64}
+            DB_PASSWORD: ${DB_PASSWORD_B64}
+            JWT_SECRET: ${JWT_SECRET_B64}
+          EOF
 
           tar \
             -C /tmp/oficina360-package \
             -czf /tmp/oficina360-k8s.tar.gz \
             k8s
 
-          base64 \
-            -w 0 \
+          base64 -w 0 \
             /tmp/oficina360-k8s.tar.gz \
             > /tmp/oficina360-k8s.base64
 
-          ARCHIVE_SIZE="$(
-            stat -c '%s' /tmp/oficina360-k8s.tar.gz
-          )"
-
-          BASE64_SIZE="$(
-            stat -c '%s' /tmp/oficina360-k8s.base64
-          )"
+          ARCHIVE_SIZE="$(stat -c '%s' /tmp/oficina360-k8s.tar.gz)"
+          BASE64_SIZE="$(stat -c '%s' /tmp/oficina360-k8s.base64)"
 
           echo "Tamanho compactado: ${ARCHIVE_SIZE} bytes"
           echo "Tamanho Base64: ${BASE64_SIZE} bytes"
@@ -278,16 +306,11 @@ jobs:
             exit 1
           fi
 
-          # Evita tentar transportar arquivos grandes pelo SendCommand.
-          if [ "$BASE64_SIZE" -gt 200000 ]; then
-            echo "O pacote Base64 está muito grande para este fluxo."
-            echo "Mantenha somente YAMLs e pequenos scripts na pasta k8s."
+          if [ "$BASE64_SIZE" -gt 20000 ]; then
+            echo "O pacote Base64 excede 20 KB."
+            echo "Reduza os manifests ou use outro meio de entrega."
             exit 1
           fi
-
-      # ========================================================
-      # DEPLOY
-      # ========================================================
 
       - name: Send Kubernetes Manifests
         if: ${{ inputs.action == 'deploy' }}
@@ -299,15 +322,7 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          if [ -z "$DOCKERHUB_USERNAME" ]; then
-            echo "O Secret DOCKERHUB_USERNAME não foi configurado."
-            exit 1
-          fi
-
-          MANIFESTS_BASE64="$(
-            cat /tmp/oficina360-k8s.base64
-          )"
-
+          MANIFESTS_BASE64="$(cat /tmp/oficina360-k8s.base64)"
           IMAGE_URI="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
 
           jq -n \
@@ -319,31 +334,192 @@ jobs:
                 "set -Eeuo pipefail",
                 "rm -rf /tmp/oficina360",
                 "mkdir -p /tmp/oficina360",
-                (
-                  "printf '\''%s'\'' '\''"
-                  + $package
-                  + "'\'' | base64 -d > /tmp/oficina360/k8s.tar.gz"
-                ),
+                ("printf %s " + ($package | @sh) + " | base64 -d > /tmp/oficina360/k8s.tar.gz"),
                 "tar -xzf /tmp/oficina360/k8s.tar.gz -C /tmp/oficina360",
                 "rm -f /tmp/oficina360/k8s.tar.gz",
-                "test -d /tmp/oficina360/k8s",
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/namespace.yaml",
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/secret.generated.yaml",
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/configmap.yaml",
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/postgres-pvc.yaml",
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/postgres-service.yaml",
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/postgres-deployment.yaml",
-                (
-                  "sudo k3s kubectl rollout status deployment/postgres"
-                  + " --namespace "
-                  + $namespace
-                  + " --timeout=300s"
-                ),
+                ("sudo k3s kubectl rollout status deployment/postgres --namespace " + $namespace + " --timeout=300s"),
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/api-deployment.yaml",
                 "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/api-service.yaml",
-                (
-                  "sudo k3s kubectl set image"
-                  + " deployment/oficina360-api"
-                  + " oficina360-api="
-                  + $image
-                  + " --namespace "
-                  + $namespace
+                ("sudo k3s kubectl set image deployment/oficina360-api oficina360-api=" + $image + " --namespace " + $namespace),
+                ("sudo k3s kubectl rollout status deployment/oficina360-api --namespace " + $namespace + " --timeout=600s"),
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/hpa.yaml",
+                ("sudo k3s kubectl get pods --namespace " + $namespace + " -o wide"),
+                ("sudo k3s kubectl get services --namespace " + $namespace),
+                ("sudo k3s kubectl get pvc --namespace " + $namespace),
+                ("sudo k3s kubectl get hpa --namespace " + $namespace),
+                "rm -rf /tmp/oficina360"
+              ]
+            }' \
+            > /tmp/deploy-parameters.json
+
+          COMMAND_ID="$(
+            aws ssm send-command \
+              --region "$AWS_REGION" \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --comment "Deploy Kubernetes Oficina360" \
+              --parameters file:///tmp/deploy-parameters.json \
+              --timeout-seconds 1200 \
+              --query 'Command.CommandId' \
+              --output text
+          )"
+
+          if [ -z "$COMMAND_ID" ] || [ "$COMMAND_ID" = "None" ]; then
+            echo "O SSM não retornou um Command ID."
+            exit 1
+          fi
+
+          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
+          echo "Command ID: $COMMAND_ID"
+
+      - name: Wait for Kubernetes Deployment
+        if: ${{ inputs.action == 'deploy' }}
+        env:
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+          COMMAND_ID: ${{ steps.deploy-command.outputs.command_id }}
+        run: |
+          set -Eeuo pipefail
+
+          set +e
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID"
+          WAIT_RESULT=$?
+          set -e
+
+          STATUS="$(
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'Status' \
+              --output text
+          )"
+
+          echo "Status final: $STATUS"
+          echo "=== Saída ==="
+
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'StandardOutputContent' \
+            --output text
+
+          echo "=== Erros ==="
+
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'StandardErrorContent' \
+            --output text
+
+          if [ "$WAIT_RESULT" -ne 0 ] || [ "$STATUS" != "Success" ]; then
+            exit 1
+          fi
+
+      - name: Send Kubernetes Status
+        if: ${{ inputs.action == 'status' }}
+        id: status-command
+        env:
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+        run: |
+          set -Eeuo pipefail
+
+          jq -n \
+            --arg namespace "$KUBERNETES_NAMESPACE" \
+            '{
+              commands: [
+                "sudo k3s kubectl get nodes -o wide",
+                ("sudo k3s kubectl get pods --namespace " + $namespace + " -o wide"),
+                ("sudo k3s kubectl get deployments --namespace " + $namespace),
+                ("sudo k3s kubectl get services --namespace " + $namespace),
+                ("sudo k3s kubectl get endpoints --namespace " + $namespace),
+                ("sudo k3s kubectl get pvc --namespace " + $namespace),
+                ("sudo k3s kubectl get hpa --namespace " + $namespace)
+              ]
+            }' \
+            > /tmp/status-parameters.json
+
+          COMMAND_ID="$(
+            aws ssm send-command \
+              --region "$AWS_REGION" \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --parameters file:///tmp/status-parameters.json \
+              --timeout-seconds 180 \
+              --query 'Command.CommandId' \
+              --output text
+          )"
+
+          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Show Kubernetes Status
+        if: ${{ inputs.action == 'status' }}
+        env:
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+          COMMAND_ID: ${{ steps.status-command.outputs.command_id }}
+        run: |
+          set -Eeuo pipefail
+
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID"
+
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query 'StandardOutputContent' \
+            --output text
+
+      - name: Remove Kubernetes Workloads
+        if: ${{ inputs.action == 'remove' }}
+        env:
+          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+        run: |
+          set -Eeuo pipefail
+
+          jq -n \
+            --arg namespace "$KUBERNETES_NAMESPACE" \
+            '{
+              commands: [
+                ("sudo k3s kubectl delete namespace " + $namespace + " --ignore-not-found=true")
+              ]
+            }' \
+            > /tmp/remove-parameters.json
+
+          COMMAND_ID="$(
+            aws ssm send-command \
+              --region "$AWS_REGION" \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --parameters file:///tmp/remove-parameters.json \
+              --timeout-seconds 300 \
+              --query 'Command.CommandId' \
+              --output text
+          )"
+
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID"
+
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query '{
+              Status:Status,
+              Output:StandardOutputContent,
+              Error:StandardErrorContent
+            }'
