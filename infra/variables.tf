@@ -93,3 +93,14 @@ variable "key_name" {
     error_message = "key_name deve conter o nome de um Key Pair existente."
   }
 }
+
+variable "iam_instance_profile_name" {
+  description = "Nome do Instance Profile usado pela EC2"
+  type        = string
+
+  validation {
+    condition = (
+      length(trimspace(var.iam_instance_profile_name)) > 0
+    )
+
+    error_message = "iam_instance_profile_name deve ser
