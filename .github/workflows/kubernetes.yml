@@ -68,7 +68,6 @@ jobs:
             "$K8S_DIR/deploy.sh"
             "$K8S_DIR/1-namespace.yaml"
             "$K8S_DIR/3-configmap.yaml"
-            "$K8S_DIR/4-metrics-server.yaml"
             "$K8S_DIR/5-postgres-pvc.yaml"
             "$K8S_DIR/6-postgres-service.yaml"
             "$K8S_DIR/7-postgres-deployment.yaml"

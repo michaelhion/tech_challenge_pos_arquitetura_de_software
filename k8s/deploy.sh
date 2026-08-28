@@ -1,4 +1,3 @@
-```bash
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
@@ -334,46 +333,46 @@ apply_configmap() {
 # 7. Metrics Server
 # ==============================================================
 
-deploy_metrics_server() {
-  echo ""
-  echo "[7/12] Instalando Metrics Server..."
-
-  $KUBECTL apply \
-    --filename "$SCRIPT_DIR/4-metrics-server.yaml"
-
-  echo ""
-  echo "Aguardando Metrics Server..."
-
-  $KUBECTL rollout status \
-    deployment/metrics-server \
-    --namespace kube-system \
-    --timeout=300s
-
-  echo ""
-  echo "Verificando API de métricas..."
-
-  for attempt in $(seq 1 18); do
-
-    if $KUBECTL top nodes >/dev/null 2>&1; then
-      echo "Metrics Server está fornecendo métricas."
-
-      echo ""
-      $KUBECTL top nodes
-
-      return
-    fi
-
-    echo "Tentativa ${attempt}/18: aguardando métricas..."
-
-    sleep 10
-  done
-
-  echo ""
-  echo "AVISO: o Metrics Server foi implantado, mas"
-  echo "kubectl top ainda não retornou métricas."
-
-  echo "O HPA poderá mostrar métricas como <unknown> inicialmente."
-}
+#deploy_metrics_server() {
+#  echo ""
+#  echo "[7/12] Instalando Metrics Server..."
+#
+#  $KUBECTL apply \
+#    --filename "$SCRIPT_DIR/4-metrics-server.yaml"
+#
+#  echo ""
+#  echo "Aguardando Metrics Server..."
+#
+#  $KUBECTL rollout status \
+#    deployment/metrics-server \
+#    --namespace kube-system \
+#    --timeout=300s
+#
+#  echo ""
+#  echo "Verificando API de métricas..."
+#
+#  for attempt in $(seq 1 18); do
+#
+#    if $KUBECTL top nodes >/dev/null 2>&1; then
+#      echo "Metrics Server está fornecendo métricas."
+#
+#      echo ""
+#      $KUBECTL top nodes
+#
+#      return
+#    fi
+#
+#    echo "Tentativa ${attempt}/18: aguardando métricas..."
+#
+#    sleep 10
+#  done
+#
+#  echo ""
+#  echo "AVISO: o Metrics Server foi implantado, mas"
+#  echo "kubectl top ainda não retornou métricas."
+#
+#  echo "O HPA poderá mostrar métricas como <unknown> inicialmente."
+#}
 
 
 # ==============================================================
@@ -598,7 +597,7 @@ validate_manifests
 apply_namespace
 configure_secret
 apply_configmap
-deploy_metrics_server
+#deploy_metrics_server
 deploy_postgres
 deploy_api
 deploy_api_service
