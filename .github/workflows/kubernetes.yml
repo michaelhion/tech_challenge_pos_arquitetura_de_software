@@ -76,14 +76,12 @@ jobs:
           )"
 
           if [ -z "$INSTANCE_IDS" ] || [ "$INSTANCE_IDS" = "None" ]; then
-            echo "Nenhuma EC2 foi encontrada com a tag Name=${EC2_INSTANCE_NAME}."
+            echo "Nenhuma EC2 foi encontrada."
             exit 1
           fi
 
-          INSTANCE_COUNT="$(wc -w <<< "$INSTANCE_IDS")"
-
-          if [ "$INSTANCE_COUNT" -ne 1 ]; then
-            echo "Foram encontradas várias instâncias: $INSTANCE_IDS"
+          if [ "$(wc -w <<< "$INSTANCE_IDS")" -ne 1 ]; then
+            echo "Foi encontrada uma quantidade inesperada de instâncias."
             exit 1
           fi
 
@@ -93,8 +91,10 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$INSTANCE_ID"
 
+          echo "::add-mask::$INSTANCE_ID"
           echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
-          echo "EC2 localizada: $INSTANCE_ID"
+
+          echo "EC2 localizada e em execução."
 
       - name: Wait for SSM
         env:
@@ -174,45 +174,91 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          set +e
-          aws ssm wait command-executed \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID"
-          WAIT_RESULT=$?
-          set -e
+          echo "Aguardando a verificação do K3s..."
 
-          STATUS="$(
-            aws ssm get-command-invocation \
-              --region "$AWS_REGION" \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$INSTANCE_ID" \
-              --query 'Status' \
-              --output text
-          )"
+          FINAL_STATUS=""
 
-          echo "Status final: $STATUS"
-          echo "=== Saída ==="
+          for attempt in $(seq 1 80); do
+            STATUS="$(
+              aws ssm get-command-invocation \
+                --region "$AWS_REGION" \
+                --command-id "$COMMAND_ID" \
+                --instance-id "$INSTANCE_ID" \
+                --query 'Status' \
+                --output text \
+                2>/dev/null || true
+            )"
+
+            case "$STATUS" in
+              Success)
+                FINAL_STATUS="$STATUS"
+                echo "Comando SSM concluído com sucesso."
+                break
+                ;;
+
+              Failed|Cancelled|TimedOut|Cancelling)
+                FINAL_STATUS="$STATUS"
+                echo "O comando SSM terminou com status: $STATUS"
+                break
+                ;;
+
+              Pending|InProgress|Delayed|"")
+                echo "Tentativa ${attempt}/80: status ${STATUS:-indisponível}"
+                sleep 10
+                ;;
+
+              *)
+                echo "Tentativa ${attempt}/80: status desconhecido '$STATUS'"
+                sleep 10
+                ;;
+            esac
+          done
+
+          if [ -z "$FINAL_STATUS" ]; then
+            FINAL_STATUS="$(
+              aws ssm get-command-invocation \
+                --region "$AWS_REGION" \
+                --command-id "$COMMAND_ID" \
+                --instance-id "$INSTANCE_ID" \
+                --query 'Status' \
+                --output text \
+                2>/dev/null || echo "TimedOut"
+            )"
+          fi
+
+          echo ""
+          echo "Status final: $FINAL_STATUS"
+
+          echo ""
+          echo "=== Saída do comando ==="
 
           aws ssm get-command-invocation \
             --region "$AWS_REGION" \
             --command-id "$COMMAND_ID" \
             --instance-id "$INSTANCE_ID" \
             --query 'StandardOutputContent' \
-            --output text
+            --output text \
+            || true
 
-          echo "=== Erros ==="
+          echo ""
+          echo "=== Saída de erro ==="
 
           aws ssm get-command-invocation \
             --region "$AWS_REGION" \
             --command-id "$COMMAND_ID" \
             --instance-id "$INSTANCE_ID" \
             --query 'StandardErrorContent' \
-            --output text
+            --output text \
+            || true
 
-          if [ "$WAIT_RESULT" -ne 0 ] || [ "$STATUS" != "Success" ]; then
+          if [ "$FINAL_STATUS" != "Success" ]; then
+            echo ""
+            echo "A inicialização do K3s não foi concluída com sucesso."
             exit 1
           fi
+
+          echo ""
+          echo "K3s validado com sucesso."
 
       - name: Validate Deploy Secrets
         if: ${{ inputs.action == 'deploy' }}
@@ -378,53 +424,99 @@ jobs:
           echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
           echo "Command ID: $COMMAND_ID"
 
-      - name: Wait for Kubernetes Deployment
-        if: ${{ inputs.action == 'deploy' }}
-        env:
-          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
-          COMMAND_ID: ${{ steps.deploy-command.outputs.command_id }}
-        run: |
-          set -Eeuo pipefail
-
-          set +e
-          aws ssm wait command-executed \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID"
-          WAIT_RESULT=$?
-          set -e
-
-          STATUS="$(
-            aws ssm get-command-invocation \
-              --region "$AWS_REGION" \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$INSTANCE_ID" \
-              --query 'Status' \
-              --output text
-          )"
-
-          echo "Status final: $STATUS"
-          echo "=== Saída ==="
-
-          aws ssm get-command-invocation \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID" \
-            --query 'StandardOutputContent' \
-            --output text
-
-          echo "=== Erros ==="
-
-          aws ssm get-command-invocation \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID" \
-            --query 'StandardErrorContent' \
-            --output text
-
-          if [ "$WAIT_RESULT" -ne 0 ] || [ "$STATUS" != "Success" ]; then
-            exit 1
-          fi
+          - name: Wait for Kubernetes Deployment
+              if: ${{ inputs.action == 'deploy' }}
+              env:
+                INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+                COMMAND_ID: ${{ steps.deploy-command.outputs.command_id }}
+              run: |
+                set -Eeuo pipefail
+                
+                echo "Aguardando o deploy Kubernetes..."
+                
+                FINAL_STATUS=""
+                
+                for attempt in $(seq 1 120); do
+                  STATUS="$(
+                    aws ssm get-command-invocation \
+                      --region "$AWS_REGION" \
+                      --command-id "$COMMAND_ID" \
+                      --instance-id "$INSTANCE_ID" \
+                      --query 'Status' \
+                      --output text \
+                      2>/dev/null || true
+                  )"
+                
+                  case "$STATUS" in
+                    Success)
+                      FINAL_STATUS="$STATUS"
+                      echo "Deploy concluído com sucesso."
+                      break
+                      ;;
+                
+                    Failed|Cancelled|TimedOut|Cancelling)
+                      FINAL_STATUS="$STATUS"
+                      echo "Deploy finalizado com status: $STATUS"
+                      break
+                      ;;
+                
+                    Pending|InProgress|Delayed|"")
+                      echo "Tentativa ${attempt}/120: status ${STATUS:-indisponível}"
+                      sleep 10
+                      ;;
+                
+                    *)
+                      echo "Tentativa ${attempt}/120: status desconhecido '$STATUS'"
+                      sleep 10
+                      ;;
+                  esac
+                done
+                
+                if [ -z "$FINAL_STATUS" ]; then
+                  FINAL_STATUS="$(
+                    aws ssm get-command-invocation \
+                      --region "$AWS_REGION" \
+                      --command-id "$COMMAND_ID" \
+                      --instance-id "$INSTANCE_ID" \
+                      --query 'Status' \
+                      --output text \
+                      2>/dev/null || echo "TimedOut"
+                  )"
+                fi
+                
+                echo ""
+                echo "Status final: $FINAL_STATUS"
+                
+                echo ""
+                echo "=== Saída do deploy ==="
+                
+                aws ssm get-command-invocation \
+                  --region "$AWS_REGION" \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$INSTANCE_ID" \
+                  --query 'StandardOutputContent' \
+                  --output text \
+                  || true
+                
+                echo ""
+                echo "=== Erros do deploy ==="
+                
+                aws ssm get-command-invocation \
+                  --region "$AWS_REGION" \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$INSTANCE_ID" \
+                  --query 'StandardErrorContent' \
+                  --output text \
+                  || true
+                
+                if [ "$FINAL_STATUS" != "Success" ]; then
+                  echo ""
+                  echo "O deploy Kubernetes falhou."
+                  exit 1
+                fi
+                
+                echo ""
+                echo "Deploy Kubernetes validado com sucesso."
 
       - name: Send Kubernetes Status
         if: ${{ inputs.action == 'status' }}
