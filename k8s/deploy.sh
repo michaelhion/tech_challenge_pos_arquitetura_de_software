@@ -19,7 +19,6 @@ KUBECTL="${KUBECTL:-sudo k3s kubectl}"
 MANIFESTS=(
   "1-namespace.yaml"
   "3-configmap.yaml"
-  "4-metrics-server.yaml"
   "5-postgres-pvc.yaml"
   "6-postgres-service.yaml"
   "7-postgres-deployment.yaml"
@@ -327,53 +326,6 @@ apply_configmap() {
   $KUBECTL apply \
     --filename "$SCRIPT_DIR/3-configmap.yaml"
 }
-
-
-# ==============================================================
-# 7. Metrics Server
-# ==============================================================
-
-#deploy_metrics_server() {
-#  echo ""
-#  echo "[7/12] Instalando Metrics Server..."
-#
-#  $KUBECTL apply \
-#    --filename "$SCRIPT_DIR/4-metrics-server.yaml"
-#
-#  echo ""
-#  echo "Aguardando Metrics Server..."
-#
-#  $KUBECTL rollout status \
-#    deployment/metrics-server \
-#    --namespace kube-system \
-#    --timeout=300s
-#
-#  echo ""
-#  echo "Verificando API de métricas..."
-#
-#  for attempt in $(seq 1 18); do
-#
-#    if $KUBECTL top nodes >/dev/null 2>&1; then
-#      echo "Metrics Server está fornecendo métricas."
-#
-#      echo ""
-#      $KUBECTL top nodes
-#
-#      return
-#    fi
-#
-#    echo "Tentativa ${attempt}/18: aguardando métricas..."
-#
-#    sleep 10
-#  done
-#
-#  echo ""
-#  echo "AVISO: o Metrics Server foi implantado, mas"
-#  echo "kubectl top ainda não retornou métricas."
-#
-#  echo "O HPA poderá mostrar métricas como <unknown> inicialmente."
-#}
-
 
 # ==============================================================
 # 8. PostgreSQL
