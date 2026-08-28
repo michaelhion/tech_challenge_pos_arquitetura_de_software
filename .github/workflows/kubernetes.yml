@@ -1,236 +1,481 @@
 ---
-name: Kubernetes Manifests Test
+            name: Kubernetes Manifests Test
 
-on:
-  workflow_dispatch:
+            on:
+              workflow_dispatch:
 
-permissions:
-  contents: read
+            permissions:
+              contents: read
 
-concurrency:
-  group: oficina360-kubernetes-test
-  cancel-in-progress: false
+            concurrency:
+              group: oficina360-kubernetes-test
+              cancel-in-progress: false
 
-env:
-  AWS_REGION: us-east-1
-  EC2_INSTANCE_NAME: Oficina360-k3s
-  KUBERNETES_NAMESPACE: oficina360
+            env:
+              AWS_REGION: us-east-1
+              EC2_INSTANCE_NAME: Oficina360-k3s
+              KUBERNETES_NAMESPACE: oficina360
 
-jobs:
-  deploy:
-    name: Apply Kubernetes Manifests
-    runs-on: ubuntu-latest
+            jobs:
+              deploy:
+                name: Apply Kubernetes Manifests
+                runs-on: ubuntu-latest
 
-    environment:
-      name: lab
+                environment:
+                  name: lab
 
-    defaults:
-      run:
-        shell: bash
+                defaults:
+                  run:
+                    shell: bash
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+                steps:
+                  - name: Checkout
+                    uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6.2.3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
+                  - name: Configure AWS Credentials
+                    uses: aws-actions/configure-aws-credentials@v6.2.3
+                    with:
+                      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                      aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+                      aws-region: ${{ env.AWS_REGION }}
 
-      - name: Validate AWS Credentials
-        run: |
-          set -Eeuo pipefail
+                  - name: Validate AWS Credentials
+                    run: |
+                      set -Eeuo pipefail
+                      
+                      aws sts get-caller-identity >/dev/null
+                      
+                      echo "Credenciais AWS validadas."
 
-          aws sts get-caller-identity >/dev/null
+                  - name: Locate EC2 Instance
+                    id: ec2
+                    run: |
+                      set -Eeuo pipefail
+                      
+                      INSTANCE_IDS="$(
+                        aws ec2 describe-instances \
+                          --region "$AWS_REGION" \
+                          --filters \
+                            "Name=tag:Name,Values=${EC2_INSTANCE_NAME}" \
+                            "Name=instance-state-name,Values=pending,running" \
+                          --query 'Reservations[].Instances[].InstanceId' \
+                          --output text
+                      )"
+                      
+                      if [ -z "$INSTANCE_IDS" ] ||
+                         [ "$INSTANCE_IDS" = "None" ]; then
+                      
+                        echo "Nenhuma EC2 do projeto foi encontrada."
+                        exit 1
+                      fi
+                      
+                      INSTANCE_COUNT="$(
+                        wc -w <<< "$INSTANCE_IDS"
+                      )"
+                      
+                      if [ "$INSTANCE_COUNT" -ne 1 ]; then
+                        echo "Foi encontrada uma quantidade inesperada de instâncias."
+                        exit 1
+                      fi
+                      
+                      INSTANCE_ID="$INSTANCE_IDS"
+                      
+                      echo "::add-mask::$INSTANCE_ID"
+                      
+                      aws ec2 wait instance-running \
+                        --region "$AWS_REGION" \
+                        --instance-ids "$INSTANCE_ID"
+                      
+                      echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
+                      
+                      echo "EC2 localizada e em execução."
 
-          echo "Credenciais AWS validadas."
+                  - name: Wait for SSM
+                    env:
+                      INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+                    run: |
+                      set -Eeuo pipefail
+                      
+                      for attempt in $(seq 1 30); do
+                        STATUS="$(
+                          aws ssm describe-instance-information \
+                            --region "$AWS_REGION" \
+                            --filters \
+                              "Key=InstanceIds,Values=${INSTANCE_ID}" \
+                            --query 'InstanceInformationList[0].PingStatus' \
+                            --output text \
+                            2>/dev/null || true
+                        )"
+                      
+                        if [ "$STATUS" = "Online" ]; then
+                          echo "EC2 disponível no Systems Manager."
+                          exit 0
+                        fi
+                      
+                        echo "Tentativa ${attempt}/30: aguardando Systems Manager..."
+                        sleep 10
+                      done
+                      
+                      echo "A EC2 não ficou disponível no Systems Manager."
+                      echo "Verifique o LabInstanceProfile e o amazon-ssm-agent."
+                      exit 1
 
-      - name: Locate EC2 Instance
-        id: ec2
-        run: |
-          set -Eeuo pipefail
+                  - name: Validate Kubernetes Files
+                    run: |
+                      set -Eeuo pipefail
+                      
+                      required_files=(
+                        "k8s/1-namespace.yaml"
+                        "k8s/3-configmap.yaml"
+                      )
+                      
+                      for file in "${required_files[@]}"; do
+                        if [ ! -f "$file" ]; then
+                          echo "Manifesto obrigatório não encontrado: $file"
+                          exit 1
+                        fi
+                      
+                        echo "Manifesto encontrado: $file"
+                      done
+                      
+                      if ! grep -Eq \
+                        '^[[:space:]]*kind:[[:space:]]*Namespace[[:space:]]*$' \
+                        k8s/1-namespace.yaml; then
+                      
+                        echo "O arquivo 1-namespace.yaml não declara um Namespace."
+                        exit 1
+                      fi
+                      
+                      if ! grep -Eq \
+                        '^[[:space:]]*name:[[:space:]]*oficina360[[:space:]]*$' \
+                        k8s/1-namespace.yaml; then
+                      
+                        echo "O Namespace oficina360 não foi encontrado no manifesto."
+                        exit 1
+                      fi
+                      
+                      echo "Manifestos mínimos validados."
 
-          INSTANCE_IDS="$(
-            aws ec2 describe-instances \
-              --region "$AWS_REGION" \
-              --filters \
-                "Name=tag:Name,Values=${EC2_INSTANCE_NAME}" \
-                "Name=instance-state-name,Values=running" \
-              --query 'Reservations[].Instances[].InstanceId' \
-              --output text
-          )"
+                  - name: Package Kubernetes Manifests
+                    run: |
+                      set -Eeuo pipefail
+                      
+                      required_files=(
+                        "k8s/1-namespace.yaml"
+                        "k8s/3-configmap.yaml"
+                      )
+                      
+                      rm -rf /tmp/oficina360-package
+                      
+                      rm -f \
+                        /tmp/oficina360-k8s.tar.gz \
+                        /tmp/oficina360-k8s.base64 \
+                        /tmp/ssm-parameters.json
+                      
+                      mkdir -p /tmp/oficina360-package/k8s
+                      
+                      cp \
+                        "${required_files[@]}" \
+                        /tmp/oficina360-package/k8s/
+                      
+                      echo "Arquivos selecionados para o teste:"
+                      
+                      find /tmp/oficina360-package/k8s \
+                        -maxdepth 1 \
+                        -type f \
+                        -name '*.yaml' \
+                        -printf '%f\n* \
+                        | sort
+                      
+                      t*r \
+                        -C /tmp/oficina360*package \
+                        -czf /tmp/of*cina360-k8s.tar.gz \
+                        k*s
+                      
+                      base64 \
+                        *w 0 \
+                        /tmp/oficina360-*8s.tar.gz \
+                        > /tmp/ofi*ina360-k8s.base64
+                      
+                      ARCHI*E_SIZE="$(
+                        stat -c '%s* /tmp/oficina360-k8s.tar.gz
+                  *   )"
+                  
+                  BASE64_SIZE="$(
+              *          stat -c '%s' /tmp/oficin*360-k8s.base64
+              )"
+              
+              *    if [ ! -s /tmp/oficina360-k8s.base64 ]; then
+              echo "O *acote Base64 está vazio."
+              *   exit 1
+              fi
 
-          if [ -z "$INSTANCE_IDS" ] ||
-             [ "$INSTANCE_IDS" = "None" ]; then
+              *f [ "$BASE64_SIZE" -gt 20000 ]; th*n
+              echo "O pacote ficou*maior que o limite definido."
+              *       echo "Tamanho atual: ${BASE*4_SIZE} bytes."
+              exit 1*          fi
+              
+              echo "Paco*e criado com sucesso."
+              e*ho "Quantidade de manifests: ${#re*uired_files[@]}"
+              echo "T*manho compactado: ${ARCHIVE_SIZE} *ytes."
+              echo "Tamanho par* transporte: ${BASE64_SIZE} bytes.*
 
-            echo "Nenhuma EC2 em execução foi encontrada."
-            exit 1
-          fi
+              - name: Send Manifests wit* SSM
+                id: ssm
+                env:
+  *         INSTANCE_ID: ${{ steps.ec*.outputs.instance_id }}
+              ru*: |
+                set -Eeuo pipefail
 
-          INSTANCE_COUNT="$(
-            wc -w <<< "$INSTANCE_IDS"
-          )"
+  *         if [ ! -s /tmp/oficina360-k8s.base64 ]; then
+  ech* "O pacote de manifests não foi en*ontrado."
+  exit 1
+  *    fi
+  
+  MANIFESTS_BASE64*"$(
+  cat /tmp/oficina36*-k8s.base64
+  )"
+  
+  * echo "::add-mask::$MANIFESTS_BASE*4"
+  
+  python3 - <<'PY'
+  *      import json
+  from p*thlib import Path
+  
+  packa*e_file = Path("/tmp/oficina360-k8s*base64")
+  output_file = P*th("/tmp/ssm-parameters.json")
 
-          if [ "$INSTANCE_COUNT" -ne 1 ]; then
-            echo "Foi encontrada uma quantidade inesperada de instâncias."
-            exit 1
-          fi
+  *       package = package_file.read*text(
+  encoding="utf-*"
+  ).strip()
 
-          INSTANCE_ID="$INSTANCE_IDS"
+            i* not package:
+              raise *ystemExit(
+              "O pa*ote Base64 está vazio."
+  *   )
+  
+  commands = [
+  "set -Eeuo pipefail",
 
-          echo "::add-mask::$INSTANCE_ID"
-          echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
+  "rm -rf /tmp/oficina360",
 
-          echo "EC2 localizada."
+  "mkdir -p /tmp/oficina360",
+  
+  (
+  "printf '%s' '"
+  + package
+  + "' | base64 -d "
+  "> /tmp/oficina360/k8s.tar.gz"
+  ),
+  
+  (
+  *                "chmod 600 "
+  *            "/tmp/oficina360/k8s.t*r.gz"
+  ),
+  
+  *   (
+  "tar -xzf "*                  "/tmp/oficina360*k8s.tar.gz "
+  "-C*/tmp/oficina360"
+  ),
+  *              (
+  *rm -f "
+  "/tmp/of*cina360/k8s.tar.gz"
+  *,
 
-      - name: Wait for SSM
-        env:
-          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
-        run: |
-          set -Eeuo pipefail
+  "echo 'Aguardando*K3s...'",
+  
+  (
+  *          "for attempt in $(seq 1 *0); do "
+  "if sud* timeout 15 "
+  "k*s kubectl get nodes "
+  *     ">/dev/null 2>&1; then "
+  *             "echo 'K3s disponível*; "
+  "break; "
+  *               "fi; "
+  *     "if [ \"$attempt\" -eq 60 ]; *hen "
+  "echo 'K3s*indisponível'; "
+  *"exit 1; "
+  "fi; *
+  "sleep 10; "
+  *               "done"
+  * ),
 
-          for attempt in $(seq 1 30); do
-            STATUS="$(
-              aws ssm describe-instance-information \
-                --region "$AWS_REGION" \
-                --filters \
-                  "Key=InstanceIds,Values=${INSTANCE_ID}" \
-                --query 'InstanceInformationList[0].PingStatus' \
-                --output text \
-                2>/dev/null || true
-            )"
+  "echo 'Criando *amespace...'",
+  
+  (
+  *               "sudo k3s kubectl a*ply "
+  "--filenam* "
+  "/tmp/oficina*60/k8s/"
+  "1-name*pace.yaml"
+  ),
+  
+  *        (
+  "sudo *3s kubectl get namespace "
+  *          "oficina360"
+  *  ),
 
-            if [ "$STATUS" = "Online" ]; then
-              echo "EC2 disponível no Systems Manager."
-              exit 0
-            fi
+  "echo 'Validan*o ConfigMap...'",
+  
+  (*                  "sudo k3s kubect* apply "
+  "--dry-*un=server "
+  "--f*lename "
+  "/tmp/o*icina360/k8s/"
+  "*-configmap.yaml"
+  ),
+  *              "echo 'Aplicando Con*igMap...'",
+  
+  (
+  *            "sudo k3s kubectl appl* "
+  "--filename "*                  "/tmp/oficina360*k8s/"
+  "3-configm*p.yaml"
+  ),
+  
+  *     "echo 'Consultando ConfigMaps*..'",
+  
+  (
+  *      "sudo k3s kubectl get config*ap "
+  "--namespac* oficina360"
+  ),
+  
+  *          "rm -rf /tmp/oficina360"*
+  
+  (
+  * "echo "
+  "'Teste*mínimo concluído com sucesso'"
+  *          ),
+]
 
-            echo "Tentativa ${attempt}/30: aguardando SSM..."
-            sleep 10
-          done
+  * output_file.write_text(
+  *    json.dumps(
+  *"commands": commands},
+  *      ensure_ascii=False,
+  *     ),
+  encoding="ut*-8",
+  )
+  PY
+  
+  *      if [ ! -s /tmp/ssm-parameters.json ]; then
+  echo "Nã* foi possível gerar os parâmetros *o SSM."
+  exit 1
+  *  fi
+  
+  COMMAND_ID="$(
+  *        aws ssm send-command \
+  *          --region "$AWS_REGION" \*              --instance-ids "$INS*ANCE_ID" \
+  --documen*-name "AWS-RunShellScript" \
+  *        --comment "Teste mínimo Ku*ernetes Oficina360" \
+  --parameters file:///tmp/ssm-parameters.json \
+  --timeout-seconds 900 \
+  --query 'Command.CommandId' \
+  --output text
+  )"
+  
+  if [ -z "$COMMAND_ID" ] ||
+  [ "$COMMAND_ID" = "None" ]; then
+  
+  echo "O Systems Manager não retornou um Command ID."
+  exit 1
+  fi
+  
+  echo "::add-mask::$COMMAND_ID"
+  echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
+  
+  rm -f \
+  /tmp/ssm-parameters.json \
+  /tmp/oficina360-k8s.base64 \
+  /tmp/oficina360-k8s.tar.gz
+  
+  rm -rf /tmp/oficina360-package
+  
+  echo "Manifestos enviados para execução."
 
-          echo "A EC2 não ficou disponível no Systems Manager."
-          exit 1
-
-      - name: Validate Kubernetes Files
-        run: |
-          set -Eeuo pipefail
-
-          required_files=(
-            "k8s/1-namespace.yaml"
-            "k8s/3-configmap.yaml"
-          )
-
-          for file in "${required_files[@]}"; do
-            if [ ! -f "$file" ]; then
-              echo "Manifesto obrigatório não encontrado: $file"
-              exit 1
-            fi
-
-            echo "Manifesto encontrado: $file"
-          done
-
-      - name: Package Kubernetes Manifests
-        run: |
-          set -Eeuo pipefail
-
-          required_files=(
-            "k8s/1-namespace.yaml"
-            "k8s/3-configmap.yaml"
-          )
-
-          rm -rf /tmp/oficina360-package
-
-          mkdir -p \
-            /tmp/oficina360-package/k8s
-
-          cp \
-            "${required_files[@]}" \
-            /tmp/oficina360-package/k8s/
-
-          echo "=== Arquivos selecionados ==="
-
-          find /tmp/oficina360-package/k8s \
-            -maxdepth 1 \
-            -type f \
-            -name '*.yaml' \
-            -printf '%f\n' \
-            | sort
-
-          tar \
-            -C /tmp/oficina360-package \
-            -czf /tmp/oficina360-k8s.tar.gz \
-            k8s
-
-          base64 \
-            -w 0 \
-            /tmp/oficina360-k8s.tar.gz \
-            > /tmp/oficina360-k8s.base64
-
-          BASE64_SIZE="$(
-            stat -c '%s' /tmp/oficina360-k8s.base64
-          )"
-
-          if [ ! -s /tmp/oficina360-k8s.base64 ]; then
-            echo "O pacote Base64 está vazio."
-            exit 1
-          fi
-
-          if [ "$BASE64_SIZE" -gt 20000 ]; then
-            echo "O pacote ficou maior que 20 KB."
-            echo "Tamanho atual: ${BASE64_SIZE} bytes."
-            exit 1
-          fi
-
-          echo "Pacote criado com sucesso."
-          echo "Manifestos incluídos: ${#required_files[@]}"
-          echo "Tamanho para envio: ${BASE64_SIZE} bytes."
-
-      - name: Send Manifests with SSM
-        id: ssm
-        env:
-          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
-        run: |
-          set -Eeuo pipefail
-
-          MANIFESTS_BASE64="$(
-            cat /tmp/oficina360-k8s.base64
-          )"
-
-          echo "::add-mask::$MANIFESTS_BASE64"
-
-          jq -n \
-            --arg package "$MANIFESTS_BASE64" \
-            --arg namespace "$KUBERNETES_NAMESPACE" \
-            '{
-              commands: [
-                "set -Eeuo pipefail",
-
-                "rm -rf /tmp/oficina360",
-                "mkdir -p /tmp/oficina360",
-
-                (
-                  "printf %s "
-                  + ($package | @sh)
-                  + " | base64 -d > /tmp/oficina360/k8s.tar.gz"
-                ),
-
-                "chmod 600 /tmp/oficina360/k8s.tar.gz",
-
-                "tar -xzf /tmp/oficina360/k8s.tar.gz -C /tmp/oficina360",
-
-                "rm -f /tmp/oficina360/k8s.tar.gz",
-
-                "echo === Aguardando K3s ===",
-
-                "for attempt in $(seq 1 60); do if sudo timeout 15 k3s kubectl get nodes >/dev/null 2>&1; then echo K3s disponível; break; fi; if [ $attempt -eq 60 ]; then echo K3s indisponível; exit 1; fi; sleep 10; done",
-
-                "echo === Criando namespace ===",
-
-                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/1-namespace.yaml",
-
-                (
-                  "sudo k3s
+            - name: Wait for Manifest Execution
+              env:
+                INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
+                COMMAND_ID: ${{ steps.ssm.outputs.command_id }}
+              run: |
+                set -Eeuo pipefail
+                
+                FINAL_STATUS=""
+                
+                for attempt in $(seq 1 100); do
+                  STATUS="$(
+                    aws ssm get-command-invocation \
+                      --region "$AWS_REGION" \
+                      --command-id "$COMMAND_ID" \
+                      --instance-id "$INSTANCE_ID" \
+                      --query 'Status' \
+                      --output text \
+                      2>/dev/null || true
+                  )"
+                
+                  case "$STATUS" in
+                    Success)
+                      FINAL_STATUS="$STATUS"
+                      echo "Execução concluída com sucesso."
+                      break
+                      ;;
+                
+                    Failed|Cancelled|TimedOut|Cancelling)
+                      FINAL_STATUS="$STATUS"
+                      echo "A execução terminou com falha."
+                      break
+                      ;;
+                
+                    Pending|InProgress|Delayed|"")
+                      echo "Tentativa ${attempt}/100: execução em andamento..."
+                      sleep 10
+                      ;;
+                
+                    *)
+                      echo "Tentativa ${attempt}/100: aguardando resultado..."
+                      sleep 10
+                      ;;
+                  esac
+                done
+                
+                if [ -z "$FINAL_STATUS" ]; then
+                  FINAL_STATUS="TimedOut"
+                fi
+                
+                echo "Status final: $FINAL_STATUS"
+                
+                echo ""
+                echo "=== Saída sanitizada ==="
+                
+                aws ssm get-command-invocation \
+                  --region "$AWS_REGION" \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$INSTANCE_ID" \
+                  --query 'StandardOutputContent' \
+                  --output text \
+                  2>/dev/null \
+                  | sed -E \
+                      -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/[EMAIL_REMOVIDO]/g' \
+                      -e 's/[0-9]{12}/[CONTA_AWS_REMOVIDA]/g' \
+                      -e 's/i-[0-9a-f]{8,17}/[INSTANCE_ID_REMOVIDO]/g' \
+                  || true
+                
+                if [ "$FINAL_STATUS" != "Success" ]; then
+                  echo ""
+                  echo "=== Erros sanitizados ==="
+                
+                  aws ssm get-command-invocation \
+                    --region "$AWS_REGION" \
+                    --command-id "$COMMAND_ID" \
+                    --instance-id "$INSTANCE_ID" \
+                    --query 'StandardErrorContent' \
+                    --output text \
+                    2>/dev/null \
+                    | sed -E \
+                        -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/[EMAIL_REMOVIDO]/g' \
+                        -e 's/[0-9]{12}/[CONTA_AWS_REMOVIDA]/g' \
+                        -e 's/i-[0-9a-f]{8,17}/[INSTANCE_ID_REMOVIDO]/g' \
+                    || true
+                
+                  exit 1
+                fi
+                
+                echo ""
+                echo "Teste mínimo do Kubernetes finalizado."
