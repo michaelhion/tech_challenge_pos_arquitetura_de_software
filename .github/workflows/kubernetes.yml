@@ -119,60 +119,46 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          if [ ! -d "k8s" ]; then
-            echo "O diretório k8s não foi encontrado."
-            exit 1
-          fi
+          required_files=(
+            "k8s/1-namespace.yaml"
+            "k8s/3-configmap.yaml"
+          )
 
-          MANIFEST_COUNT="$(
-            find k8s \
-              -maxdepth 1 \
-              -type f \
-              -name '*.yaml' \
-              | wc -l
-          )"
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Manifesto obrigatório não encontrado: $file"
+              exit 1
+            fi
 
-          if [ "$MANIFEST_COUNT" -eq 0 ]; then
-            echo "Nenhum manifesto YAML foi encontrado."
-            exit 1
-          fi
-
-          echo "Manifestos encontrados: $MANIFEST_COUNT"
-
-          find k8s \
-            -maxdepth 1 \
-            -type f \
-            -name '*.yaml' \
-            -printf '%f\n' \
-            | sort
+            echo "Manifesto encontrado: $file"
+          done
 
       - name: Package Kubernetes Manifests
         run: |
           set -Eeuo pipefail
 
-          rm -rf /tmp/oficina360-package
-          mkdir -p /tmp/oficina360-package/k8s
+          required_files=(
+            "k8s/1-namespace.yaml"
+            "k8s/3-configmap.yaml"
+          )
 
-          find k8s \
+          rm -rf /tmp/oficina360-package
+
+          mkdir -p \
+            /tmp/oficina360-package/k8s
+
+          cp \
+            "${required_files[@]}" \
+            /tmp/oficina360-package/k8s/
+
+          echo "=== Arquivos selecionados ==="
+
+          find /tmp/oficina360-package/k8s \
             -maxdepth 1 \
             -type f \
             -name '*.yaml' \
-            ! -name 'secret.yaml' \
-            ! -name 'secrets.yaml' \
-            -exec cp {} /tmp/oficina360-package/k8s/ \;
-
-          FILE_COUNT="$(
-            find /tmp/oficina360-package/k8s \
-              -maxdepth 1 \
-              -type f \
-              -name '*.yaml' \
-              | wc -l
-          )"
-
-          if [ "$FILE_COUNT" -eq 0 ]; then
-            echo "Nenhum manifesto foi selecionado para envio."
-            exit 1
-          fi
+            -printf '%f\n' \
+            | sort
 
           tar \
             -C /tmp/oficina360-package \
@@ -200,7 +186,7 @@ jobs:
           fi
 
           echo "Pacote criado com sucesso."
-          echo "Arquivos incluídos: $FILE_COUNT"
+          echo "Manifestos incluídos: ${#required_files[@]}"
           echo "Tamanho para envio: ${BASE64_SIZE} bytes."
 
       - name: Send Manifests with SSM
@@ -222,158 +208,29 @@ jobs:
             '{
               commands: [
                 "set -Eeuo pipefail",
+
                 "rm -rf /tmp/oficina360",
                 "mkdir -p /tmp/oficina360",
+
                 (
                   "printf %s "
                   + ($package | @sh)
                   + " | base64 -d > /tmp/oficina360/k8s.tar.gz"
                 ),
+
+                "chmod 600 /tmp/oficina360/k8s.tar.gz",
+
                 "tar -xzf /tmp/oficina360/k8s.tar.gz -C /tmp/oficina360",
+
                 "rm -f /tmp/oficina360/k8s.tar.gz",
-                "echo === Arquivos recebidos ===",
-                "find /tmp/oficina360/k8s -maxdepth 1 -type f -name *.yaml -printf %f\\\\n | sort",
+
                 "echo === Aguardando K3s ===",
+
                 "for attempt in $(seq 1 60); do if sudo timeout 15 k3s kubectl get nodes >/dev/null 2>&1; then echo K3s disponível; break; fi; if [ $attempt -eq 60 ]; then echo K3s indisponível; exit 1; fi; sleep 10; done",
-                "echo === Validando manifests ===",
-                "sudo k3s kubectl apply --dry-run=server --filename /tmp/oficina360/k8s",
-                "echo === Aplicando manifests ===",
-                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s",
-                "echo === Recursos criados ===",
+
+                "echo === Criando namespace ===",
+
+                "sudo k3s kubectl apply --filename /tmp/oficina360/k8s/1-namespace.yaml",
+
                 (
-                  "sudo k3s kubectl get all --namespace "
-                  + $namespace
-                ),
-                (
-                  "sudo k3s kubectl get pvc --namespace "
-                  + $namespace
-                  + " || true"
-                ),
-                (
-                  "sudo k3s kubectl get hpa --namespace "
-                  + $namespace
-                  + " || true"
-                ),
-                "rm -rf /tmp/oficina360",
-                "echo Aplicação dos manifests concluída"
-              ]
-            }' \
-            > /tmp/ssm-parameters.json
-
-          COMMAND_ID="$(
-            aws ssm send-command \
-              --region "$AWS_REGION" \
-              --instance-ids "$INSTANCE_ID" \
-              --document-name "AWS-RunShellScript" \
-              --comment "Teste de manifests Kubernetes" \
-              --parameters file:///tmp/ssm-parameters.json \
-              --timeout-seconds 900 \
-              --query 'Command.CommandId' \
-              --output text
-          )"
-
-          rm -f \
-            /tmp/ssm-parameters.json \
-            /tmp/oficina360-k8s.base64 \
-            /tmp/oficina360-k8s.tar.gz
-
-          rm -rf /tmp/oficina360-package
-
-          if [ -z "$COMMAND_ID" ] ||
-             [ "$COMMAND_ID" = "None" ]; then
-
-            echo "O SSM não retornou um Command ID."
-            exit 1
-          fi
-
-          echo "::add-mask::$COMMAND_ID"
-          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
-
-          echo "Manifestos enviados para a EC2."
-
-      - name: Wait for Manifest Execution
-        env:
-          INSTANCE_ID: ${{ steps.ec2.outputs.instance_id }}
-          COMMAND_ID: ${{ steps.ssm.outputs.command_id }}
-        run: |
-          set -Eeuo pipefail
-
-          FINAL_STATUS=""
-
-          for attempt in $(seq 1 100); do
-            STATUS="$(
-              aws ssm get-command-invocation \
-                --region "$AWS_REGION" \
-                --command-id "$COMMAND_ID" \
-                --instance-id "$INSTANCE_ID" \
-                --query 'Status' \
-                --output text \
-                2>/dev/null || true
-            )"
-
-            case "$STATUS" in
-              Success)
-                FINAL_STATUS="$STATUS"
-                echo "Comando concluído com sucesso."
-                break
-                ;;
-
-              Failed|Cancelled|TimedOut|Cancelling)
-                FINAL_STATUS="$STATUS"
-                echo "O comando terminou com falha."
-                break
-                ;;
-
-              Pending|InProgress|Delayed|"")
-                echo "Tentativa ${attempt}/100: execução em andamento..."
-                sleep 10
-                ;;
-
-              *)
-                echo "Tentativa ${attempt}/100: aguardando resultado..."
-                sleep 10
-                ;;
-            esac
-          done
-
-          if [ -z "$FINAL_STATUS" ]; then
-            FINAL_STATUS="TimedOut"
-          fi
-
-          echo "Status final: $FINAL_STATUS"
-
-          echo ""
-          echo "=== Saída sanitizada ==="
-
-          aws ssm get-command-invocation \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID" \
-            --query 'StandardOutputContent' \
-            --output text \
-            2>/dev/null \
-            | sed -E \
-                -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/[EMAIL_REMOVIDO]/g' \
-                -e 's/[0-9]{12}/[CONTA_AWS_REMOVIDA]/g' \
-                -e 's/i-[0-9a-f]{8,17}/[INSTANCE_ID_REMOVIDO]/g' \
-            || true
-
-          if [ "$FINAL_STATUS" != "Success" ]; then
-            echo ""
-            echo "=== Erros sanitizados ==="
-
-            aws ssm get-command-invocation \
-              --region "$AWS_REGION" \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$INSTANCE_ID" \
-              --query 'StandardErrorContent' \
-              --output text \
-              2>/dev/null \
-              | sed -E \
-                  -e 's/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}/[EMAIL_REMOVIDO]/g' \
-                  -e 's/[0-9]{12}/[CONTA_AWS_REMOVIDA]/g' \
-                  -e 's/i-[0-9a-f]{8,17}/[INSTANCE_ID_REMOVIDO]/g' \
-              || true
-
-            exit 1
-          fi
+                  "sudo k3s
