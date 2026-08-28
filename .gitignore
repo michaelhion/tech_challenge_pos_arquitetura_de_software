@@ -43,6 +43,6 @@ terraform.tfvars
 gera-imagem-docker.sh
 
 
-k8s/secret.yaml
+k8s/2-secret.yaml
 
 /*-bkp

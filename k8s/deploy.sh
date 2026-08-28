@@ -12,15 +12,15 @@ SCRIPT_DIR="$(
 KUBECTL="${KUBECTL:-kubectl}"
 
 MANIFESTS=(
-  "namespace.yaml"
-  "configmap.yaml"
-  "metrics-server.yaml"
-  "postgres-pvc.yaml"
-  "postgres-service.yaml"
-  "postgres-deployment.yaml"
-  "api-deployment.yaml"
-  "api-service.yaml"
-  "hpa.yaml"
+  "1-namespace.yaml"
+  "3-configmap.yaml"
+  "4-metrics-server.yaml"
+  "5-postgres-pvc.yaml"
+  "6-postgres-service.yaml"
+  "7-postgres-deployment.yaml"
+  "8-api-deployment.yaml"
+  "9-api-service.yaml"
+  "10-hpa.yaml"
 )
 
 show_header() {
@@ -155,7 +155,7 @@ apply_namespace() {
   echo "[4/12] Criando namespace..."
 
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/namespace.yaml"
+    --filename "$SCRIPT_DIR/1-namespace.yaml"
 }
 
 configure_secret() {
@@ -166,7 +166,7 @@ configure_secret() {
     echo "Aplicando Secret local: secret.yaml"
 
     $KUBECTL apply \
-      --filename "$SCRIPT_DIR/secret.yaml"
+      --filename "$SCRIPT_DIR/2-secret.yaml"
 
     return
   fi
@@ -198,7 +198,7 @@ apply_configmap() {
   echo "[6/12] Aplicando ConfigMap..."
 
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/configmap.yaml"
+    --filename "$SCRIPT_DIR/3-configmap.yaml"
 }
 
 deploy_metrics_server() {
@@ -206,7 +206,7 @@ deploy_metrics_server() {
   echo "[7/12] Instalando Metrics Server..."
 
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/metrics-server.yaml"
+    --filename "$SCRIPT_DIR/4-metrics-server.yaml"
 
   echo "Aguardando Metrics Server..."
 
@@ -240,15 +240,15 @@ deploy_postgres() {
 
   echo "Aplicando PVC..."
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/postgres-pvc.yaml"
+    --filename "$SCRIPT_DIR/5-postgres-pvc.yaml"
 
   echo "Aplicando Service..."
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/postgres-service.yaml"
+    --filename "$SCRIPT_DIR/6-postgres-service.yaml"
 
   echo "Aplicando Deployment..."
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/postgres-deployment.yaml"
+    --filename "$SCRIPT_DIR/7-postgres-deployment.yaml"
 
   echo ""
   echo "Aguardando o PVC ficar vinculado..."
@@ -310,7 +310,7 @@ deploy_api() {
   echo "[9/12] Implantando API..."
 
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/api-deployment.yaml"
+    --filename "$SCRIPT_DIR/8-api-deployment.yaml"
 
   echo ""
   echo "Aguardando API ficar disponível..."
@@ -326,7 +326,7 @@ deploy_api_service() {
   echo "[10/12] Criando Service da API..."
 
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/api-service.yaml"
+    --filename "$SCRIPT_DIR/9-api-service.yaml"
 }
 
 deploy_hpa() {
@@ -334,7 +334,7 @@ deploy_hpa() {
   echo "[11/12] Criando HPA..."
 
   $KUBECTL apply \
-    --filename "$SCRIPT_DIR/hpa.yaml"
+    --filename "$SCRIPT_DIR/10-hpa.yaml"
 }
 
 show_result() {
