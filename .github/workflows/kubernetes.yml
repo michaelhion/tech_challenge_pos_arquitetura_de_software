@@ -126,6 +126,12 @@ jobs:
           required_files=(
             "k8s/1-namespace.yaml"
             "k8s/3-configmap.yaml"
+            "k8s/5-postgres-pvc.yaml"
+            "k8s/6-postgres-service.yaml"
+            "k8s/7-postgres-deployment.yaml"
+            "k8s/8-api-deployment.yaml"
+            "k8s/9-api-service.yaml"
+            "k8s/10-hpa.yaml"
           )
 
           for file in "${required_files[@]}"; do
@@ -153,15 +159,48 @@ jobs:
             exit 1
           fi
 
-          echo "Manifestos mínimos validados."
+          echo "Todos os manifests foram encontrados."
+          
+      - name: Validate Kubernetes Secrets
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          set -Eeuo pipefail
+
+          required_secrets=(
+            "DB_USERNAME"
+            "DB_PASSWORD"
+            "JWT_SECRET"
+          )
+
+          for secret_name in "${required_secrets[@]}"; do
+            if [ -z "${!secret_name:-}" ]; then
+              echo "Secret obrigatório não configurado: $secret_name"
+              exit 1
+            fi
+          done
+
+          echo "Secrets obrigatórios configurados."
 
       - name: Package Kubernetes Manifests
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           set -Eeuo pipefail
 
           required_files=(
             "k8s/1-namespace.yaml"
             "k8s/3-configmap.yaml"
+            "k8s/5-postgres-pvc.yaml"
+            "k8s/6-postgres-service.yaml"
+            "k8s/7-postgres-deployment.yaml"
+            "k8s/8-api-deployment.yaml"
+            "k8s/9-api-service.yaml"
+            "k8s/10-hpa.yaml"
           )
 
           rm -rf /tmp/oficina360-package
@@ -177,13 +216,45 @@ jobs:
             "${required_files[@]}" \
             /tmp/oficina360-package/k8s/
 
-          echo "Arquivos selecionados:"
+          DB_USERNAME_BASE64="$(
+            printf '%s' "$DB_USERNAME" |
+              base64 -w 0
+          )"
+
+          DB_PASSWORD_BASE64="$(
+            printf '%s' "$DB_PASSWORD" |
+              base64 -w 0
+          )"
+
+          JWT_SECRET_BASE64="$(
+            printf '%s' "$JWT_SECRET" |
+              base64 -w 0
+          )"
+
+          cat > /tmp/oficina360-package/k8s/2-secret.generated.yaml <<EOF
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: oficina360-secret
+            namespace: oficina360
+          type: Opaque
+          data:
+            DB_USERNAME: ${DB_USERNAME_BASE64}
+            DB_PASSWORD: ${DB_PASSWORD_BASE64}
+            JWT_SECRET: ${JWT_SECRET_BASE64}
+          EOF
+
+          chmod 600 \
+            /tmp/oficina360-package/k8s/2-secret.generated.yaml
+
+          echo "Manifestos preparados para envio:"
 
           find /tmp/oficina360-package/k8s \
             -maxdepth 1 \
             -type f \
-            -printf '%f\n' \
-            | sort
+            -name '*.yaml' \
+            -printf '%f\n' |
+            sort
 
           tar \
             -C /tmp/oficina360-package \
@@ -208,14 +279,13 @@ jobs:
             exit 1
           fi
 
-          if [ "$BASE64_SIZE" -gt 20000 ]; then
+          if [ "$BASE64_SIZE" -gt 24000 ]; then
             echo "O pacote ficou maior que o limite definido."
             echo "Tamanho atual: ${BASE64_SIZE} bytes."
             exit 1
           fi
 
           echo "Pacote criado com sucesso."
-          echo "Quantidade de manifests: ${#required_files[@]}"
           echo "Tamanho compactado: ${ARCHIVE_SIZE} bytes."
           echo "Tamanho para transporte: ${BASE64_SIZE} bytes."
 
@@ -235,10 +305,10 @@ jobs:
           import json
           from pathlib import Path
 
-          package_file = Path("/tmp/oficina360-k8s.base64")
-          output_file = Path("/tmp/ssm-parameters.json")
+          package_path = Path("/tmp/oficina360-k8s.base64")
+          parameters_path = Path("/tmp/ssm-parameters.json")
 
-          package = package_file.read_text(
+          package = package_path.read_text(
               encoding="utf-8"
           ).strip()
 
@@ -249,28 +319,36 @@ jobs:
 
           commands = [
               "set -Eeuo pipefail",
+
               "rm -rf /tmp/oficina360",
+
               "mkdir -p /tmp/oficina360",
+
               (
                   "printf '%s' '"
                   + package
                   + "' | base64 -d "
                   "> /tmp/oficina360/k8s.tar.gz"
               ),
+
               (
                   "chmod 600 "
                   "/tmp/oficina360/k8s.tar.gz"
               ),
+
               (
                   "tar -xzf "
                   "/tmp/oficina360/k8s.tar.gz "
                   "-C /tmp/oficina360"
               ),
+
               (
                   "rm -f "
                   "/tmp/oficina360/k8s.tar.gz"
               ),
+
               "echo 'Aguardando K3s...'",
+
               (
                   "for attempt in $(seq 1 60); do "
                   "if sudo timeout 15 "
@@ -286,45 +364,154 @@ jobs:
                   "sleep 10; "
                   "done"
               ),
-              "echo 'Criando Namespace...'",
+
+              "echo 'Aplicando Namespace...'",
+
               (
                   "sudo k3s kubectl apply "
                   "--filename "
                   "/tmp/oficina360/k8s/"
                   "1-namespace.yaml"
               ),
+
               (
                   "sudo k3s kubectl get namespace "
                   "oficina360"
               ),
-              "echo 'Validando ConfigMap...'",
+
+              "echo 'Aplicando Secret...'",
+
               (
                   "sudo k3s kubectl apply "
-                  "--dry-run=server "
                   "--filename "
                   "/tmp/oficina360/k8s/"
-                  "3-configmap.yaml"
+                  "2-secret.generated.yaml"
               ),
+
+              (
+                  "rm -f "
+                  "/tmp/oficina360/k8s/"
+                  "2-secret.generated.yaml"
+              ),
+
               "echo 'Aplicando ConfigMap...'",
+
               (
                   "sudo k3s kubectl apply "
                   "--filename "
                   "/tmp/oficina360/k8s/"
                   "3-configmap.yaml"
               ),
-              "echo 'Consultando ConfigMaps...'",
+
+              "echo 'Aplicando PVC do PostgreSQL...'",
+
               (
-                  "sudo k3s kubectl get configmap "
+                  "sudo k3s kubectl apply "
+                  "--filename "
+                  "/tmp/oficina360/k8s/"
+                  "5-postgres-pvc.yaml"
+              ),
+
+              "echo 'Aplicando Service do PostgreSQL...'",
+
+              (
+                  "sudo k3s kubectl apply "
+                  "--filename "
+                  "/tmp/oficina360/k8s/"
+                  "6-postgres-service.yaml"
+              ),
+
+              "echo 'Aplicando Deployment do PostgreSQL...'",
+
+              (
+                  "sudo k3s kubectl apply "
+                  "--filename "
+                  "/tmp/oficina360/k8s/"
+                  "7-postgres-deployment.yaml"
+              ),
+
+              "echo 'Aguardando PostgreSQL...'",
+
+              (
+                  "sudo k3s kubectl rollout status "
+                  "deployment/postgres "
+                  "--namespace oficina360 "
+                  "--timeout=300s"
+              ),
+
+              "echo 'Aplicando Deployment da API...'",
+
+              (
+                  "sudo k3s kubectl apply "
+                  "--filename "
+                  "/tmp/oficina360/k8s/"
+                  "8-api-deployment.yaml"
+              ),
+
+              "echo 'Aplicando Service da API...'",
+
+              (
+                  "sudo k3s kubectl apply "
+                  "--filename "
+                  "/tmp/oficina360/k8s/"
+                  "9-api-service.yaml"
+              ),
+
+              "echo 'Aguardando API...'",
+
+              (
+                  "sudo k3s kubectl rollout status "
+                  "deployment/oficina360-api "
+                  "--namespace oficina360 "
+                  "--timeout=600s"
+              ),
+
+              "echo 'Aplicando HPA...'",
+
+              (
+                  "sudo k3s kubectl apply "
+                  "--filename "
+                  "/tmp/oficina360/k8s/"
+                  "10-hpa.yaml"
+              ),
+
+              "echo 'Consultando Pods...'",
+
+              (
+                  "sudo k3s kubectl get pods "
                   "--namespace oficina360"
               ),
+
+              "echo 'Consultando Services...'",
+
+              (
+                  "sudo k3s kubectl get services "
+                  "--namespace oficina360"
+              ),
+
+              "echo 'Consultando PVC...'",
+
+              (
+                  "sudo k3s kubectl get pvc "
+                  "--namespace oficina360"
+              ),
+
+              "echo 'Consultando HPA...'",
+
+              (
+                  "sudo k3s kubectl get hpa "
+                  "--namespace oficina360"
+              ),
+
               "rm -rf /tmp/oficina360",
+
               (
                   "echo "
-                  "'Teste mínimo concluído com sucesso'"
+                  "'Deploy Kubernetes concluído com sucesso'"
               ),
           ]
 
-          output_file.write_text(
+          parameters_path.write_text(
               json.dumps(
                   {"commands": commands},
                   ensure_ascii=False,
@@ -343,9 +530,9 @@ jobs:
               --region "$AWS_REGION" \
               --instance-ids "$INSTANCE_ID" \
               --document-name "AWS-RunShellScript" \
-              --comment "Teste mínimo Kubernetes Oficina360" \
+              --comment "Deploy Kubernetes Oficina360" \
               --parameters file:///tmp/ssm-parameters.json \
-              --timeout-seconds 900 \
+              --timeout-seconds 1200 \
               --query 'Command.CommandId' \
               --output text
           )"
