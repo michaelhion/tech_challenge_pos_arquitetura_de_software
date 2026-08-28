@@ -1,3 +1,4 @@
+```bash
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
@@ -9,7 +10,12 @@ SCRIPT_DIR="$(
   pwd
 )"
 
-KUBECTL="${KUBECTL:-kubectl}"
+# Em uma instalação K3s, o kubectl oficial do K3s é a opção mais segura.
+# Pode ser sobrescrito:
+#
+#   KUBECTL="kubectl" ./deploy.sh
+#
+KUBECTL="${KUBECTL:-sudo k3s kubectl}"
 
 MANIFESTS=(
   "1-namespace.yaml"
@@ -23,6 +29,11 @@ MANIFESTS=(
   "10-hpa.yaml"
 )
 
+
+# ==============================================================
+# Utilitários
+# ==============================================================
+
 show_header() {
   echo "======================================"
   echo " Oficina360 - Deploy Kubernetes"
@@ -30,11 +41,39 @@ show_header() {
   echo ""
 }
 
+
+show_k3s_diagnostics() {
+  echo ""
+  echo "======================================"
+  echo " Diagnóstico do K3s"
+  echo "======================================"
+
+  echo ""
+  echo "=== Status do serviço K3s ==="
+  sudo systemctl status k3s --no-pager || true
+
+  echo ""
+  echo "=== Estado do serviço K3s ==="
+  sudo systemctl is-active k3s || true
+
+  echo ""
+  echo "=== Últimos logs do K3s ==="
+  sudo journalctl \
+    -u k3s \
+    -n 100 \
+    --no-pager || true
+}
+
+
 show_diagnostics() {
   echo ""
   echo "======================================"
-  echo " Diagnóstico do ambiente"
+  echo " Diagnóstico do ambiente Kubernetes"
   echo "======================================"
+
+  echo ""
+  echo "=== K3s ==="
+  sudo systemctl status k3s --no-pager || true
 
   echo ""
   echo "=== Nodes ==="
@@ -92,11 +131,16 @@ show_diagnostics() {
     --tail=100 || true
 }
 
+
 handle_error() {
   local exit_code=$?
 
   echo ""
-  echo "ERRO: o deploy falhou com código $exit_code."
+  echo "======================================"
+  echo " ERRO NO DEPLOY"
+  echo "======================================"
+  echo ""
+  echo "Código de saída: $exit_code"
 
   show_diagnostics
 
@@ -104,6 +148,11 @@ handle_error() {
 }
 
 trap handle_error ERR
+
+
+# ==============================================================
+# 1. Validar arquivos
+# ==============================================================
 
 validate_files() {
   echo "[1/12] Verificando arquivos necessários..."
@@ -119,9 +168,78 @@ validate_files() {
   echo "Todos os manifests necessários foram encontrados."
 }
 
+
+# ==============================================================
+# 2. Verificar K3s / Kubernetes
+# ==============================================================
+
+check_cluster() {
+  echo ""
+  echo "[2/12] Verificando conexão com Kubernetes..."
+
+  echo ""
+  echo "Kubectl utilizado:"
+  echo "$KUBECTL"
+
+  echo ""
+  echo "Verificando serviço K3s..."
+
+  if ! sudo systemctl is-active --quiet k3s; then
+    echo "K3s não está ativo."
+
+    echo ""
+    echo "Tentando iniciar o serviço K3s..."
+
+    sudo systemctl start k3s
+
+    sleep 5
+  fi
+
+  echo "K3s está ativo."
+  echo ""
+  echo "Aguardando API Server do Kubernetes..."
+
+  for attempt in $(seq 1 60); do
+
+    if $KUBECTL get nodes >/dev/null 2>&1; then
+      echo ""
+      echo "Kubernetes está disponível."
+      break
+    fi
+
+    if [[ "$attempt" -eq 60 ]]; then
+      echo ""
+      echo "ERRO: Kubernetes não ficou disponível dentro do prazo."
+
+      show_k3s_diagnostics
+
+      exit 1
+    fi
+
+    echo "Tentativa ${attempt}/60: API Server ainda não está disponível."
+
+    sleep 5
+  done
+
+  echo ""
+  echo "=== Cluster ==="
+
+  $KUBECTL cluster-info
+
+  echo ""
+  echo "=== Nodes ==="
+
+  $KUBECTL get nodes -o wide
+}
+
+
+# ==============================================================
+# 3. Validar manifests
+# ==============================================================
+
 validate_manifests() {
   echo ""
-  echo "[2/12] Validando manifests Kubernetes..."
+  echo "[3/12] Validando manifests Kubernetes..."
 
   for manifest in "${MANIFESTS[@]}"; do
     echo "Validando: $manifest"
@@ -142,13 +260,10 @@ validate_manifests() {
   echo "Validação concluída."
 }
 
-check_cluster() {
-  echo ""
-  echo "[3/12] Verificando conexão com Kubernetes..."
 
-  $KUBECTL cluster-info
-  $KUBECTL get nodes -o wide
-}
+# ==============================================================
+# 4. Namespace
+# ==============================================================
 
 apply_namespace() {
   echo ""
@@ -158,6 +273,11 @@ apply_namespace() {
     --filename "$SCRIPT_DIR/1-namespace.yaml"
 }
 
+
+# ==============================================================
+# 5. Secret
+# ==============================================================
+
 configure_secret() {
   echo ""
   echo "[5/12] Configurando Secret..."
@@ -166,7 +286,7 @@ configure_secret() {
     echo "Aplicando Secret local: secret.yaml"
 
     $KUBECTL apply \
-      --filename "$SCRIPT_DIR/2-secret.yaml"
+      --filename "$SCRIPT_DIR/secret.yaml"
 
     return
   fi
@@ -179,19 +299,27 @@ configure_secret() {
     return
   fi
 
+  echo ""
   echo "ERRO: o arquivo secret.yaml não existe e o Secret"
   echo "oficina360-secret também não foi encontrado no cluster."
   echo ""
+
   echo "Para desenvolvimento local:"
   echo "  cp \"$SCRIPT_DIR/secret-example.yaml\" \"$SCRIPT_DIR/secret.yaml\""
   echo ""
   echo "Depois, substitua os valores de exemplo."
   echo ""
+
   echo "Na pipeline, o Secret deve ser criado dinamicamente"
   echo "a partir dos GitHub Actions Secrets."
 
   exit 1
 }
+
+
+# ==============================================================
+# 6. ConfigMap
+# ==============================================================
 
 apply_configmap() {
   echo ""
@@ -201,6 +329,11 @@ apply_configmap() {
     --filename "$SCRIPT_DIR/3-configmap.yaml"
 }
 
+
+# ==============================================================
+# 7. Metrics Server
+# ==============================================================
+
 deploy_metrics_server() {
   echo ""
   echo "[7/12] Instalando Metrics Server..."
@@ -208,6 +341,7 @@ deploy_metrics_server() {
   $KUBECTL apply \
     --filename "$SCRIPT_DIR/4-metrics-server.yaml"
 
+  echo ""
   echo "Aguardando Metrics Server..."
 
   $KUBECTL rollout status \
@@ -219,34 +353,52 @@ deploy_metrics_server() {
   echo "Verificando API de métricas..."
 
   for attempt in $(seq 1 18); do
+
     if $KUBECTL top nodes >/dev/null 2>&1; then
       echo "Metrics Server está fornecendo métricas."
+
+      echo ""
       $KUBECTL top nodes
+
       return
     fi
 
     echo "Tentativa ${attempt}/18: aguardando métricas..."
+
     sleep 10
   done
 
-  echo "AVISO: o Metrics Server foi implantado, mas kubectl top"
-  echo "ainda não retornou métricas."
+  echo ""
+  echo "AVISO: o Metrics Server foi implantado, mas"
+  echo "kubectl top ainda não retornou métricas."
+
   echo "O HPA poderá mostrar métricas como <unknown> inicialmente."
 }
+
+
+# ==============================================================
+# 8. PostgreSQL
+# ==============================================================
 
 deploy_postgres() {
   echo ""
   echo "[8/12] Implantando PostgreSQL..."
 
+  echo ""
   echo "Aplicando PVC..."
+
   $KUBECTL apply \
     --filename "$SCRIPT_DIR/5-postgres-pvc.yaml"
 
+  echo ""
   echo "Aplicando Service..."
+
   $KUBECTL apply \
     --filename "$SCRIPT_DIR/6-postgres-service.yaml"
 
+  echo ""
   echo "Aplicando Deployment..."
+
   $KUBECTL apply \
     --filename "$SCRIPT_DIR/7-postgres-deployment.yaml"
 
@@ -254,6 +406,7 @@ deploy_postgres() {
   echo "Aguardando o PVC ficar vinculado..."
 
   for attempt in $(seq 1 30); do
+
     pvc_status="$(
       $KUBECTL get pvc postgres-pvc \
         --namespace "$NAMESPACE" \
@@ -267,6 +420,8 @@ deploy_postgres() {
     fi
 
     if [[ "$attempt" -eq 30 ]]; then
+
+      echo ""
       echo "ERRO: o PVC não ficou Bound dentro do prazo."
 
       echo ""
@@ -293,6 +448,7 @@ deploy_postgres() {
     fi
 
     echo "Tentativa ${attempt}/30: PVC em estado '${pvc_status:-desconhecido}'."
+
     sleep 5
   done
 
@@ -304,6 +460,11 @@ deploy_postgres() {
     --namespace "$NAMESPACE" \
     --timeout=300s
 }
+
+
+# ==============================================================
+# 9. API
+# ==============================================================
 
 deploy_api() {
   echo ""
@@ -321,6 +482,11 @@ deploy_api() {
     --timeout=600s
 }
 
+
+# ==============================================================
+# 10. Service da API
+# ==============================================================
+
 deploy_api_service() {
   echo ""
   echo "[10/12] Criando Service da API..."
@@ -328,6 +494,11 @@ deploy_api_service() {
   $KUBECTL apply \
     --filename "$SCRIPT_DIR/9-api-service.yaml"
 }
+
+
+# ==============================================================
+# 11. HPA
+# ==============================================================
 
 deploy_hpa() {
   echo ""
@@ -337,38 +508,49 @@ deploy_hpa() {
     --filename "$SCRIPT_DIR/10-hpa.yaml"
 }
 
+
+# ==============================================================
+# 12. Resultado
+# ==============================================================
+
 show_result() {
   echo ""
   echo "[12/12] Validando recursos implantados..."
 
   echo ""
   echo "=== Pods ==="
+
   $KUBECTL get pods \
     --namespace "$NAMESPACE" \
     -o wide
 
   echo ""
   echo "=== Deployments ==="
+
   $KUBECTL get deployments \
     --namespace "$NAMESPACE"
 
   echo ""
   echo "=== Services ==="
+
   $KUBECTL get services \
     --namespace "$NAMESPACE"
 
   echo ""
   echo "=== Endpoints ==="
+
   $KUBECTL get endpoints \
     --namespace "$NAMESPACE"
 
   echo ""
   echo "=== PVCs ==="
+
   $KUBECTL get pvc \
     --namespace "$NAMESPACE"
 
   echo ""
   echo "=== HPA ==="
+
   $KUBECTL get hpa \
     --namespace "$NAMESPACE"
 
@@ -380,6 +562,7 @@ show_result() {
     --output=jsonpath='{.spec.template.spec.containers[0].image}'
 
   echo ""
+
   echo ""
   echo "=== Acesso externo ==="
 
@@ -401,10 +584,17 @@ show_result() {
   fi
 }
 
+
+# ==============================================================
+# Execução
+# ==============================================================
+
 show_header
+
 validate_files
-validate_manifests
 check_cluster
+validate_manifests
+
 apply_namespace
 configure_secret
 apply_configmap
@@ -421,3 +611,4 @@ echo ""
 echo "======================================"
 echo " Deploy concluído com sucesso!"
 echo "======================================"
+```
