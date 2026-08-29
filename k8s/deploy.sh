@@ -497,11 +497,10 @@ show_result() {
   $KUBECTL get services \
     --namespace "$NAMESPACE"
 
-  echo ""
-  echo "=== Endpoints ==="
+  echo "=== EndpointSlices ==="
 
-  $KUBECTL get endpoints \
-    --namespace "$NAMESPACE"
+  $KUBECTL get endpointslices \
+    --namespace "$NAMESPACE" || true
 
   echo ""
   echo "=== PVCs ==="
@@ -572,4 +571,4 @@ echo ""
 echo "======================================"
 echo " Deploy concluído com sucesso!"
 echo "======================================"
-```
+
