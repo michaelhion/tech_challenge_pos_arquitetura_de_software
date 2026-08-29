@@ -26,6 +26,7 @@ O Oficina360 contempla o ciclo de atendimento de uma oficina, desde o cadastro d
 - [Testes e qualidade](#testes-e-qualidade)
 - [Documentação complementar](#documentação-complementar)
 - [Limitações do ambiente acadêmico](#limitações-do-ambiente-acadêmico)
+- [Segurança, tratamento de erros e testes](#Segurança-tratamento-de-erros-e-testes)
 
 ---
 
@@ -1253,6 +1254,75 @@ Para um ambiente produtivo, poderiam ser adotados:
 - observabilidade centralizada;
 - backup automatizado;
 - tags imutáveis para imagens Docker.
+
+---
+
+## Segurança, tratamento de erros e testes
+
+### Segurança
+
+A aplicação utiliza:
+
+- autenticação JWT;
+- autorização por perfil;
+- validação de propriedade dos recursos;
+- codificação de senhas;
+- sanitização de logs;
+- GitHub Secrets;
+- Kubernetes Secrets;
+- AWS Systems Manager;
+- análise com Snyk, OWASP Dependency Check e SonarCloud.
+
+### Tratamento de erros
+
+Os erros são separados em:
+
+- exceções de domínio;
+- exceções da aplicação;
+- conflitos;
+- erros de autorização;
+- falhas de infraestrutura.
+
+O `GlobalExceptionHandler` converte as exceções em respostas HTTP
+padronizadas, sem expor detalhes internos da aplicação.
+
+Exemplo:
+
+```json
+{
+  "status": 404,
+  "erro": "Recurso não encontrado",
+  "mensagem": "Ordem de serviço não encontrada"
+}
+```
+
+### Testes
+
+A solução possui:
+
+- testes de domínio;
+- testes de casos de uso;
+- testes de Controllers;
+- testes de adapters;
+- testes de segurança;
+- testes de integração;
+- testes das regras arquiteturais.
+
+Os fluxos críticos de ordens de serviço possuem testes de integração para
+criação, diagnóstico, aprovação, execução, finalização e listagem.
+
+Cobertura da versão entregue:
+
+```text
+Linhas: PREENCHER%
+Branches: PREENCHER%
+```
+
+Mais detalhes:
+
+- [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
+- [docs/security/jacoco/index.html](docs/security/jacoco/index.html)
+- [SonarCloud](https://sonarcloud.io/project/overview?id=michaelhion_tech_challenge_pos_arquitetura_de_software)
 
 ---
 
