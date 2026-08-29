@@ -53,7 +53,9 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          aws sts get-caller-identity
+          aws sts get-caller-identity >/dev/null
+
+          echo "Credenciais AWS validadas."
 
       # ------------------------------------------------------------
       # 4. Validar arquivos do deploy
@@ -221,37 +223,43 @@ jobs:
         run: |
           set -Eeuo pipefail
 
+          rm -rf .deploy
           mkdir -p .deploy/k8s
 
           deployment_files=(
-          "k8s/1-namespace.yaml"
-          "k8s/3-configmap.yaml"
-          "k8s/5-postgres-pvc.yaml"
-          "k8s/6-postgres-service.yaml"
-          "k8s/7-postgres-deployment.yaml"
-          "k8s/8-api-deployment.yaml"
-          "k8s/9-api-service.yaml"
-          "k8s/10-hpa.yaml"
-          "k8s/deploy.sh"
+            "k8s/1-namespace.yaml"
+            "k8s/3-configmap.yaml"
+            "k8s/5-postgres-pvc.yaml"
+            "k8s/6-postgres-service.yaml"
+            "k8s/7-postgres-deployment.yaml"
+            "k8s/8-api-deployment.yaml"
+            "k8s/9-api-service.yaml"
+            "k8s/10-hpa.yaml"
+            "k8s/deploy.sh"
           )
-  
-          cp "${deployment_files[@]}".deploy/k8s/
-          cp k8s/deploy.sh .deploy/k8s/
+
+          cp \
+            "${deployment_files[@]}" \
+            .deploy/k8s/
 
           if [[ -f k8s/validate.sh ]]; then
             cp k8s/validate.sh .deploy/k8s/
+            chmod +x .deploy/k8s/validate.sh
           fi
 
           DB_USERNAME_BASE64="$(
-            printf '%s' "$DB_USERNAME" | base64 -w 0
+            printf '%s' "$DB_USERNAME" |
+              base64 -w 0
           )"
 
           DB_PASSWORD_BASE64="$(
-            printf '%s' "$DB_PASSWORD" | base64 -w 0
+            printf '%s' "$DB_PASSWORD" |
+              base64 -w 0
           )"
 
           JWT_SECRET_BASE64="$(
-            printf '%s' "$JWT_SECRET" | base64 -w 0
+            printf '%s' "$JWT_SECRET" |
+              base64 -w 0
           )"
 
           cat > .deploy/k8s/secret.yaml <<EOF
@@ -270,8 +278,27 @@ jobs:
           chmod 600 .deploy/k8s/secret.yaml
           chmod +x .deploy/k8s/deploy.sh
 
-          if [[ -f .deploy/k8s/validate.sh ]]; then
-            chmod +x .deploy/k8s/validate.sh
+          echo "Arquivos incluídos no pacote:"
+
+          find .deploy/k8s \
+            -maxdepth 1 \
+            -type f \
+            -printf '%f\n' |
+            sort
+
+          if find .deploy/k8s \
+            -maxdepth 1 \
+            -type f \
+            -name '*metrics-server*' |
+            grep -q .; then
+
+            echo "::error::O Metrics Server não deve entrar no pacote."
+            exit 1
+          fi
+
+          if [[ -f .deploy/k8s/secret-example.yaml ]]; then
+            echo "::error::secret-example.yaml não deve entrar no pacote."
+            exit 1
           fi
 
           echo "Pacote de deploy preparado."
