@@ -245,7 +245,7 @@ Documentação completa:
 
 - [Arquitetura da Solução](docs/ARQUITETURA.md)
 - [Evolução da Fase 2](docs/FASE_2.md)
-- [Documentação do Terraform](docs/DOCUMENTACAO_TERRAFORM.md)
+- [Documentação do Terraform](docs/TERRAFORM.md)
 
 ---
 
@@ -663,7 +663,7 @@ Não edite nem remova manualmente o state enquanto os recursos correspondentes e
 
 Documentação detalhada:
 
-- [Documentação do Terraform](docs/DOCUMENTACAO_TERRAFORM.md)
+- [Documentação do Terraform](docs/TERRAFORM.md)
 
 ---
 
@@ -1214,7 +1214,7 @@ Exemplo:
 |-------------------------------------------------------------------------------|-------------------------------------------------|
 | [FASE_2.md](docs/FASE_2.md)                                                   | Evolução arquitetural, Kubernetes, AWS e CI/CD  |
 | [ARQUITETURA.md](docs/ARQUITETURA.md)                                         | DDD, Modelo C4 e detalhes arquiteturais         |
-| [DOCUMENTACAO_TERRAFORM.md](docs/DOCUMENTACAO_TERRAFORM.md)                   | Infraestrutura AWS e Terraform                  |
+| [TERRAFORM.md](docs/DOCUMENTACAO_TERRAFORM.md)                   | Infraestrutura AWS e Terraform                  |
 | [Documento de Requisitos](docs/requisitos/Documento_Requisitos_Oficina360.md) | Requisitos funcionais e regras de negócio       |
 | [Linguagem Ubíqua](docs/requisitos/LINGUAGEM-UBIQUA.md)                       | Termos utilizados no domínio                    |
 | [docs/ddd/](docs/ddd)                                                         | Artefatos de Domain-Driven Design               |
