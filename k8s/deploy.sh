@@ -70,65 +70,57 @@ show_diagnostics() {
   echo "======================================"
 
   echo ""
-  echo "=== K3s ==="
-  sudo systemctl status k3s --no-pager || true
+  echo "=== Serviço K3s ==="
+
+  sudo systemctl is-active k3s || true
+
+  echo ""
+  echo "=== Memória ==="
+
+  free -h || true
+
+  echo ""
+  echo "=== Swap ==="
+
+  swapon --show || true
 
   echo ""
   echo "=== Nodes ==="
-  $KUBECTL get nodes -o wide || true
+
+  timeout 30 \
+    $KUBECTL get nodes || true
+
+  if ! timeout 30 \
+    $KUBECTL get namespace "$NAMESPACE" \
+    >/dev/null 2>&1; then
+
+    echo ""
+    echo "Namespace indisponível ou API Kubernetes sobrecarregada."
+    return
+  fi
 
   echo ""
   echo "=== Pods ==="
-  $KUBECTL get pods \
-    --namespace "$NAMESPACE" \
-    -o wide || true
 
-  echo ""
-  echo "=== Deployments ==="
-  $KUBECTL get deployments \
-    --namespace "$NAMESPACE" || true
-
-  echo ""
-  echo "=== Services ==="
-  $KUBECTL get services \
-    --namespace "$NAMESPACE" || true
-
-  echo ""
-  echo "=== Endpoints ==="
-  $KUBECTL get endpoints \
-    --namespace "$NAMESPACE" || true
-
-  echo ""
-  echo "=== PVCs ==="
-  $KUBECTL get pvc \
-    --namespace "$NAMESPACE" || true
+  timeout 30 \
+    $KUBECTL get pods \
+      --namespace "$NAMESPACE" || true
 
   echo ""
   echo "=== HPA ==="
-  $KUBECTL get hpa \
-    --namespace "$NAMESPACE" || true
+
+  timeout 30 \
+    $KUBECTL get hpa \
+      --namespace "$NAMESPACE" || true
 
   echo ""
   echo "=== Eventos recentes ==="
-  $KUBECTL get events \
-    --namespace "$NAMESPACE" \
-    --sort-by='.lastTimestamp' || true
 
-  echo ""
-  echo "=== Logs da API ==="
-  $KUBECTL logs \
-    deployment/oficina360-api \
-    --namespace "$NAMESPACE" \
-    --tail=100 || true
-
-  echo ""
-  echo "=== Logs do PostgreSQL ==="
-  $KUBECTL logs \
-    deployment/postgres \
-    --namespace "$NAMESPACE" \
-    --tail=100 || true
+  timeout 30 \
+    $KUBECTL get events \
+      --namespace "$NAMESPACE" \
+      --sort-by='.lastTimestamp' || true
 }
-
 
 handle_error() {
   local exit_code=$?
@@ -448,8 +440,33 @@ deploy_hpa() {
   echo ""
   echo "[11/12] Criando HPA..."
 
-  $KUBECTL apply \
-    --filename "$SCRIPT_DIR/10-hpa.yaml"
+  local attempt
+
+  for attempt in $(seq 1 12); do
+    if timeout 60 \
+      $KUBECTL apply \
+        --filename "$SCRIPT_DIR/10-hpa.yaml"; then
+
+      echo "HPA aplicado com sucesso."
+
+      $KUBECTL get hpa \
+        --namespace "$NAMESPACE" || true
+
+      return 0
+    fi
+
+    echo "Tentativa ${attempt}/12: API do Kubernetes indisponível para o HPA."
+
+    if [[ "$attempt" -lt 12 ]]; then
+      sleep 15
+    fi
+  done
+
+  echo ""
+  echo "ERRO: não foi possível aplicar o HPA."
+  echo "A API do K3s permaneceu sobrecarregada."
+
+  return 1
 }
 
 
