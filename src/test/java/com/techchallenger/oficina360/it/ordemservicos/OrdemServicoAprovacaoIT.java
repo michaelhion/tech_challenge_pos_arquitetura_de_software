@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.it.ordemservicos;
 
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.Estoque;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
 import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.it.BaseIT;

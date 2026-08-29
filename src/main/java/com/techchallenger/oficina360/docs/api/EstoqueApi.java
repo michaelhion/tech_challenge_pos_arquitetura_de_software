@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.docs.api;
 
-import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.estoques.EstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

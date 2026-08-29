@@ -1,7 +1,6 @@
 package com.techchallenger.oficina360.usecases.ordemservico;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;
 import com.techchallenger.oficina360.dominio.OrdemServicoServico;
 import com.techchallenger.oficina360.dominio.Servico;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;

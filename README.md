@@ -1214,7 +1214,7 @@ Exemplo:
 |-------------------------------------------------------------------------------|-------------------------------------------------|
 | [FASE_2.md](docs/FASE_2.md)                                                   | Evolução arquitetural, Kubernetes, AWS e CI/CD  |
 | [ARQUITETURA.md](docs/ARQUITETURA.md)                                         | DDD, Modelo C4 e detalhes arquiteturais         |
-| [TERRAFORM.md](docs/DOCUMENTACAO_TERRAFORM.md)                   | Infraestrutura AWS e Terraform                  |
+| [TERRAFORM.md](docs/TERRAFORM.md)                   | Infraestrutura AWS e Terraform                  |
 | [Documento de Requisitos](docs/requisitos/Documento_Requisitos_Oficina360.md) | Requisitos funcionais e regras de negócio       |
 | [Linguagem Ubíqua](docs/requisitos/LINGUAGEM-UBIQUA.md)                       | Termos utilizados no domínio                    |
 | [docs/ddd/](docs/ddd)                                                         | Artefatos de Domain-Driven Design               |

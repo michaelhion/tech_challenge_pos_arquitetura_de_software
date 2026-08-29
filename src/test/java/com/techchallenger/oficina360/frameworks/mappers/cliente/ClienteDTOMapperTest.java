@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.mappers.cliente;
 
 import com.techchallenger.oficina360.dominio.Cliente;
-import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
 import com.techchallenger.oficina360.usecases.ordemservico.command.ClienteCommand;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +16,7 @@ class ClienteDTOMapperTest {
 	private static final UUID CLIENTE_ID = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
 
 	private static final String DOCUMENTO = "12345678901";
+	private static final String DOCUMENTO_MASCARADO = "***8901";
 
 	private static final String NOME = "João Cliente da Silva";
 
@@ -148,7 +149,7 @@ class ClienteDTOMapperTest {
 
 		assertNotNull(resultado);
 
-		assertAll(() -> assertEquals(DOCUMENTO, resultado.documento(),
+		assertAll(() -> assertEquals(DOCUMENTO_MASCARADO, resultado.documento(),
 						"O documento não pode ser confundido " + "com o telefone"),
 				() -> assertEquals(NOME, resultado.nome(), "O nome não pode ser confundido " + "com o e-mail"),
 				() -> assertEquals(EMAIL, resultado.email(), "O e-mail deve ocupar o campo email"),
@@ -177,7 +178,7 @@ class ClienteDTOMapperTest {
 
 		ClienteDTO dtoConvertido = ClienteDTOMapper.commandToDTO(command);
 
-		assertAll(() -> assertEquals(dtoOriginal.documento(), dtoConvertido.documento()),
+		assertAll(() -> assertEquals(DOCUMENTO_MASCARADO, dtoConvertido.documento()),
 				() -> assertEquals(dtoOriginal.nome(), dtoConvertido.nome()),
 				() -> assertEquals(dtoOriginal.email(), dtoConvertido.email()),
 				() -> assertEquals(dtoOriginal.telefone(), dtoConvertido.telefone()));

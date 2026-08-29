@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.docs.api;
 
-import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.veiculos.VeiculoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

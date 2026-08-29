@@ -1,15 +1,15 @@
 package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.frameworks.dtos.consultarstatus.ConsultarStatusDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoResponseDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDetailDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.OrdemServicoOficinaController;
 import com.techchallenger.oficina360.usecases.ordemservico.AbrirOrdemServicoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
@@ -57,7 +57,9 @@ import static org.mockito.Mockito.*;
 class OrdemServicoOficinaControllerTest {
 
 	private static final String CPF = "12345678901";
+	private static final String CPF_MASCARADO = "***8901";
 	private static final String PLACA = "ABC1D23";
+	private static final String PLACA_MASCARADO = "ABC***23";
 
 	private static final String RECLAMACAO_CLIENTE = "Veículo apresenta ruído ao frear e vibração no volante.";
 
@@ -141,19 +143,22 @@ class OrdemServicoOficinaControllerTest {
 		assertTrue(pagina.isFirst());
 		assertTrue(pagina.isLast());
 
-		OrdemServicoDTO primeiraResposta = pagina.getContent().get(0);
+		OrdemServicoDTO primeiraResposta = pagina.getContent().getFirst();
 
-		assertEquals(CPF, primeiraResposta.documentoCliente());
-		assertEquals(PLACA, primeiraResposta.placaVeiculo());
+		assertEquals(CPF_MASCARADO, primeiraResposta.documentoCliente());
+		assertEquals(PLACA_MASCARADO, primeiraResposta.placaVeiculo());
 		assertEquals(RECLAMACAO_CLIENTE, primeiraResposta.descricaoProblema());
 		assertEquals(OrdemDeServicoStatus.RECEBIDA, primeiraResposta.ordemDeServicoStatus());
 
 		OrdemServicoDTO segundaResposta = pagina.getContent().get(1);
 
-		assertEquals("98765432100", segundaResposta.documentoCliente());
-		assertEquals("DEF2G34", segundaResposta.placaVeiculo());
-		assertEquals(DESCRICAO_PROBLEMA, segundaResposta.descricaoProblema());
-		assertEquals(OrdemDeServicoStatus.EM_DIAGNOSTICO, segundaResposta.ordemDeServicoStatus());
+		assertAll(
+			()->assertEquals("***2100", segundaResposta.documentoCliente()),
+			()->assertEquals("DEF***34", segundaResposta.placaVeiculo()),
+			()->assertEquals(DESCRICAO_PROBLEMA, segundaResposta.descricaoProblema()),
+			()->assertEquals(OrdemDeServicoStatus.EM_DIAGNOSTICO, segundaResposta.ordemDeServicoStatus())
+		);
+
 
 		verify(listarOrdensServicoUseCase, times(1)).executar(queryEsperada);
 
@@ -272,8 +277,8 @@ class OrdemServicoOficinaControllerTest {
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertEquals(ordemServicoId, response.getBody().id());
-		assertEquals(CPF, response.getBody().documentoCliente());
-		assertEquals(PLACA, response.getBody().placaVeiculo());
+		assertEquals(CPF_MASCARADO, response.getBody().documentoCliente());
+		assertEquals(PLACA_MASCARADO, response.getBody().placaVeiculo());
 		assertEquals(RECLAMACAO_CLIENTE, response.getBody().descricaoProblema());
 		assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus());
 
@@ -300,8 +305,8 @@ class OrdemServicoOficinaControllerTest {
 
 		assertNotNull(response.getBody());
 
-		assertAll(() -> assertEquals(CPF, response.getBody().documentoCliente()),
-				() -> assertEquals(PLACA, response.getBody().placaVeiculo()),
+		assertAll(() -> assertEquals(CPF_MASCARADO, response.getBody().documentoCliente()),
+				() -> assertEquals(PLACA_MASCARADO, response.getBody().placaVeiculo()),
 				() -> assertEquals(novaDescricao, response.getBody().descricaoProblema()),
 				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, response.getBody().ordemDeServicoStatus()));
 
@@ -354,8 +359,8 @@ class OrdemServicoOficinaControllerTest {
 		OrdemServicoDetailDTO responseBody = response.getBody();
 
 		assertAll(
-				() -> assertEquals(CPF, responseBody.documentoCliente()),
-				() -> assertEquals(PLACA, responseBody.placaVeiculo()),
+				() -> assertEquals(CPF_MASCARADO, responseBody.documentoCliente()),
+				() -> assertEquals(PLACA_MASCARADO, responseBody.placaVeiculo()),
 				() -> assertEquals(RECLAMACAO_CLIENTE, responseBody.descricaoProblema()),
 				() -> assertEquals(OrdemDeServicoStatus.AGUARDANDO_APROVACAO, responseBody.ordemDeServicoStatus()),
 				() -> assertNotNull(responseBody.dadosFinanceiros()), () -> assertEquals(0,

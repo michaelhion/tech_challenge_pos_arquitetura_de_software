@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.it.fixtures.ordemservico;
 
-import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.servicos.ServicoDTO;
 import java.math.BigDecimal;
 
 public final class ServicoFixture {

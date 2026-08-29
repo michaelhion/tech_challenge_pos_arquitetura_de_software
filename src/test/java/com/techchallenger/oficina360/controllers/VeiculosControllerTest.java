@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.controllers;
 
-import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.veiculos.VeiculoDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.VeiculosController;
 import com.techchallenger.oficina360.usecases.veiculo.AtualizarVeiculoUseCase;
 import com.techchallenger.oficina360.usecases.veiculo.BuscarVeiculoPorPlacaUseCase;
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.*;
 class VeiculosControllerTest {
 
 	private static final String PLACA = "ABC1D23";
+	private static final String PLACA_MASCARADA = "ABC***23";
 
 	private static final String MARCA = "Volkswagen";
 
@@ -36,6 +37,7 @@ class VeiculosControllerTest {
 	private static final String DOCUMENTO_CLIENTE = "12345678901";
 
 	private static final String PLACA_ATUALIZADA = "DEF2G34";
+	private static final String PLACA_ATUALIZADA_MASCARADA = "DEF***34";
 
 	private static final String PLACA_INEXISTENTE = "ZZZ9Z99";
 
@@ -76,7 +78,7 @@ class VeiculosControllerTest {
 
 		assertNotNull(response.getBody());
 
-		assertVeiculo(response.getBody(), PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
+		assertVeiculo(response.getBody(), PLACA_MASCARADA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
 
 		verify(buscarVeiculoPorPlacaUseCase, times(1)).findByPlaca(PLACA);
 
@@ -112,7 +114,7 @@ class VeiculosControllerTest {
 
 		assertNotNull(response.getBody());
 
-		assertVeiculo(response.getBody(), PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
+		assertVeiculo(response.getBody(), PLACA_MASCARADA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
 
 		verify(cadastrarVeiculoUseCase, times(1)).save(commandEsperado);
 
@@ -133,7 +135,7 @@ class VeiculosControllerTest {
 
 		assertNotNull(response.getBody());
 
-		assertVeiculo(response.getBody(), PLACA_ATUALIZADA, "Toyota", "Corolla", 2022, DOCUMENTO_CLIENTE);
+		assertVeiculo(response.getBody(), PLACA_ATUALIZADA_MASCARADA, "Toyota", "Corolla", 2022, DOCUMENTO_CLIENTE);
 
 		verify(atualizarVeiculoUseCase, times(1)).edit(PLACA, commandEsperado);
 
@@ -172,9 +174,9 @@ class VeiculosControllerTest {
 
 		assertEquals(2, response.getBody().size());
 
-		assertVeiculo(response.getBody().get(0), PLACA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
+		assertVeiculo(response.getBody().get(0), PLACA_MASCARADA, MARCA, MODELO, ANO, DOCUMENTO_CLIENTE);
 
-		assertVeiculo(response.getBody().get(1), PLACA_ATUALIZADA, "Toyota", "Corolla", 2022, "98765432100");
+		assertVeiculo(response.getBody().get(1), PLACA_ATUALIZADA_MASCARADA, "Toyota", "Corolla", 2022, "98765432100");
 
 		verify(listarVeiculosUseCase, times(1)).findAll();
 

@@ -2,9 +2,8 @@ package com.techchallenger.oficina360.it.ordemservicos;
 
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.gateways.EstoqueGateway;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoDTO;
 import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
 import com.techchallenger.oficina360.it.BaseIT;
@@ -40,17 +39,13 @@ public class OrdemServicoDiagnosticoIT extends BaseIT {
 	private static final String OS_COM_STATUS_RECEBIDA = "76dba7d9-2ded-426f-aae8-fd8f8506a7cc";
 
 	@Autowired
-	private EstoqueGateway estoqueGateway;
-
-	@Autowired
 	private OrdemServicoGateway ordemServicoGateway;
 
 	@MockitoBean
 	private NotificacaoEmailGateway notificacaoEmailGateway;
 
 	private UUID extrairIdDoResponse(ResultActions resultActions) throws Exception {
-		UUID id = UUID.fromString(JsonPath.read(resultActions.andReturn().getResponse().getContentAsString(), "$.id"));
-		return id;
+		return UUID.fromString(JsonPath.read(resultActions.andReturn().getResponse().getContentAsString(), "$.id"));
 	}
 
 	@Test

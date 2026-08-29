@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.controllers;
 
-import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.ServicosController;
 import com.techchallenger.oficina360.usecases.servicos.AtualizarServicoUseCase;
 import com.techchallenger.oficina360.usecases.servicos.BuscarServicoPorCodigoUseCase;

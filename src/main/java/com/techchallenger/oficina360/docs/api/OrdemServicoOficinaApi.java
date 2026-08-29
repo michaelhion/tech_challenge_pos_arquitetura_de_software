@@ -1,12 +1,12 @@
 package com.techchallenger.oficina360.docs.api;
 
-import com.techchallenger.oficina360.dtos.consultarstatus.ConsultarStatusDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
+import com.techchallenger.oficina360.frameworks.dtos.consultarstatus.ConsultarStatusDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoResponseDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDetailDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.listagem.OrdemServicoFiltroDTO;
 import com.techchallenger.oficina360.usecases.ordemservico.query.OrdemServicoOrdenacao;
 import com.techchallenger.oficina360.usecases.shared.paginacao.DirecaoOrdenacao;
 import io.swagger.v3.oas.annotations.Operation;
@@ -315,7 +315,7 @@ public interface OrdemServicoOficinaApi {
             UUID id
     );
 
-    public ResponseEntity<ConsultarStatusDTO> consultarStatus(
+    ResponseEntity<ConsultarStatusDTO> consultarStatus(
             @Parameter(
             description = PARAM_ID_DESCRIPTION,
             example = EXAMPLE_UUID,

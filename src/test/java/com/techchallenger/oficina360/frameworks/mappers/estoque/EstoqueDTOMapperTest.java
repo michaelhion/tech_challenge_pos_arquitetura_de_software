@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.frameworks.mappers.estoque;
 
 import com.techchallenger.oficina360.dominio.Estoque;
-import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.estoques.EstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.EstoqueEntity;
 import com.techchallenger.oficina360.usecases.ordemservico.command.EstoqueCommand;
 import com.techchallenger.oficina360.usecases.ordemservico.command.ReservaEstoqueCommand;

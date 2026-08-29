@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.OrdemServicoClienteApi;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.usecases.ordemservico.AprovarOrcamentoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
 import jakarta.validation.Valid;

@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.controllers;
 
-import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.ClientesController;
 import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;
@@ -26,7 +26,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ClientesControllerTest {
 
-    public static final String DOCUMENTO = "12345678901";
+    private static final String DOCUMENTO = "12345678901";
+    private static final String DOCUMENTO_MASCARADO = "***8901";
     @Mock
     private BuscarClientePorDocumentoUseCase buscarClientePorDocumentoUseCase;
 
@@ -76,7 +77,7 @@ class ClientesControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(DOCUMENTO, response.getBody().documento());
+        assertEquals(DOCUMENTO_MASCARADO, response.getBody().documento());
         assertEquals("João da Silva", response.getBody().nome());
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
@@ -91,9 +92,7 @@ class ClientesControllerTest {
         when(buscarClientePorDocumentoUseCase.findByDocumento(documento))
                 .thenThrow(new RecursoNaoEncontradoException("Cliente não encontrado"));
 
-        assertThrows(RecursoNaoEncontradoException.class, () -> {
-            clientesController.buscarPorDocumento(documento);
-        });
+        assertThrows(RecursoNaoEncontradoException.class, () -> clientesController.buscarPorDocumento(documento));
 
         verify(buscarClientePorDocumentoUseCase, times(1)).findByDocumento(documento);
     }
@@ -108,7 +107,7 @@ class ClientesControllerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(DOCUMENTO, response.getBody().documento());
+        assertEquals(DOCUMENTO_MASCARADO, response.getBody().documento());
         assertEquals("João da Silva", response.getBody().nome());
         assertEquals("joao.silva@email.com", response.getBody().email());
         assertEquals("11999999999", response.getBody().telefone());
@@ -139,7 +138,7 @@ class ClientesControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(DOCUMENTO, response.getBody().documento());
+        assertEquals(DOCUMENTO_MASCARADO, response.getBody().documento());
         assertEquals("João da Silva Atualizado", response.getBody().nome());
         assertEquals("joao.atualizado@email.com", response.getBody().email());
         assertEquals("11888888888", response.getBody().telefone());
@@ -174,19 +173,20 @@ class ClientesControllerTest {
 
         ResponseEntity<List<ClienteDTO>> response = clientesController.listarClientes();
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
+        assertAll(
+            ()-> assertEquals(HttpStatus.OK, response.getStatusCode()),
+            ()-> assertNotNull(response.getBody()),
+            ()-> assertEquals(2, response.getBody().size()),
+            ()-> assertEquals(DOCUMENTO_MASCARADO, response.getBody().getFirst().documento()),
+            ()-> assertEquals("João da Silva", response.getBody().getFirst().nome()),
+            ()-> assertEquals("joao.silva@email.com", response.getBody().getFirst().email()),
+            ()-> assertEquals("11999999999", response.getBody().getFirst().telefone()),
+            ()-> assertEquals("***2100", response.getBody().get(1).documento()),
+            ()-> assertEquals("Maria Oliveira", response.getBody().get(1).nome()),
+            ()-> assertEquals("maria.oliveira@email.com", response.getBody().get(1).email()),
+            ()-> assertEquals("11988887777", response.getBody().get(1).telefone())
+        );
 
-        assertEquals(DOCUMENTO, response.getBody().get(0).documento());
-        assertEquals("João da Silva", response.getBody().get(0).nome());
-        assertEquals("joao.silva@email.com", response.getBody().get(0).email());
-        assertEquals("11999999999", response.getBody().get(0).telefone());
-
-        assertEquals("98765432100", response.getBody().get(1).documento());
-        assertEquals("Maria Oliveira", response.getBody().get(1).nome());
-        assertEquals("maria.oliveira@email.com", response.getBody().get(1).email());
-        assertEquals("11988887777", response.getBody().get(1).telefone());
 
         verify(listarClientesUseCase, times(1)).findAll();
     }

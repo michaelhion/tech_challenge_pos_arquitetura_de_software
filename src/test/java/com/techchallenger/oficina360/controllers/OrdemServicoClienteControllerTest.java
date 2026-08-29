@@ -1,9 +1,9 @@
 package com.techchallenger.oficina360.controllers;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDTO;
 import com.techchallenger.oficina360.frameworks.web.controllers.OrdemServicoClienteController;
 import com.techchallenger.oficina360.usecases.ordemservico.AprovarOrcamentoUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.BuscarOrdemServicoPorIdUseCase;
@@ -96,11 +96,13 @@ class OrdemServicoClienteControllerTest {
 
 		ResponseEntity<OrdemServicoDTO> response = controller.buscarPorId(ordemServicoId);
 
-		assertAll(() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(response.getBody()),
+		assertAll(
+				() -> assertEquals(HttpStatus.OK, response.getStatusCode()), () -> assertNotNull(response.getBody()),
 				() -> assertEquals(dtoEsperado.documentoCliente(), response.getBody().documentoCliente()),
 				() -> assertEquals(dtoEsperado.placaVeiculo(), response.getBody().placaVeiculo()),
 				() -> assertEquals(dtoEsperado.descricaoProblema(), response.getBody().descricaoProblema()),
-				() -> assertEquals(dtoEsperado.ordemDeServicoStatus(), response.getBody().ordemDeServicoStatus()));
+				() -> assertEquals(dtoEsperado.ordemDeServicoStatus(), response.getBody().ordemDeServicoStatus())
+		);
 
 		verify(buscarOrdemServicoPorIdUseCase, times(1)).findById(ordemServicoId);
 

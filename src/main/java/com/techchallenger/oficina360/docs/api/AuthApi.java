@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.docs.api;
 
-import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
-import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
-import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.CriarUsuarioRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.LoginRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.LoginResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,6 +1,6 @@
 package com.techchallenger.oficina360.it.ordemservicos;
 
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
 import com.techchallenger.oficina360.it.BaseIT;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;

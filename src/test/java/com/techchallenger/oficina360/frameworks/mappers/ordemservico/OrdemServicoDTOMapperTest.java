@@ -3,17 +3,17 @@ package com.techchallenger.oficina360.frameworks.mappers.ordemservico;
 import com.techchallenger.oficina360.dominio.OrdemServico;
 import com.techchallenger.oficina360.dominio.OrdemServicoItemEstoque;
 import com.techchallenger.oficina360.dominio.OrdemServicoServico;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.DadosFinanceirosDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.detalhes.PecasInsumosAdicionadosDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.detalhes.ServicosAdicionadosDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import com.techchallenger.oficina360.enums.OrdemDeServicoStatus;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoResponseDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.DadosFinanceirosDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDetailDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.detalhes.PecasInsumosAdicionadosDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.detalhes.ServicosAdicionadosDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
 import com.techchallenger.oficina360.usecases.ordemservico.command.AprovacaoOrdemServicoCommand;
 import com.techchallenger.oficina360.usecases.ordemservico.command.DadosFinanceirosCommand;
@@ -46,8 +46,10 @@ class OrdemServicoDTOMapperTest {
 	private static final UUID ORDEM_SERVICO_ID = UUID.fromString("7b5a3247-a14a-44f8-872f-016e179a92fd");
 
 	private static final String DOCUMENTO_CLIENTE = "12345678901";
+	private static final String DOCUMENTO_CLIENTE_MASCARADO = "***8901";
 
 	private static final String PLACA_VEICULO = "ABC1D23";
+	private static final String PLACA_VEICULO_MASCARADA = "ABC***23";
 
 	private static final String DESCRICAO_PROBLEMA = "Veículo apresenta ruído metálico ao frear";
 
@@ -89,19 +91,10 @@ class OrdemServicoDTOMapperTest {
 	private OrdemServico ordemServico;
 
 	@Mock
-	private OrdemServicoEntity ordemServicoEntity;
-
-	@Mock
 	private OrdemServicoServico servico;
 
 	@Mock
 	private OrdemServicoItemEstoque itemEstoque;
-
-	@Mock
-	private OrdemServicoServico servicoConvertido;
-
-	@Mock
-	private OrdemServicoItemEstoque itemConvertido;
 
 	private OrdemServicoDTOMapper mapper;
 
@@ -124,9 +117,9 @@ class OrdemServicoDTOMapperTest {
 
 		assertNotNull(resultado);
 
-		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE, resultado.documentoCliente(),
+		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE_MASCARADO, resultado.documentoCliente(),
 						"O documento deve ocupar documentoCliente"),
-				() -> assertEquals(PLACA_VEICULO, resultado.placaVeiculo(), "A placa deve ocupar placaVeiculo"),
+				() -> assertEquals(PLACA_VEICULO_MASCARADA, resultado.placaVeiculo(), "A placa deve ocupar placaVeiculo"),
 				() -> assertEquals(DESCRICAO_PROBLEMA, resultado.descricaoProblema(),
 						"A descrição deve ocupar descricaoProblema"),
 				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.ordemDeServicoStatus(),
@@ -184,13 +177,13 @@ class OrdemServicoDTOMapperTest {
 		assertNotNull(resultado);
 		assertEquals(1, resultado.size());
 
-		OrdemServicoDTO dto = resultado.get(0);
+		OrdemServicoDTO dto = resultado.getFirst();
 
 		assertNotNull(dto);
 
-		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE, dto.documentoCliente(),
+		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE_MASCARADO, dto.documentoCliente(),
 						"O documento do cliente deve ocupar o campo documentoCliente"),
-				() -> assertEquals(PLACA_VEICULO, dto.placaVeiculo(), "A placa deve ocupar o campo placaVeiculo"),
+				() -> assertEquals(PLACA_VEICULO_MASCARADA, dto.placaVeiculo(), "A placa deve ocupar o campo placaVeiculo"),
 				() -> assertEquals(DESCRICAO_PROBLEMA, dto.descricaoProblema(),
 						"A descrição deve ocupar o campo descricaoProblema"),
 				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, dto.ordemDeServicoStatus(),
@@ -204,7 +197,7 @@ class OrdemServicoDTOMapperTest {
 
 		assertEquals(1, resultado.size());
 
-		assertNull(resultado.get(0));
+		assertNull(resultado.getFirst());
 	}
 
 	@Test
@@ -279,8 +272,8 @@ class OrdemServicoDTOMapperTest {
 
 		assertNotNull(resultado);
 
-		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE, resultado.documentoCliente()),
-				() -> assertEquals(PLACA_VEICULO, resultado.placaVeiculo()),
+		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE_MASCARADO, resultado.documentoCliente()),
+				() -> assertEquals(PLACA_VEICULO_MASCARADA, resultado.placaVeiculo()),
 				() -> assertEquals(DESCRICAO_PROBLEMA, resultado.descricaoProblema()),
 				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.ordemDeServicoStatus()));
 	}
@@ -294,8 +287,8 @@ class OrdemServicoDTOMapperTest {
 		assertNotNull(resultado);
 
 		assertAll(() -> assertEquals(ORDEM_SERVICO_ID, resultado.id()),
-				() -> assertEquals(DOCUMENTO_CLIENTE, resultado.documentoCliente()),
-				() -> assertEquals(PLACA_VEICULO, resultado.placaVeiculo()),
+				() -> assertEquals(DOCUMENTO_CLIENTE_MASCARADO, resultado.documentoCliente()),
+				() -> assertEquals(PLACA_VEICULO_MASCARADA, resultado.placaVeiculo()),
 				() -> assertEquals(DESCRICAO_PROBLEMA, resultado.descricaoProblema()),
 				() -> assertEquals(OrdemDeServicoStatus.RECEBIDA, resultado.ordemDeServicoStatus()));
 	}
@@ -312,8 +305,8 @@ class OrdemServicoDTOMapperTest {
 
 		assertNotNull(resultado);
 
-		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE, resultado.documentoCliente()),
-				() -> assertEquals(PLACA_VEICULO, resultado.placaVeiculo()),
+		assertAll(() -> assertEquals(DOCUMENTO_CLIENTE_MASCARADO, resultado.documentoCliente()),
+				() -> assertEquals(PLACA_VEICULO_MASCARADA, resultado.placaVeiculo()),
 				() -> assertEquals(DESCRICAO_PROBLEMA, resultado.descricaoProblema()),
 				() -> assertEquals(OrdemDeServicoStatus.AGUARDANDO_APROVACAO, resultado.ordemDeServicoStatus()),
 				() -> assertNotNull(resultado.dadosFinanceiros()));
@@ -345,8 +338,8 @@ class OrdemServicoDTOMapperTest {
 
 		assertAll(() -> assertEquals(List.of("SRV-TROCA-OLEO", "SRV-ALINHAMENTO"), resultado.codigosServicos()),
 				() -> assertEquals(2, resultado.itensEstoque().size()),
-				() -> assertEquals("EST-FILTRO-OLEO", resultado.itensEstoque().get(0).codigo()),
-				() -> assertEquals(1, resultado.itensEstoque().get(0).quantidade()),
+				() -> assertEquals("EST-FILTRO-OLEO", resultado.itensEstoque().getFirst().codigo()),
+				() -> assertEquals(1, resultado.itensEstoque().getFirst().quantidade()),
 				() -> assertEquals("EST-OLEO-5W30", resultado.itensEstoque().get(1).codigo()),
 				() -> assertEquals(4, resultado.itensEstoque().get(1).quantidade()));
 	}
@@ -410,9 +403,9 @@ class OrdemServicoDTOMapperTest {
 				() -> assertEquals(1, resultado.servicos().size()),
 				() -> assertEquals(1, resultado.pecasInsumos().size()));
 
-		ServicosAdicionadosDTO servicoDTO = resultado.servicos().get(0);
+		ServicosAdicionadosDTO servicoDTO = resultado.servicos().getFirst();
 
-		PecasInsumosAdicionadosDTO pecaDTO = resultado.pecasInsumos().get(0);
+		PecasInsumosAdicionadosDTO pecaDTO = resultado.pecasInsumos().getFirst();
 
 		assertAll(() -> assertEquals(DESCRICAO_SERVICO, servicoDTO.nome()),
 				() -> assertBigDecimalEquals(VALOR_SERVICO, servicoDTO.valor()),

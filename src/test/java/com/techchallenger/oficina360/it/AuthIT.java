@@ -2,7 +2,7 @@ package com.techchallenger.oficina360.it;
 
 import com.techchallenger.oficina360.constants.Roles;
 import com.techchallenger.oficina360.dominio.Usuario;
-import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.LoginRequestDTO;
 import com.techchallenger.oficina360.gateways.PasswordEncoderGateway;
 import com.techchallenger.oficina360.gateways.UsuarioGateway;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +67,7 @@ class AuthIT {
 
 		JsonNode json = objectMapper.readTree(response);
 
-		String token = json.get("token").asText();
+		String token = json.get("token").asString();
 
 		mockMvc.perform(get("/clientes/listar")
 				.header("Authorization", "Bearer " + token))
@@ -88,7 +88,7 @@ class AuthIT {
 
 		JsonNode json = objectMapper.readTree(response);
 
-		String token = json.get("token").asText();
+		String token = json.get("token").asString();
 
 		mockMvc.perform(
 				post("/clientes/salvar")
@@ -136,8 +136,7 @@ class AuthIT {
 
 		String token1 =
 				objectMapper.readTree(response1)
-						.get("token")
-						.asText();
+						.get("token").asString();
 
 		mockMvc.perform(
 						get("/clientes/listar")

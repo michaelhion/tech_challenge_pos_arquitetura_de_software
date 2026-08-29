@@ -1,17 +1,19 @@
 package com.techchallenger.oficina360.frameworks.mappers.veiculo;
 
 import com.techchallenger.oficina360.dominio.Veiculo;
-import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.veiculos.VeiculoDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.VeiculoEntity;
 import com.techchallenger.oficina360.usecases.veiculo.commands.VeiculoCommand;
 import org.springframework.stereotype.Component;
+
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
 
 @Component
 public class VeiculoDTOMapper {
 
     public static VeiculoDTO commandToDTO(VeiculoCommand command){
         return new VeiculoDTO(
-                command.placa(),
+                mascararPlaca(command.placa()),
                 command.marca(),
                 command.modelo(),
                 Integer.valueOf(command.ano()),

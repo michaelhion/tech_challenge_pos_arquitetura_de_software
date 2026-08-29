@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.VeiculosApi;
-import com.techchallenger.oficina360.dtos.veiculos.VeiculoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.veiculos.VeiculoDTO;
 import com.techchallenger.oficina360.frameworks.mappers.veiculo.VeiculoDTOMapper;
 import com.techchallenger.oficina360.usecases.veiculo.AtualizarVeiculoUseCase;
 import com.techchallenger.oficina360.usecases.veiculo.BuscarVeiculoPorPlacaUseCase;

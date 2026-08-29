@@ -17,22 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.AGUARDANDO_APROVACAO;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.EM_DIAGNOSTICO;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.EM_EXECUCAO;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.ENTREGUE;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.FINALIZADA;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.ORCAMENTO_APROVADO;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.ORCAMENTO_REPROVADO;
-import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.RECEBIDA;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.techchallenger.oficina360.enums.OrdemDeServicoStatus.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

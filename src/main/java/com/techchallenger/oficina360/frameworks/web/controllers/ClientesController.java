@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.ClientesApi;
-import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.frameworks.mappers.cliente.ClienteDTOMapper;
 import com.techchallenger.oficina360.usecases.cliente.AtualizarClienteUseCase;
 import com.techchallenger.oficina360.usecases.cliente.BuscarClientePorDocumentoUseCase;

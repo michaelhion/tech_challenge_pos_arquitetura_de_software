@@ -3,7 +3,7 @@ package com.techchallenger.oficina360.it.ordemservicos;
 import com.jayway.jsonpath.JsonPath;
 import com.techchallenger.oficina360.dominio.Estoque;
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
 import com.techchallenger.oficina360.gateways.NotificacaoEmailGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
 
@@ -127,8 +126,8 @@ public class OrdemServicoFluxosIT extends BaseIT {
 	}
 
 
-	private ResultActions aprovar(String id,AprovacaoOrdemServicoDTO aprovacaoOrdemServicoDTO, String token) throws Exception {
-		return mockMvc.perform(autenticado(patch(("/ordem-servico/clientes/aprovacao/%s").formatted(
+	private void aprovar(String id,AprovacaoOrdemServicoDTO aprovacaoOrdemServicoDTO, String token) throws Exception {
+		mockMvc.perform(autenticado(patch(("/ordem-servico/clientes/aprovacao/%s").formatted(
 				id)), token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(aprovacaoOrdemServicoDTO)));

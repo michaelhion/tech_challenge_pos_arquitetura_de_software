@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.mappers.cliente;
 
 import com.techchallenger.oficina360.dominio.Cliente;
-import com.techchallenger.oficina360.dtos.clientes.ClienteDTO;
+import com.techchallenger.oficina360.frameworks.dtos.clientes.ClienteDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.ClienteEntity;
 import com.techchallenger.oficina360.usecases.ordemservico.command.ClienteCommand;
 import org.springframework.stereotype.Component;
@@ -72,7 +72,7 @@ public class ClienteDTOMapper {
 
     public static ClienteDTO commandToDTO(ClienteCommand command){
         return new ClienteDTO(
-                command.documento(),
+                mascararDocumento(command.documento()),
                 command.nome(),
                 command.email(),
                 command.telefone()

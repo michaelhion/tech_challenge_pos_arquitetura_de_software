@@ -1,7 +1,7 @@
 package com.techchallenger.oficina360.frameworks.mappers.servico;
 
 import com.techchallenger.oficina360.dominio.Servico;
-import com.techchallenger.oficina360.dtos.servicos.ServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.servicos.ServicoDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.ServicoEntity;
 import com.techchallenger.oficina360.usecases.servicos.commands.ServicoCommand;
 import org.springframework.stereotype.Component;

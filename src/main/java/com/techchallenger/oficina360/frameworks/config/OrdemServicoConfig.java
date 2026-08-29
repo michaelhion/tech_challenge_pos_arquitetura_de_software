@@ -4,7 +4,6 @@ import com.techchallenger.oficina360.frameworks.adapters.RelogioSistema;
 import com.techchallenger.oficina360.gateways.ClienteGateway;
 import com.techchallenger.oficina360.gateways.EstoqueGateway;
 import com.techchallenger.oficina360.gateways.OrdemServicoGateway;
-import com.techchallenger.oficina360.gateways.Relogio;
 import com.techchallenger.oficina360.gateways.ServicoGateway;
 import com.techchallenger.oficina360.gateways.TempoExecucaoServicoGateway;
 import com.techchallenger.oficina360.gateways.VeiculoGateway;

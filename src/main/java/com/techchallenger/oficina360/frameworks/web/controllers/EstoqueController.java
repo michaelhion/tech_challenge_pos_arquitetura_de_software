@@ -1,8 +1,8 @@
 package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.EstoqueApi;
-import com.techchallenger.oficina360.dtos.estoques.EstoqueDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.estoques.EstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.ReservaEstoqueDTO;
 import com.techchallenger.oficina360.frameworks.mappers.estoque.EstoqueDTOMapper;
 import com.techchallenger.oficina360.usecases.estoque.BuscarItemEstoqueUseCase;
 import com.techchallenger.oficina360.usecases.estoque.CriarItemEstoqueUseCase;

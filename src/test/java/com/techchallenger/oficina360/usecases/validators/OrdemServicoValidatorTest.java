@@ -20,9 +20,7 @@ import java.util.UUID;
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.OS_ORDEM_DE_SERVICO_ATIVA_PARA_O_VEICULO;
 import static com.techchallenger.oficina360.constants.MensagensDeErroConstant.OS_VEICULO_NAO_PERTENCE_AO_CLIENTE;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

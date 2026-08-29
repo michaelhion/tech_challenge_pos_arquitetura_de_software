@@ -1,9 +1,9 @@
 package com.techchallenger.oficina360.frameworks.web.controllers;
 
 import com.techchallenger.oficina360.docs.api.AuthApi;
-import com.techchallenger.oficina360.dtos.autenticacao.CriarUsuarioRequestDTO;
-import com.techchallenger.oficina360.dtos.autenticacao.LoginRequestDTO;
-import com.techchallenger.oficina360.dtos.autenticacao.LoginResponseDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.CriarUsuarioRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.LoginRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.autenticacao.LoginResponseDTO;
 import com.techchallenger.oficina360.usecases.auth.AutenticarUsuarioUseCase;
 import com.techchallenger.oficina360.usecases.auth.CriarUsuarioUseCase;
 import com.techchallenger.oficina360.usecases.ordemservico.command.CriarUsuarioCommand;

@@ -1,10 +1,10 @@
 package com.techchallenger.oficina360.it.fixtures.ordemservico;
 
 import com.techchallenger.oficina360.dominio.Usuario;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

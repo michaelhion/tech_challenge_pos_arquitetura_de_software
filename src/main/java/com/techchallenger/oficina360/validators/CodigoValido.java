@@ -8,8 +8,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static com.techchallenger.oficina360.dtos.validators.CodigoPattern.MESSAGE;
-import static com.techchallenger.oficina360.dtos.validators.CodigoPattern.REGEX;
+import static com.techchallenger.oficina360.frameworks.dtos.validators.CodigoPattern.MESSAGE;
+import static com.techchallenger.oficina360.frameworks.dtos.validators.CodigoPattern.REGEX;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

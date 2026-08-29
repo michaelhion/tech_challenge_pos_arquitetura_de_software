@@ -1,16 +1,16 @@
 package com.techchallenger.oficina360.frameworks.mappers.ordemservico;
 
 import com.techchallenger.oficina360.dominio.OrdemServico;
-import com.techchallenger.oficina360.dtos.ordemservico.AprovacaoOrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoRequestDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.CriarOrdemServicoResponseDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.DadosFinanceirosDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.OrdemServicoDetailDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.detalhes.PecasInsumosAdicionadosDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.detalhes.ServicosAdicionadosDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoDTO;
-import com.techchallenger.oficina360.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.AprovacaoOrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoRequestDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.CriarOrdemServicoResponseDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.DadosFinanceirosDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.OrdemServicoDetailDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.detalhes.PecasInsumosAdicionadosDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.detalhes.ServicosAdicionadosDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoDTO;
+import com.techchallenger.oficina360.frameworks.dtos.ordemservico.diagnostico.DiagnosticoEstoqueDTO;
 import com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoEntity;
 import com.techchallenger.oficina360.usecases.ordemservico.command.AprovacaoOrdemServicoCommand;
 import com.techchallenger.oficina360.usecases.ordemservico.command.DadosFinanceirosCommand;
@@ -28,6 +28,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararDocumento;
+import static com.techchallenger.oficina360.utils.FormataDadosUtils.mascararPlaca;
+
 @Component
 @RequiredArgsConstructor
 public class OrdemServicoDTOMapper {
@@ -38,8 +41,8 @@ public class OrdemServicoDTOMapper {
 
 	public static OrdemServicoDTO domainToDTO(OrdemServico domain){
 		return new OrdemServicoDTO(
-				domain.getDocumentoCliente(),
-				domain.getPlacaVeiculo(),
+				mascararDocumento(domain.getDocumentoCliente()),
+				mascararPlaca(domain.getPlacaVeiculo()),
 				domain.getDescricaoProblema(),
 				domain.getOrdemDeServicoStatus()
 		);
@@ -75,8 +78,8 @@ public class OrdemServicoDTOMapper {
 		}
 
 		return new OrdemServicoDTO(
-				output.documentoCliente(),
-				output.placaVeiculo(),
+				mascararDocumento(output.documentoCliente()),
+				mascararPlaca(output.placaVeiculo()),
 				output.descricaoProblema(),
 				output.status()
 		);
@@ -144,8 +147,8 @@ public class OrdemServicoDTOMapper {
 
 	public static OrdemServicoDTO commandToDTO(OrdemServicoRespCommand command) {
 		return new OrdemServicoDTO(
-				command.documentoCliente(),
-				command.placaVeiculo(),
+				mascararDocumento(command.documentoCliente()),
+				mascararPlaca(command.placaVeiculo()),
 				command.descricaoProblema(),
 				command.status()
 
@@ -154,8 +157,8 @@ public class OrdemServicoDTOMapper {
 
 	public static OrdemServicoDetailDTO commandDadosFinanceirosToDTO(OrdemServicoDiagnosticoRespCommand command) {
 		return new OrdemServicoDetailDTO(
-				command.documentoCliente(),
-				command.placaVeiculo(),
+				mascararDocumento(command.documentoCliente()),
+				mascararPlaca(command.placaVeiculo()),
 				command.descricaoProblema(),
 				command.status(),
 				toDadosFinanceirosDTO(command.dadosFinanceirosCommand())
@@ -166,8 +169,8 @@ public class OrdemServicoDTOMapper {
 	public static CriarOrdemServicoResponseDTO criarOsRespCommandToDTO(OrdemServicoRespCommand command){
 		return new CriarOrdemServicoResponseDTO(
 				command.id(),
-				command.documentoCliente(),
-				command.placaVeiculo(),
+				mascararDocumento(command.documentoCliente()),
+				mascararPlaca(command.placaVeiculo()),
 				command.descricaoProblema(),
 				command.status()
 		);
