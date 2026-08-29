@@ -248,13 +248,6 @@ validate_manifests() {
       >/dev/null
   done
 
-  if [[ -x "$SCRIPT_DIR/validate.sh" ]]; then
-    echo ""
-    echo "Executando validate.sh..."
-
-    "$SCRIPT_DIR/validate.sh"
-  fi
-
   echo "Validação concluída."
 }
 

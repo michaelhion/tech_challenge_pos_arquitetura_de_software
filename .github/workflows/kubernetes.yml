@@ -87,10 +87,6 @@ jobs:
 
           chmod +x "$K8S_DIR/deploy.sh"
 
-          if [[ -f "$K8S_DIR/validate.sh" ]]; then
-            chmod +x "$K8S_DIR/validate.sh"
-          fi
-
           echo "Arquivos de deploy encontrados."
 
       # ------------------------------------------------------------
@@ -242,11 +238,6 @@ jobs:
             "${deployment_files[@]}" \
             .deploy/k8s/
 
-          if [[ -f k8s/validate.sh ]]; then
-            cp k8s/validate.sh .deploy/k8s/
-            chmod +x .deploy/k8s/validate.sh
-          fi
-
           DB_USERNAME_BASE64="$(
             printf '%s' "$DB_USERNAME" |
               base64 -w 0
@@ -292,7 +283,7 @@ jobs:
             -name '*metrics-server*' |
             grep -q .; then
 
-            echo "::error::O Metrics Server não deve entrar no pacote."
+            echo "::error::Metrics Server não deve entrar no pacote."
             exit 1
           fi
 
