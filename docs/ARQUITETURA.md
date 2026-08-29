@@ -92,7 +92,24 @@ A arquitetura da solução foi documentada utilizando o modelo C4, permitindo vi
 
 O diagrama de contexto apresenta os atores que interagem com o sistema e uma visão macro da solução.
 
-![C4 Context](c4/images/C4_CONTEXT.png)
+```mermaid
+flowchart LR
+
+    Cliente[Cliente]
+    Atendente[Atendente]
+    Mecanico[Mecânico]
+    Admin[Administrador]
+
+    Sistema[Oficina360]
+
+    Cliente -->|Consulta status da OS\nAprova orçamento| Sistema
+
+    Atendente -->|Gerencia clientes\nveículos e OS| Sistema
+
+    Mecanico -->|Realiza diagnósticos\nExecuta serviços| Sistema
+
+    Admin -->|Administra usuários\nConfigura sistema| Sistema
+````
 
 ### Objetivo
 
@@ -102,9 +119,9 @@ Demonstrar:
 - Qual o propósito da solução;
 - Como os usuários interagem com o Oficina360.
 
-### Arquivo Fonte
+### Arquivo Fonte do que foi feito na primeira fase
 
-[C4_CONTEXT.dsl](c4/dsl/C4_CONTEXT.dsl)
+[C4_CONTEXT.dsl](c4/c4_fase_1/dsl/C4_CONTEXT.dsl)
 
 ---
 
@@ -112,7 +129,32 @@ Demonstrar:
 
 O diagrama de containers apresenta a divisão lógica da aplicação em seus principais blocos tecnológicos.
 
-![C4 Container](c4/images/C4_CONTAINER.png)
+```mermaid
+flowchart LR
+
+    Cliente[Usuários]
+
+    subgraph Oficina360
+
+        API["API Oficina360
+        Spring Boot"]
+
+        Swagger["Swagger/OpenAPI"]
+
+    end
+
+    Banco["(PostgreSQL)"]
+
+    Email[Servidor SMTP]
+
+    Cliente -->|HTTPS + JWT| API
+
+    Swagger --> API
+
+    API -->|JPA/Hibernate| Banco
+
+    API -->|Notificações| Email
+```
 
 ### Objetivo
 
@@ -155,9 +197,9 @@ Responsável pela documentação e exploração dos endpoints REST.
 
 **Tecnologia:** SpringDoc
 
-### Arquivo Fonte
+### Arquivo Fonte do que foi feito na primeira fase
 
-[C4_CONTAINER.dsl](c4/dsl/C4_CONTAINER.dsl)
+[C4_CONTAINER.dsl](c4/c4_fase_1/dsl/C4_CONTAINER.dsl)
 
 ---
 
@@ -165,7 +207,143 @@ Responsável pela documentação e exploração dos endpoints REST.
 
 O diagrama de componentes apresenta a estrutura interna da API Oficina360.
 
-![C4 Component](c4/images/C4_COMPONENT.png)
+```mermaid
+flowchart LR
+
+    Usuario[Usuário]
+
+    subgraph Interface Adapters
+
+        Controllers["Controllers
+        AuthController
+        ClientesController
+        VeículosController
+        EstoqueController
+        ServicosController
+        OrdemServicoController"]
+
+    end
+
+    subgraph Application
+
+        UseCases["Use Cases
+
+        CadastrarClienteUseCase
+        AbrirOrdemServicoUseCase
+        DiagnosticarOSUseCase
+        AprovarOrcamentoUseCase
+        IniciarExecucaoUseCase
+        FinalizarExecucaoUseCase"]
+
+        Gateways["Gateways
+
+        ClienteGateway
+        VeiculoGateway
+        OrdemServicoGateway
+        EstoqueGateway
+        UsuarioGateway
+        TokenGateway"]
+    end
+
+    subgraph Domain
+
+        Dominio["Entidades
+
+        Cliente
+        Veiculo
+        OrdemServico
+        Estoque
+        Servico
+        Usuario"]
+    end
+
+    subgraph Frameworks
+
+        Adapters["Gateway Implementations"]
+
+        Security["JWT/Spring Security"]
+
+        Persistence["JPA Repositories"]
+
+        Email["SMTP"]
+    end
+
+    Banco["(PostgreSQL)"]
+
+    Usuario --> Controllers
+
+    Controllers --> UseCases
+
+    UseCases --> Dominio
+
+    UseCases --> Gateways
+
+    Gateways --> Adapters
+
+    Adapters --> Persistence
+
+    Adapters --> Security
+
+    Adapters --> Email
+
+    Persistence --> Banco
+```
+#### component detail
+
+```mermaid
+flowchart LR
+
+    Usuario[Atendente]
+
+    Controller["OrdemServicoOficinaController"]
+
+    UC1["AbrirOrdemServicoUseCase"]
+
+    UC2["DiagnosticarOrdemServicoUseCase"]
+
+    UC3["AprovarOrcamentoUseCase"]
+
+    UC4["IniciarExecucaoUseCase"]
+
+    UC5["FinalizarExecucaoUseCase"]
+
+    Gateway["OrdemServicoGateway"]
+
+    EstoqueGateway["EstoqueGateway"]
+
+    Notificacao["NotificacaoEmailGateway"]
+
+    Adapter["OrdemServicoGatewayImpl"]
+
+    Repo["OrdemServicosRepository"]
+
+    Banco["(PostgreSQL)"]
+
+    Usuario --> Controller
+
+    Controller --> UC1
+    Controller --> UC2
+    Controller --> UC3
+    Controller --> UC4
+    Controller --> UC5
+
+    UC1 --> Gateway
+    UC2 --> Gateway
+    UC2 --> EstoqueGateway
+
+    UC3 --> Gateway
+
+    UC4 --> Gateway
+
+    UC5 --> Gateway
+    UC5 --> Notificacao
+
+    Gateway --> Adapter
+
+    Adapter --> Repo
+
+    Repo --> Banco
+```
 
 ### Objetivo
 
@@ -175,42 +353,65 @@ Demonstrar:
 - O relacionamento entre os componentes;
 - A distribuição das responsabilidades dentro da API.
 
-### Arquivo Fonte
+### Arquivo Fonte do que foi feito na primeira fase
 
-[C4_COMPONENT.dsl](c4/dsl/C4_COMPONENT.dsl)
+[C4_COMPONENT.dsl](c4/c4_fase_1/dsl/C4_COMPONENT.dsl)
 
 ---
 
-# Arquitetura em Camadas
+# Arquitetura clean Architecture
 
-A solução utiliza uma arquitetura em camadas baseada no padrão adotado pelo Spring Boot.
+A solução utiliza uma arquitetura clean arch + spring boot.
 
 ```text
-Controller
-      ↓
-Service
-      ↓
-Repository
-      ↓
-Banco de Dados
+┌───────────────────────────────┐
+│ Frameworks & Drivers          │
+│                               │
+│ controllers                   │
+│ security                      │
+│ repositories                  │
+│ spring configuration          │
+└──────────────┬────────────────┘
+               │
+┌──────────────▼────────────────┐
+│ Interface Adapters            │
+│                               │
+│ GatewayImpl                   │
+│ DTO Mappers                   │
+│ Request/Response DTO          │
+└──────────────┬────────────────┘
+               │
+┌──────────────▼────────────────┐
+│ Application Business Rules    │
+│                               │
+│ UseCases                      │
+│ Factories                     │
+│ Validators                    │
+│ Services                      │
+│ Finders                       │
+└──────────────┬────────────────┘
+               │
+┌──────────────▼────────────────┐
+│ Enterprise Business Rules     │
+│                               │
+│ Cliente                       │
+│ Veiculo                       │
+│ OrdemServico                  │
+│ Estoque                       │
+│ Servico                       │
+│ Usuario                       │
+└───────────────────────────────┘
 ```
 
 ---
 
 # Segurança
 
-Relatorio do snyk sobre pom.xml
+Relatorio do OWASP 
 
-Obs.: vulnerabilidade média sem solução no momento (30/06/26)
+[Relatorio](security/owasp/dependency-check-report.html)
 
-![Relatorio pom](security/relatorio-snyk-pom.png)
 
-Relatorio do snyk sobre dockerfile
-
-![Relatorio dockerfile](security/relatorio-snyk-dockerfile.png)
-
-Relatorio sonar (tambem disponivel em https://sonarcloud.io/project/overview?id=michaelhion_tech_challenge_pos_arquitetura_de_software)
+Relatorio sonar [Sonar](https://sonarcloud.io/project/overview?id=michaelhion_tech_challenge_pos_arquitetura_de_software)
 
 Obs.: Apresenta um falso positivo (no caso de uma api puramente rest) sobre desabilitar o csrf, se futuramente esta api tiver integração com um front end será necessário corrigir
-
-![Relatorio sonar](security/relatorio-sonar.png)

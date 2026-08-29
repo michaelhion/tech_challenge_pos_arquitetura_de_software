@@ -263,7 +263,7 @@ O sistema deve permitir que clientes adicionem observações ao aprovar ou repro
 
 ## RNF001 – Arquitetura
 
-Arquitetura em camadas: Controller, Service, Repository, Entity, DTO e Mapper.
+Arquitetura clean architecture
 
 ## RNF002 – API REST
 

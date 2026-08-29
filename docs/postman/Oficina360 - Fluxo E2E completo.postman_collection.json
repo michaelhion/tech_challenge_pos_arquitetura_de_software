@@ -1,0 +1,954 @@
+{
+  "info": {
+    "_postman_id": "fe4cf4ef-695e-426f-ad6b-842a8ceeb423",
+    "name": "Oficina360 - Fluxo E2E completo",
+    "description": "Fluxo ponta a ponta: autentica admin, cria cliente e usuario, autentica cliente, cria veiculo, servico, estoque e ordem de servico; diagnostica, aprova, inicia e finaliza a execucao. Execute a collection em ordem pelo Collection Runner ou Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "14192165"
+  },
+  "item": [
+    {
+      "name": "01 - Login do administrador",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Inicializa dados unicos para cada execucao da collection.",
+              "const runId = Date.now().toString().slice(-8);",
+              "",
+              "function gerarCpfValido(base9) {",
+              "  const nums = base9.split('').map(Number);",
+              "  let soma = nums.reduce((acc, n, i) => acc + n * (10 - i), 0);",
+              "  let d1 = 11 - (soma % 11); d1 = d1 >= 10 ? 0 : d1;",
+              "  const nums10 = [...nums, d1];",
+              "  soma = nums10.reduce((acc, n, i) => acc + n * (11 - i), 0);",
+              "  let d2 = 11 - (soma % 11); d2 = d2 >= 10 ? 0 : d2;",
+              "  return `${base9}${d1}${d2}`;",
+              "}",
+              "",
+              "const base = String(Math.floor(100000000 + Math.random() * 899999999));",
+              "pm.collectionVariables.set(\"runId\", runId);",
+              "pm.collectionVariables.set(\"clienteDocumento\", gerarCpfValido(base));",
+              "pm.collectionVariables.set(\"clienteNome\", `Cliente E2E ${runId}`);",
+              "pm.collectionVariables.set(\"clienteEmail\", `cliente.e2e.${runId}@oficina360.test`);",
+              "pm.collectionVariables.set(\"clienteSenha\", `Senha@${runId}`);",
+              "pm.collectionVariables.set(\"clienteTelefone\", `119${runId}`.slice(0, 11));",
+              "",
+              "const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';",
+              "const placa = `${letras[Math.floor(Math.random()*26)]}${letras[Math.floor(Math.random()*26)]}${letras[Math.floor(Math.random()*26)]}${Math.floor(Math.random()*10)}${letras[Math.floor(Math.random()*26)]}${String(Math.floor(Math.random()*100)).padStart(2,'0')}`;",
+              "pm.collectionVariables.set(\"veiculoPlaca\", placa);",
+              "pm.collectionVariables.set(\"servicoCodigo\", `SRV-E2E-${runId}`);",
+              "pm.collectionVariables.set(\"estoqueCodigo\", `EST-E2E-${runId}`);",
+              "pm.collectionVariables.unset(\"adminToken\");",
+              "pm.collectionVariables.unset(\"clienteToken\");",
+              "pm.collectionVariables.unset(\"ordemServicoId\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status HTTP 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.token, 'Token do administrador').to.be.a('string').and.not.empty;",
+              "pm.collectionVariables.set('adminToken', json.token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"senha\": \"{{adminSenha}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Autentica o administrador e inicializa os dados unicos da execucao."
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Cadastrar cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "const documento = pm.collectionVariables.get(\"clienteDocumento\");",
+              "",
+              "pm.test(\"Status HTTP 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Cliente foi criado com documento mascarado\", function () {",
+              "    pm.expect(json.documento).to.be.a(\"string\");",
+              "",
+              "    const ultimosQuatroDigitos = documento.slice(-4);",
+              "",
+              "    pm.expect(json.documento).to.eql(",
+              "        `***${ultimosQuatroDigitos}`",
+              "    );",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documento\": \"{{clienteDocumento}}\",\n  \"nome\": \"{{clienteNome}}\",\n  \"email\": \"{{clienteEmail}}\",\n  \"telefone\": \"{{clienteTelefone}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/clientes/salvar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "clientes",
+            "salvar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Criar usuario do cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Usuario do cliente criado', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{clienteEmail}}\",\n  \"senha\": \"{{clienteSenha}}\",\n  \"documento\": \"{{clienteDocumento}}\",\n  \"role\": \"CLIENTE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/criar-usuario",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "criar-usuario"
+          ]
+        },
+        "description": "Cria o usuario CLIENTE usado para aprovar o orcamento. Ajuste a autorizacao se este endpoint for publico."
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Login do cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status HTTP 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.token, 'Token do cliente').to.be.a('string').and.not.empty;",
+              "pm.collectionVariables.set('clienteToken', json.token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{clienteEmail}}\",\n  \"senha\": \"{{clienteSenha}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Cadastrar veiculo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "const placa = pm.collectionVariables.get(\"veiculoPlaca\");",
+              "",
+              "pm.test(\"Status HTTP 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Veículo foi criado com placa mascarada\", function () {",
+              "    pm.expect(json.placa).to.be.a(\"string\");",
+              "    pm.expect(placa).to.be.a(\"string\").and.not.empty;",
+              "",
+              "    const tresPrimeirosCaracteres = placa.slice(0, 3);",
+              "    const doisUltimosCaracteres = placa.slice(-2);",
+              "",
+              "    pm.expect(json.placa).to.eql(",
+              "        `${tresPrimeirosCaracteres}***${doisUltimosCaracteres}`",
+              "    );",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"placa\": \"{{veiculoPlaca}}\",\n  \"marca\": \"Volkswagen\",\n  \"modelo\": \"Virtus E2E\",\n  \"ano\": 2024,\n  \"clienteDocumento\": \"{{clienteDocumento}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/veiculos/salvar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "veiculos",
+            "salvar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Cadastrar servico",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status HTTP 201', function () { pm.response.to.have.status(201); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.codigo).to.eql(pm.collectionVariables.get('servicoCodigo'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"{{servicoCodigo}}\",\n  \"descricao\": \"Diagnostico e troca de componente E2E\",\n  \"valor\": 180.5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/servicos/salvar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "servicos",
+            "salvar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Cadastrar item de estoque",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status HTTP 201', function () { pm.response.to.have.status(201); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.codigo).to.eql(pm.collectionVariables.get('estoqueCodigo'));",
+              "pm.expect(json.disponiveis).to.eql(10);",
+              "pm.collectionVariables.set(",
+              "    \"quantidadeEstoqueInicial\",",
+              "    json.quantidade",
+              ");",
+              "",
+              "pm.collectionVariables.set(",
+              "    \"quantidadeUtilizada\",",
+              "    2",
+              ");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigo\": \"{{estoqueCodigo}}\",\n  \"nome\": \"Componente E2E\",\n  \"valor\": 75.25,\n  \"quantidade\": 10,\n  \"reservados\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/estoque/salvar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "estoque",
+            "salvar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Abrir ordem de servico",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status HTTP 201', function () { pm.response.to.have.status(201); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.id, 'ID da ordem de servico').to.be.a('string').and.not.empty;",
+              "pm.expect(json.ordemDeServicoStatus).to.eql('RECEBIDA');",
+              "pm.collectionVariables.set('ordemServicoId', json.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documentoCliente\": \"{{clienteDocumento}}\",\n  \"placaVeiculo\": \"{{veiculoPlaca}}\",\n  \"descricaoProblema\": \"Ruido e vibracao identificados no teste E2E\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/salvar",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "salvar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Diagnosticar ordem de servico",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status HTTP 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.ordemDeServicoStatus).to.eql('AGUARDANDO_APROVACAO');",
+              "pm.expect(json.dadosFinanceiros.valorServicos).to.eql(180.5);",
+              "pm.expect(json.dadosFinanceiros.valorPecasInsumos).to.eql(150.5);",
+              "pm.expect(json.dadosFinanceiros.valorTotal).to.eql(331);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"codigosServicos\": [\n    \"{{servicoCodigo}}\"\n  ],\n  \"itensEstoque\": [\n    {\n      \"codigo\": \"{{estoqueCodigo}}\",\n      \"quantidade\": 2\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/{{ordemServicoId}}/diagnostico",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "{{ordemServicoId}}",
+            "diagnostico"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 - Aprovar orcamento pelo cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status HTTP 200', function () { pm.response.to.have.status(202); });",
+              "// const json = pm.response.json();",
+              "// pm.expect(json.ordemDeServicoStatus).to.eql('ORCAMENTO_APROVADO');"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{clienteToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"aprovado\": true,\n  \"observacao\": \"Orcamento aprovado pelo fluxo E2E\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/clientes/aprovacao/{{ordemServicoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "clientes",
+            "aprovacao",
+            "{{ordemServicoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11 - Iniciar execucao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Execucao iniciada', function () { pm.expect(pm.response.code).to.be.oneOf([200, 202]); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/execucao/iniciar/{{ordemServicoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "execucao",
+            "iniciar",
+            "{{ordemServicoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12 - Consultar OS em execucao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status HTTP 200', function () { pm.response.to.have.status(200); });",
+              "const json = pm.response.json();",
+              "pm.expect(json.ordemDeServicoStatus).to.eql('EM_EXECUCAO');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/listar/{{ordemServicoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "listar",
+            "{{ordemServicoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 - Finalizar execucao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Execucao finalizada', function () { pm.expect(pm.response.code).to.be.oneOf([200, 202]); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/execucao/finalizar/{{ordemServicoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "execucao",
+            "finalizar",
+            "{{ordemServicoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "14 - Validar ordem finalizada",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "const documento =",
+              "    pm.collectionVariables.get(\"clienteDocumento\");",
+              "",
+              "const placa =",
+              "    pm.collectionVariables.get(\"veiculoPlaca\");",
+              "",
+              "pm.test(\"Status HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Ordem de serviço está finalizada\", function () {",
+              "    pm.expect(json.ordemDeServicoStatus)",
+              "        .to.eql(\"FINALIZADA\");",
+              "});",
+              "",
+              "pm.test(\"Documento do cliente está mascarado corretamente\", function () {",
+              "    pm.expect(documento)",
+              "        .to.be.a(\"string\")",
+              "        .and.not.empty;",
+              "",
+              "    pm.expect(json.documentoCliente)",
+              "        .to.eql(`***${documento.slice(-4)}`);",
+              "});",
+              "",
+              "pm.test(\"Placa do veículo está mascarada corretamente\", function () {",
+              "    pm.expect(placa)",
+              "        .to.be.a(\"string\")",
+              "        .and.not.empty;",
+              "",
+              "    const placaMascarada =",
+              "        `${placa.slice(0, 3)}***${placa.slice(-2)}`;",
+              "",
+              "    pm.expect(json.placaVeiculo)",
+              "        .to.eql(placaMascarada);",
+              "});",
+              "",
+              "pm.test(\"Valor total da ordem está correto\", function () {",
+              "    pm.expect(json.dadosFinanceiros)",
+              "        .to.be.an(\"object\");",
+              "",
+              "    pm.expect(json.dadosFinanceiros.valorTotal)",
+              "        .to.eql(331);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/ordem-servico/listar/{{ordemServicoId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ordem-servico",
+            "listar",
+            "{{ordemServicoId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15 - Validar reserva no estoque",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "const quantidadeInicial = Number(",
+              "    pm.collectionVariables.get(\"quantidadeEstoqueInicial\")",
+              ");",
+              "",
+              "const quantidadeUtilizada = Number(",
+              "    pm.collectionVariables.get(\"quantidadeUtilizada\")",
+              ");",
+              "",
+              "const quantidadeFinal =",
+              "    quantidadeInicial - quantidadeUtilizada;",
+              "",
+              "pm.test(\"Status HTTP 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Quantidade utilizada foi baixada do estoque\", function () {",
+              "    pm.expect(json.quantidade).to.eql(quantidadeFinal);",
+              "});",
+              "",
+              "pm.test(\"Não existem reservas pendentes\", function () {",
+              "    pm.expect(json.reservados).to.eql(0);",
+              "});",
+              "",
+              "pm.test(\"Quantidade disponível está correta\", function () {",
+              "    pm.expect(json.disponiveis).to.eql(quantidadeFinal);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/estoque/listar/{{estoqueCodigo}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "estoque",
+            "listar",
+            "{{estoqueCodigo}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@oficina360.com"
+    },
+    {
+      "key": "adminSenha",
+      "value": "123456"
+    },
+    {
+      "key": "runId",
+      "value": ""
+    },
+    {
+      "key": "clienteDocumento",
+      "value": ""
+    },
+    {
+      "key": "clienteNome",
+      "value": ""
+    },
+    {
+      "key": "clienteEmail",
+      "value": ""
+    },
+    {
+      "key": "clienteSenha",
+      "value": ""
+    },
+    {
+      "key": "clienteTelefone",
+      "value": ""
+    },
+    {
+      "key": "veiculoPlaca",
+      "value": ""
+    },
+    {
+      "key": "servicoCodigo",
+      "value": ""
+    },
+    {
+      "key": "estoqueCodigo",
+      "value": ""
+    },
+    {
+      "key": "quantidadeEstoqueInicial",
+      "value": ""
+    },
+    {
+      "key": "quantidadeUtilizada",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "clienteToken",
+      "value": ""
+    },
+    {
+      "key": "ordemServicoId",
+      "value": ""
+    }
+  ]
+}
