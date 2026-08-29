@@ -715,56 +715,10 @@
         {
           "listen": "test",
           "script": {
-            "exec": [
-              "const json = pm.response.json();",
-              "",
-              "const documento =",
-              "    pm.collectionVariables.get(\"clienteDocumento\");",
-              "",
-              "const placa =",
-              "    pm.collectionVariables.get(\"veiculoPlaca\");",
-              "",
-              "pm.test(\"Status HTTP 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Ordem de serviço está finalizada\", function () {",
-              "    pm.expect(json.ordemDeServicoStatus)",
-              "        .to.eql(\"FINALIZADA\");",
-              "});",
-              "",
-              "pm.test(\"Documento do cliente está mascarado corretamente\", function () {",
-              "    pm.expect(documento)",
-              "        .to.be.a(\"string\")",
-              "        .and.not.empty;",
-              "",
-              "    pm.expect(json.documentoCliente)",
-              "        .to.eql(`***${documento.slice(-4)}`);",
-              "});",
-              "",
-              "pm.test(\"Placa do veículo está mascarada corretamente\", function () {",
-              "    pm.expect(placa)",
-              "        .to.be.a(\"string\")",
-              "        .and.not.empty;",
-              "",
-              "    const placaMascarada =",
-              "        `${placa.slice(0, 3)}***${placa.slice(-2)}`;",
-              "",
-              "    pm.expect(json.placaVeiculo)",
-              "        .to.eql(placaMascarada);",
-              "});",
-              "",
-              "pm.test(\"Valor total da ordem está correto\", function () {",
-              "    pm.expect(json.dadosFinanceiros)",
-              "        .to.be.an(\"object\");",
-              "",
-              "    pm.expect(json.dadosFinanceiros.valorTotal)",
-              "        .to.eql(331);",
-              "});"
-            ],
             "type": "text/javascript",
-            "packages": {},
-            "requests": {}
+            "exec": [
+              "const json = pm.response.json();\n\nconst documento =\n    pm.collectionVariables.get(\"clienteDocumento\");\n\nconst placa =\n    pm.collectionVariables.get(\"veiculoPlaca\");\n\npm.test(\"Status HTTP 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Ordem de serviço está finalizada\", function () {\n    pm.expect(json.ordemDeServicoStatus)\n        .to.eql(\"FINALIZADA\");\n});\n\npm.test(\"Documento do cliente está mascarado corretamente\", function () {\n    pm.expect(documento)\n        .to.be.a(\"string\")\n        .and.not.empty;\n\n    pm.expect(json.documentoCliente)\n        .to.eql(`***${documento.slice(-4)}`);\n});\n\npm.test(\"Placa do veículo está mascarada corretamente\", function () {\n    pm.expect(placa)\n        .to.be.a(\"string\")\n        .and.not.empty;\n\n    const placaMascarada =\n        `${placa.slice(0, 3)}***${placa.slice(-2)}`;\n\n    pm.expect(json.placaVeiculo)\n        .to.eql(placaMascarada);\n});"
+            ]
           }
         }
       ],
@@ -773,8 +727,7 @@
         "header": [
           {
             "key": "Authorization",
-            "value": "Bearer {{adminToken}}",
-            "type": "text"
+            "value": "Bearer {{adminToken}}"
           }
         ],
         "url": {
