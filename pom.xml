@@ -30,7 +30,7 @@
     <properties>
         <java.version>21</java.version>
         <postgresql.version>42.7.12</postgresql.version>
-        <tomcat.version>11.0.24</tomcat.version>
+        <tomcat.version>11.0.25</tomcat.version>
         <maven.compiler.release>21</maven.compiler.release>
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/docs/security/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
