@@ -32,7 +32,7 @@ public class UsuarioDTOMapper {
         return UsuarioEntity.builder()
                 .id(domain.getId())
                 .email(domain.getEmail())
-                .senha(domain.getSenha())
+                .senha(domain.getPassword())
                 .role(domain.getRole())
                 .documento(domain.getDocumento())
                 .build();

@@ -70,7 +70,7 @@ class CriarUsuarioUseCaseTest {
 		Usuario usuarioSalvo = usuarioCaptor.getValue();
 
 		assertAll(() -> assertEquals(EMAIL, usuarioSalvo.getEmail()),
-				() -> assertEquals(SENHA_CRIPTOGRAFADA, usuarioSalvo.getSenha()),
+				() -> assertEquals(SENHA_CRIPTOGRAFADA, usuarioSalvo.getPassword()),
 				() -> assertEquals(CLIENTE, usuarioSalvo.getRole()),
 				() -> assertEquals(DOCUMENTO, usuarioSalvo.getDocumento()));
 
@@ -116,7 +116,7 @@ class CriarUsuarioUseCaseTest {
 
 		verify(usuarioGateway).save(usuarioCaptor.capture());
 
-		assertEquals(SENHA_CRIPTOGRAFADA, usuarioCaptor.getValue().getSenha());
+		assertEquals(SENHA_CRIPTOGRAFADA, usuarioCaptor.getValue().getPassword());
 
 		verify(passwordEncoderGateway).criptografar(SENHA);
 	}
@@ -228,7 +228,7 @@ class CriarUsuarioUseCaseTest {
 		Usuario usuarioSalvo = usuarioCaptor.getValue();
 
 		assertAll(() -> assertEquals(EMAIL, usuarioSalvo.getEmail()),
-				() -> assertEquals(SENHA_CRIPTOGRAFADA, usuarioSalvo.getSenha()),
+				() -> assertEquals(SENHA_CRIPTOGRAFADA, usuarioSalvo.getPassword()),
 				() -> assertEquals(role, usuarioSalvo.getRole()),
 				() -> assertEquals(DOCUMENTO, usuarioSalvo.getDocumento()));
 

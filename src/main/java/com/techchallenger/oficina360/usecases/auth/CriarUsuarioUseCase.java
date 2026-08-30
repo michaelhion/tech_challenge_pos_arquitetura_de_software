@@ -49,7 +49,7 @@ public class CriarUsuarioUseCase {
 
 		usuario.setRole(role);
 
-		usuario.setSenha(passwordEncoderGateway.criptografar(command.senha()));
+		usuario.setPassword(passwordEncoderGateway.criptografar(command.senha()));
 		usuarioGateway.save(usuario);
 	}
 

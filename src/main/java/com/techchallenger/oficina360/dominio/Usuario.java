@@ -14,47 +14,27 @@ public class Usuario implements Serializable {
 
     private String email;
 
-    private String senha;
+    private String password;
 
     private String role;
 
     private String documento;
 
-    public String getPassword() {
-        return senha;
-    }
-
-    public String getUsername() {
-        return email;
-    }
-
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
     public boolean isEnabled() {
         return true;
     }
 
-    public Usuario(UUID id, String email, String senha, String role, String documento) {
+    public Usuario(UUID id, String email, String password, String role, String documento) {
         this.id = id;
         this.email = email;
-        this.senha = senha;
+        this.password = password;
         this.role = role;
         this.documento = documento;
     }
 
-    public Usuario(String email, String senha, String role, String documento) {
+    public Usuario(String email, String password, String role, String documento) {
         this.email = email;
-        this.senha = senha;
+        this.password = password;
         this.role = role;
         this.documento = documento;
     }
@@ -70,8 +50,8 @@ public class Usuario implements Serializable {
         return email;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
     public String getRole() {
@@ -86,38 +66,8 @@ public class Usuario implements Serializable {
         this.role = role;
     }
 
-    public void setSenha(String criptografar) {
-        this.senha = criptografar;
-    }
-
-    public static Usuario criarCliente(
-            String email,
-            String senha,
-            String documento
-    ){
-
-        return new Usuario(
-                null,
-                email,
-                senha,
-                CLIENTE,
-                documento
-        );
-    }
-
-
-    public static Usuario criarAdmin(
-            String email,
-            String senha
-    ){
-
-        return new Usuario(
-                null,
-                email,
-                senha,
-                ADMIN,
-                null
-        );
+    public void setPassword(String criptografar) {
+        this.password = criptografar;
     }
 
 }

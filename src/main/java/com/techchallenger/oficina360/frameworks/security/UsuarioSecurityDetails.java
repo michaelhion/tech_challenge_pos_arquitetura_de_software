@@ -25,7 +25,7 @@ public class UsuarioSecurityDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		return usuario.getSenha();
+		return usuario.getPassword();
 	}
 
 	@Override
