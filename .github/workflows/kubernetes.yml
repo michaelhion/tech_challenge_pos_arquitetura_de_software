@@ -483,31 +483,50 @@ jobs:
         run: |
           set -Eeuo pipefail
 
+          OUTPUT="$(
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StandardOutputContent' \
+              --output text \
+              2>/dev/null || true
+          )"
+
+          ERRORS="$(
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StandardErrorContent' \
+              --output text \
+              2>/dev/null || true
+          )"
+
           echo ""
           echo "======================================"
           echo " Saída do deploy"
           echo "======================================"
-
-          aws ssm get-command-invocation \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID" \
-            --query 'StandardOutputContent' \
-            --output text \
-            2>/dev/null || true
-
           echo ""
-          echo "======================================"
-          echo " Erros do deploy"
-          echo "======================================"
 
-          aws ssm get-command-invocation \
-            --region "$AWS_REGION" \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID" \
-            --query 'StandardErrorContent' \
-            --output text \
-            2>/dev/null || true
+          if [[ -n "$OUTPUT" && "$OUTPUT" != "None" ]]; then
+            printf '%s\n' "$OUTPUT"
+          else
+            echo "Nenhuma saída padrão foi registrada."
+          fi
+
+          if [[ -n "$ERRORS" && "$ERRORS" != "None" ]]; then
+            echo ""
+            echo "======================================"
+            echo " Avisos e erros do deploy"
+            echo "======================================"
+            echo ""
+
+            printf '%s\n' "$ERRORS"
+          else
+            echo ""
+            echo "Nenhum erro foi registrado pelo comando de deploy."
+          fi
 
       # ------------------------------------------------------------
       # 16. Limpeza local
