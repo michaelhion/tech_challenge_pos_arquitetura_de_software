@@ -98,7 +98,7 @@ public class OrdemServicoFluxosIT extends BaseIT {
 						post("/ordem-servico/salvar").contentType(MediaType.APPLICATION_JSON)
 								.content(json(ordemServicoValida())), tokenAdmin())).andExpect(status().isCreated()).andReturn()
 				.getResponse().getContentAsString();
-		UUID id = UUID.fromString(JsonPath.read(response, "$.id"));;
+		UUID id = UUID.fromString(JsonPath.read(response, "$.id"));
 		return id.toString();
 	}
 
@@ -122,7 +122,7 @@ public class OrdemServicoFluxosIT extends BaseIT {
 
 		assertEquals(16, estoqueDepois.getQuantidade());
 		assertEquals(1, estoqueDepois.getReservados());
-		assertEquals(15, estoqueDepois.getDisponiveis());;
+		assertEquals(15, estoqueDepois.getDisponiveis());
 	}
 
 

@@ -30,7 +30,7 @@ class MessageUtilTest {
 	@Test
 	void deveObterMensagemPorChave() {
 
-		when(messageSource.getMessage(eq("mensagem.teste"), isNull(), eq(LocaleContextHolder.getLocale()))).thenReturn(
+		when(messageSource.getMessage("mensagem.teste", null, LocaleContextHolder.getLocale())).thenReturn(
 				"Mensagem Teste");
 
 		String resultado = messageUtil.getMessage("mensagem.teste");
@@ -45,8 +45,8 @@ class MessageUtilTest {
 
 		Object[] args = { "João" };
 
-		when(messageSource.getMessage(eq("usuario.bemvindo"), eq(args),
-				eq(LocaleContextHolder.getLocale()))).thenReturn("Bem-vindo João");
+		when(messageSource.getMessage("usuario.bemvindo", args,
+				LocaleContextHolder.getLocale())).thenReturn("Bem-vindo João");
 
 		String resultado = messageUtil.getMessage("usuario.bemvindo", args);
 
@@ -60,8 +60,8 @@ class MessageUtilTest {
 
 		Object[] args = { "João" };
 
-		when(messageSource.getMessage(eq("usuario.nao.encontrado"), eq(args), eq("Usuário não encontrado"),
-				eq(LocaleContextHolder.getLocale()))).thenReturn("Usuário não encontrado");
+		when(messageSource.getMessage("usuario.nao.encontrado", args, "Usuário não encontrado",
+				LocaleContextHolder.getLocale())).thenReturn("Usuário não encontrado");
 
 		String resultado = messageUtil.getMessageWithDefault("usuario.nao.encontrado", "Usuário não encontrado", args);
 
