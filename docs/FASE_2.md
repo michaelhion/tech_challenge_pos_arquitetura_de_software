@@ -259,47 +259,65 @@ quais depende.
 
 ### 3.3 Arquitetura Kubernetes
 
+A API Oficina360 e o PostgreSQL são executados em um cluster K3s hospedado
+em uma instância EC2.
+
+O PostgreSQL permanece disponível apenas dentro do cluster. A API é exposta
+externamente por um Service do tipo NodePort.
+
 ```mermaid
-flowchart TB
-    user["Swagger, Postman ou Cliente HTTP"]
+flowchart LR
+    client["Swagger, Postman<br/>ou cliente HTTP"]
 
     subgraph ec2["EC2 Amazon Linux 2023"]
-        subgraph k3s["Cluster K3s"]
+        subgraph cluster["Cluster K3s"]
+            serviceApi["Service NodePort<br/>Porta 30080"]
+            api["Deployment da API<br/>Oficina360"]
+            serviceDb["Service ClusterIP<br/>Porta 5432"]
+            postgres["Deployment<br/>PostgreSQL"]
+            volume["PVC<br/>2 GiB"]
+            hpa["HPA<br/>1 a 2 réplicas"]
             metrics["Metrics Server"]
-
-            subgraph namespace["Namespace oficina360"]
-                secret["Secret"]
-                configmap["ConfigMap"]
-
-                apiDeployment["Deployment Oficina360 API"]
-                apiPods["Pods da API"]
-                apiService["Service NodePort<br/>Porta 30080"]
-                hpa["Horizontal Pod Autoscaler<br/>1 a 2 réplicas"]
-
-                dbDeployment["Deployment PostgreSQL"]
-                dbPod["Pod PostgreSQL"]
-                dbService["Service ClusterIP<br/>Porta 5432"]
-                pvc["PersistentVolumeClaim<br/>2 GiB"]
-            end
+            config["ConfigMap"]
+            secret["Secret"]
         end
     end
 
-    user -->|"HTTP na porta 30080"| apiService
-    apiService --> apiPods
-    apiDeployment --> apiPods
+    client -->|"HTTP"| serviceApi
+    serviceApi --> api
+    api -->|"TCP 5432"| serviceDb
+    serviceDb --> postgres
+    postgres --> volume
 
-    secret -.->|"Credenciais e JWT"| apiPods
-    configmap -.->|"Configurações"| apiPods
+    config -.-> api
+    secret -.-> api
+    secret -.-> postgres
 
-    apiPods -->|"TCP na porta 5432"| dbService
-    dbService --> dbPod
-    dbDeployment --> dbPod
+    metrics --> hpa
+    hpa --> api
+```
 
-    secret -.->|"Usuário e senha"| dbPod
-    dbPod -->|"Persistência"| pvc
+#### Componentes
 
-    metrics -->|"Métricas de CPU"| hpa
-    hpa -->|"Ajusta réplicas"| apiDeployment
+- **Service NodePort:** expõe a API externamente pela porta `30080`;
+- **Deployment da API:** mantém os Pods do Oficina360 em execução;
+- **Service ClusterIP:** fornece um endereço interno estável para o banco;
+- **Deployment PostgreSQL:** mantém o banco de dados em execução;
+- **PVC:** fornece persistência para os dados do PostgreSQL;
+- **ConfigMap:** armazena configurações não sensíveis;
+- **Secret:** armazena credenciais do banco, chave JWT e dados SMTP;
+- **Metrics Server:** fornece as métricas utilizadas pelo HPA;
+- **HPA:** ajusta a quantidade de réplicas da API de acordo com o consumo.
+
+#### Fluxo principal
+
+```text
+Cliente HTTP
+→ Service NodePort
+→ API Oficina360
+→ Service ClusterIP
+→ PostgreSQL
+→ PVC
 ```
 
 ### 3.4 Namespace
