@@ -422,12 +422,12 @@ class OrdemServicoDTOMapperTest {
 	}
 
 	private com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoServicoEntity anyServicoEntity() {
-		return org.mockito.Mockito.mock(
+		return mock(
 				com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoServicoEntity.class);
 	}
 
 	private com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoItemEstoqueEntity anyItemEntity() {
-		return org.mockito.Mockito.mock(
+		return mock(
 				com.techchallenger.oficina360.frameworks.persistence.entities.OrdemServicoItemEstoqueEntity.class);
 	}
 }

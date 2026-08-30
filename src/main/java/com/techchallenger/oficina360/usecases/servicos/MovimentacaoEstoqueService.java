@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiConsumer;
+import java.util.function.ObjIntConsumer;
 import java.util.stream.Collectors;
 
 public class MovimentacaoEstoqueService {
@@ -28,7 +28,7 @@ public class MovimentacaoEstoqueService {
 		movimentar(itens, Estoque::consumirReserva);
 	}
 
-	private void movimentar(List<OrdemServicoItemEstoque> itens, BiConsumer<Estoque, Integer> operacao) {
+	private void movimentar(List<OrdemServicoItemEstoque> itens, ObjIntConsumer<Estoque> operacao) {
 		if (itens == null || itens.isEmpty()) {
 			return;
 		}

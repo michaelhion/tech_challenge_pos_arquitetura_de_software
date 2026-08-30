@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrdemServicoCommandMapperTest {
@@ -172,13 +171,13 @@ class OrdemServicoCommandMapperTest {
 
 	@Test
 	void devePreservarOrdemDosServicosEItensEstoque() {
-		OrdemServicoServico primeiroServico = org.mockito.Mockito.mock(OrdemServicoServico.class);
+		OrdemServicoServico primeiroServico = mock(OrdemServicoServico.class);
 
-		OrdemServicoServico segundoServico = org.mockito.Mockito.mock(OrdemServicoServico.class);
+		OrdemServicoServico segundoServico = mock(OrdemServicoServico.class);
 
-		OrdemServicoItemEstoque primeiroItem = org.mockito.Mockito.mock(OrdemServicoItemEstoque.class);
+		OrdemServicoItemEstoque primeiroItem = mock(OrdemServicoItemEstoque.class);
 
-		OrdemServicoItemEstoque segundoItem = org.mockito.Mockito.mock(OrdemServicoItemEstoque.class);
+		OrdemServicoItemEstoque segundoItem = mock(OrdemServicoItemEstoque.class);
 
 		when(primeiroServico.getDescricao()).thenReturn("Primeiro serviço");
 

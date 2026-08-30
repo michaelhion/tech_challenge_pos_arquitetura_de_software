@@ -22,8 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -191,22 +190,17 @@ class OrdemServicoSpecificationTest {
 		verify(criteriaBuilder).and(predicatesCaptor.capture());
 
 		Predicate[] predicates = predicatesCaptor.getValue();
+		assertAll(
+			()-> assertEquals(7, predicates.length),
+			()-> assertSame(statusPredicate, predicates[0]),
+			()-> assertSame(documentoPredicate, predicates[1]),
+			()-> assertSame(placaPredicate, predicates[2]),
+			()-> assertSame(aberturaInicialPredicate, predicates[3]),
+			()-> assertSame(aberturaFinalPredicate, predicates[4]),
+			()-> assertSame(valorMinimoPredicate, predicates[5]),
+			()-> assertSame(valorMaximoPredicate, predicates[6])
+		);
 
-		assertEquals(7, predicates.length);
-
-		assertSame(statusPredicate, predicates[0]);
-
-		assertSame(documentoPredicate, predicates[1]);
-
-		assertSame(placaPredicate, predicates[2]);
-
-		assertSame(aberturaInicialPredicate, predicates[3]);
-
-		assertSame(aberturaFinalPredicate, predicates[4]);
-
-		assertSame(valorMinimoPredicate, predicates[5]);
-
-		assertSame(valorMaximoPredicate, predicates[6]);
 	}
 
 	@Test
