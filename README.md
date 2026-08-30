@@ -341,22 +341,66 @@ Mais detalhes:
 
 ## Estrutura do projeto
 
-> A árvore abaixo deve permanecer alinhada aos pacotes e arquivos existentes no repositório.
+### Organização das camadas
+
+A estrutura principal da aplicação segue os princípios da Clean Architecture:
+
+- `dominio/`: contém entidades, regras e exceções do domínio;
+- `usecases/`: contém os casos de uso e serviços de aplicação;
+- `gateways/`: contém os contratos utilizados pelos casos de uso para acessar
+  persistência, autenticação, notificações e outros recursos externos;
+- `frameworks/adapters/`: contém as implementações dos gateways;
+- `frameworks/persistence/`: contém entidades JPA, repositories e
+  specifications;
+- `frameworks/web/`: contém Controllers REST, filtros e tratamento global de
+  exceções;
+- `frameworks/security/`: contém autenticação JWT e configurações do Spring
+  Security;
+- `frameworks/config/`: realiza a criação e a injeção dos casos de uso;
+- `dtos/`: contém os contratos de entrada e saída da API;
+- `mappers/`: realiza conversões entre DTOs, Commands e objetos da aplicação.
+
+Os testes são organizados por responsabilidade:
+
+- `arch/`: valida as dependências da Clean Architecture;
+- `dominio/`: testa regras de negócio sem dependência de frameworks;
+- `usecases/`: testa os casos de uso;
+- `frameworks/`: testa adapters e persistência;
+- `controllers/`: testa a camada HTTP;
+- `security/`: testa autenticação e autorização;
+- `it/`: contém testes de integração dos fluxos críticos.
 
 ```text
 .
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/techchallenger/oficina360/
-│   │   │       ├── domain/
-│   │   │       ├── usecases/
-│   │   │       └── frameworks/
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       └── db/
-│   │           └── migration/
-│   └── test/
+├── .github/
+│   ├── dependabot.yml
+│   └── workflows/
+│       ├── infra.yml
+│       ├── kubernetes.yml
+│       └── sonar.yml
+│
+├── docs/
+│   ├── ARQUITETURA.md
+│   ├── FASE_2.md
+│   ├── INFRA.md
+│   ├── c4/
+│   │   ├── dsl/
+│   │   └── images/
+│   ├── ddd/
+│   ├── requisitos/
+│   └── security/
+│
+├── infra/
+│   ├── backend.tf
+│   ├── main.tf
+│   ├── network.tf
+│   ├── outputs.tf
+│   ├── provider.tf
+│   ├── security-group.tf
+│   ├── terraform.tfvars
+│   ├── user-data.sh
+│   └── variables.tf
+│
 ├── k8s/
 │   ├── 1-namespace.yaml
 │   ├── 3-configmap.yaml
@@ -366,14 +410,72 @@ Mais detalhes:
 │   ├── 8-api-deployment.yaml
 │   ├── 9-api-service.yaml
 │   ├── 10-hpa.yaml
-│   └── deploy.sh
-├── infra/
-├── docs/
-├── .github/
-│   └── workflows/
-├── Dockerfile
+│   ├── deploy.sh
+│   ├── destroy.sh
+│   └── secret-example.yaml
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/techchallenger/oficina360/
+│   │   │       ├── constants/
+│   │   │       ├── docs/
+│   │   │       ├── dominio/
+│   │   │       │   └── shared/
+│   │   │       ├── enums/
+│   │   │       ├── frameworks/
+│   │   │       │   ├── adapters/
+│   │   │       │   ├── dtos/
+│   │   │       │   ├── config/
+│   │   │       │   ├── mappers/
+│   │   │       │   ├── persistence/
+│   │   │       │   ├── security/
+│   │   │       │   └── web/
+│   │   │       ├── gateways/
+│   │   │       ├── mappers/
+│   │   │       ├── services/
+│   │   │       ├── usecases/
+│   │   │       │   ├── auth/
+│   │   │       │   ├── autorizacao/
+│   │   │       │   ├── cliente/
+│   │   │       │   ├── estoque/
+│   │   │       │   ├── ordemservico/
+│   │   │       │   ├── servicos/
+│   │   │       │   ├── shared/
+│   │   │       │   └── veiculo/
+│   │   │       ├── utils/
+│   │   │       └── validators/
+│   │   └── resources/
+│   │       ├── application.yaml
+│   │       ├── application-docker.yaml
+│   │       ├── application-test.yaml
+│   │       ├── messages.properties
+│   │       └── db/
+│   │           └── migration/
+│   │
+│   └── test/
+│       ├── java/
+│       │   └── com/techchallenger/oficina360/
+│       │       ├── arch/
+│       │       ├── controllers/
+│       │       ├── dominio/
+│       │       ├── frameworks/
+│       │       ├── it/
+│       │       ├── mappers/
+│       │       ├── security/
+│       │       ├── services/
+│       │       ├── usecases/
+│       │       └── utils/
+│       └── resources/
+│           └── db/testdata/
+│
 ├── docker-compose.yml
+├── Dockerfile
 ├── pom.xml
+├── mvnw
+├── mvnw.cmd
+├── start.sh
+├── scan.sh
 └── README.md
 ```
 
