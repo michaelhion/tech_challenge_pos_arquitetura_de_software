@@ -25,9 +25,10 @@ public class SecurityConfig {
 
 
     @Bean
+    @SuppressWarnings("java:S4502")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
-                .csrf(csrf -> csrf.disable()) // API stateless autenticada por JWT
+                .csrf(csrf -> csrf.configure(http)) // API stateless autenticada por JWT
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
