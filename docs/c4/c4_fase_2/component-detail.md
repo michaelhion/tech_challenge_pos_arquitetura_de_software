@@ -44,6 +44,8 @@ flowchart LR
     UC4 --> Gateway
 
     UC5 --> Gateway
+    UC2 --> Notificacao
+    UC3 --> Notificacao
     UC5 --> Notificacao
 
     Gateway --> Adapter
