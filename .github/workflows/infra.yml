@@ -80,7 +80,7 @@ jobs:
           echo "Variáveis Terraform configuradas."
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@d23441a48e516b6c34aea4fa41551a30e30af803 #v6.2.3
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c #v6.2.3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -125,7 +125,7 @@ jobs:
           fi
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@a37ce9120846195fa4ece8f58b268e6043cb2f26 #v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd #v3
         with:
           terraform_wrapper: false
 
